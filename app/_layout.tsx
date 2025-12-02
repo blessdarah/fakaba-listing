@@ -1,4 +1,5 @@
 import "../tamagui-web.css";
+import "../firebase.config";
 
 import { useEffect } from "react";
 import { useColorScheme } from "react-native";
@@ -9,9 +10,10 @@ import {
   ThemeProvider,
 } from "@react-navigation/native";
 import { useFonts } from "expo-font";
-import { SplashScreen, Stack } from "expo-router";
+import { SplashScreen, Stack, router } from "expo-router";
 import { Provider } from "components/Provider";
 import { useTheme } from "tamagui";
+import { useAuth } from "../contexts/AuthContext";
 
 export {
   // Catch any errors thrown by the Layout component.
@@ -57,10 +59,32 @@ const Providers = ({ children }: { children: React.ReactNode }) => {
 function RootLayoutNav() {
   const colorScheme = useColorScheme();
   const theme = useTheme();
+  const { user, loading } = useAuth();
+
+  useEffect(() => {
+    if (!loading) {
+      if (user) {
+        router.replace("/(tabs)");
+      } else {
+        router.replace("/sign-in");
+      }
+    }
+  }, [user, loading]);
+
+  if (loading) {
+    return null;
+  }
+
   return (
     <ThemeProvider value={colorScheme === "dark" ? DarkTheme : DefaultTheme}>
       <StatusBar style={colorScheme === "dark" ? "light" : "dark"} />
       <Stack>
+        <Stack.Screen
+          name="sign-in"
+          options={{
+            headerShown: false,
+          }}
+        />
         <Stack.Screen
           name="(tabs)"
           options={{

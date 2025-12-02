@@ -1,6 +1,12 @@
 import { Link, Tabs } from "expo-router";
 import { Button, useTheme } from "tamagui";
-import { Atom, AudioWaveform, Home } from "@tamagui/lucide-icons";
+import {
+  Home,
+  Heart,
+  MapPinHouse,
+  Briefcase,
+  Settings,
+} from "@tamagui/lucide-icons";
 
 export default function TabLayout() {
   const theme = useTheme();
@@ -8,7 +14,7 @@ export default function TabLayout() {
   return (
     <Tabs
       screenOptions={{
-        tabBarActiveTintColor: theme.red10.val,
+        tabBarActiveTintColor: theme.blue8.val,
         tabBarStyle: {
           backgroundColor: theme.background.val,
           borderTopColor: theme.borderColor.val,
@@ -35,10 +41,31 @@ export default function TabLayout() {
         }}
       />
       <Tabs.Screen
+        name="favorites"
+        options={{
+          title: "Favorites",
+          tabBarIcon: ({ color }) => <Heart color={color as any} />,
+        }}
+      />
+      <Tabs.Screen
+        name="search"
+        options={{
+          title: "Search",
+          tabBarIcon: ({ color }) => <MapPinHouse color={color as any} />,
+        }}
+      />
+      <Tabs.Screen
+        name="services"
+        options={{
+          title: "Services",
+          tabBarIcon: ({ color }) => <Briefcase color={color as any} />,
+        }}
+      />
+      <Tabs.Screen
         name="settings"
         options={{
           title: "Settings",
-          tabBarIcon: ({ color }) => <AudioWaveform color={color as any} />,
+          tabBarIcon: ({ color }) => <Settings color={color as any} />,
         }}
       />
     </Tabs>
