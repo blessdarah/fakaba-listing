@@ -31,13 +31,8 @@ export default function TabLayout() {
         options={{
           title: "Home",
           tabBarIcon: ({ color }) => <Home color={color as any} />,
-          headerRight: () => (
-            <Link href="/modal" asChild>
-              <Button mr="$4" size="$2.5">
-                Hello!
-              </Button>
-            </Link>
-          ),
+          headerShown: false,
+          headerTransparent: false,
         }}
       />
       <Tabs.Screen

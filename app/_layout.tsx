@@ -1,4 +1,4 @@
-import "../tamagui-web.css";
+// import "../tamagui-web.css";
 import "../firebase.config";
 
 import { useEffect } from "react";

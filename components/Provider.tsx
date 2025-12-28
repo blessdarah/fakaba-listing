@@ -11,7 +11,8 @@ export function Provider({ children, ...rest }: Omit<TamaguiProviderProps, 'conf
   return (
     <TamaguiProvider
       config={config}
-      defaultTheme={colorScheme === 'dark' ? 'dark' : 'light'}
+      defaultTheme="light"
+      // defaultTheme={colorScheme === 'dark' ? 'dark' : 'light'}
       {...rest}
     >
       <AuthProvider>
