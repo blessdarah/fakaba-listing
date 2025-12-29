@@ -1,5 +1,5 @@
-import { Link, Tabs } from "expo-router";
-import { Button, useTheme } from "tamagui";
+import { Tabs } from "expo-router";
+import { useTheme } from "tamagui";
 import {
   Home,
   Heart,
