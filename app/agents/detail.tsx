@@ -2,6 +2,7 @@ import { Mail, MapPin, MessageCircle } from "@tamagui/lucide-icons";
 import ListingCard from "components/ListingCard";
 import { StartRating } from "components/StarRating";
 import React from "react";
+import { Dimensions } from "react-native";
 import {
   H5,
   SizableText,
@@ -15,13 +16,16 @@ import {
   Text,
   Circle,
   View,
+  H4,
+  Button,
 } from "tamagui";
 
 export default function AgentDetailScreen() {
   const [activeTab, setActiveTab] = React.useState("tab-about");
+  const deviceWidth = Dimensions.get("window").width;
   return (
     <ScrollView bg="white">
-      <View bg="$white2" pb="$2">
+      <View pb="$2">
         {/* header section */}
         <XStack items="center" justify="space-between" px="$10" pt="$8">
           <Circle bg="$green8" size={42}>
@@ -261,7 +265,113 @@ export default function AgentDetailScreen() {
         </Tabs.Content>
 
         <Tabs.Content value="tab-reviews">
-          <H5>Notifications</H5>
+          <ScrollView showsVerticalScrollIndicator={false} height={400}>
+            <YStack maxW={deviceWidth}>
+              {/* Review card */}
+              <XStack gap="$4" my="$4">
+                <Avatar
+                  circular
+                  size="$6"
+                  borderColor="$yellow10"
+                  borderWidth={3}
+                  elevation="$2"
+                >
+                  <Avatar.Image src="https://images.unsplash.com/photo-1531384441138-2736e62e0919?&w=100&h=100&dpr=2&q=80" />
+                  <Avatar.Fallback delayMs={600} backgroundColor="$blue10" />
+                </Avatar>
+                <YStack gap="$2" width={deviceWidth - 120}>
+                  <H5>Bless Darah</H5>
+                  <Paragraph fontStyle="italic" flexWrap="wrap">
+                    I worked with him for a land purchase and his approach was
+                    very professional.
+                  </Paragraph>
+                  <XStack justify="space-between">
+                    <Text>2 days ago</Text>
+                    <StartRating count={4} />
+                  </XStack>
+                </YStack>
+              </XStack>
+              {/* Review card */}
+
+              {/* Review card */}
+              <XStack gap="$4" my="$4">
+                <Avatar
+                  circular
+                  size="$6"
+                  borderColor="$yellow10"
+                  borderWidth={3}
+                  elevation="$2"
+                >
+                  <Avatar.Image src="https://images.unsplash.com/photo-1531384441138-2736e62e0919?&w=100&h=100&dpr=2&q=80" />
+                  <Avatar.Fallback delayMs={600} backgroundColor="$blue10" />
+                </Avatar>
+                <YStack gap="$2" width={deviceWidth - 120}>
+                  <H5>Raymond Snow</H5>
+                  <Paragraph fontStyle="italic" flexWrap="wrap">
+                    He is very professional and has a great approach to the job.
+                  </Paragraph>
+                  <XStack justify="space-between">
+                    <Text>3 days ago</Text>
+                    <StartRating count={3} />
+                  </XStack>
+                </YStack>
+              </XStack>
+              {/* Review card */}
+              {/* Review card */}
+              <XStack gap="$4" my="$4">
+                <Avatar
+                  circular
+                  size="$6"
+                  borderColor="$yellow10"
+                  borderWidth={3}
+                  elevation="$2"
+                >
+                  <Avatar.Image src="https://images.unsplash.com/photo-1531384441138-2736e62e0919?&w=100&h=100&dpr=2&q=80" />
+                  <Avatar.Fallback delayMs={600} backgroundColor="$blue10" />
+                </Avatar>
+                <YStack gap="$2" width={deviceWidth - 120}>
+                  <H5>William Smith</H5>
+                  <Paragraph fontStyle="italic" flexWrap="wrap">
+                    He was so poor and I had to call him several times before
+                    getting support
+                  </Paragraph>
+                  <XStack justify="space-between">
+                    <Text>1 week ago</Text>
+                    <StartRating count={1} />
+                  </XStack>
+                </YStack>
+              </XStack>
+              {/* Review card */}
+              {/* Review card */}
+              <XStack gap="$4" my="$4">
+                <Avatar
+                  circular
+                  size="$6"
+                  borderColor="$yellow10"
+                  borderWidth={3}
+                  elevation="$2"
+                >
+                  <Avatar.Image src="https://images.unsplash.com/photo-1531384441138-2736e62e0919?&w=100&h=100&dpr=2&q=80" />
+                  <Avatar.Fallback delayMs={600} backgroundColor="$blue10" />
+                </Avatar>
+                <YStack gap="$2" width={deviceWidth - 120}>
+                  <H5>Bless Darah</H5>
+                  <Paragraph fontStyle="italic" flexWrap="wrap">
+                    I worked with him for a land purchase and his approach was
+                    very professional.
+                  </Paragraph>
+                  <XStack justify="space-between">
+                    <Text>2 days ago</Text>
+                    <StartRating count={4} />
+                  </XStack>
+                </YStack>
+              </XStack>
+              {/* Review card */}
+            </YStack>
+          </ScrollView>
+          <Button mx="$6" bg={"$blue9"} color="white" rounded="$5" size={"$5"}>
+            Write Review
+          </Button>
         </Tabs.Content>
       </Tabs>
     </ScrollView>
