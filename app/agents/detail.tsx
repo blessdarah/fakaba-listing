@@ -16,7 +16,6 @@ import {
   Text,
   Circle,
   View,
-  H4,
   Button,
 } from "tamagui";
 

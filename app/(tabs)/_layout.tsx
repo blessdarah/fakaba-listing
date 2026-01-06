@@ -32,13 +32,14 @@ export default function TabLayout() {
           title: "Home",
           tabBarIcon: ({ color }) => <Home color={color as any} />,
           headerShown: false,
-          headerTransparent: false,
+          // headerTransparent: false,
         }}
       />
       <Tabs.Screen
         name="favorites"
         options={{
           title: "Favorites",
+          headerShown: false,
           tabBarIcon: ({ color }) => <Heart color={color as any} />,
         }}
       />
@@ -46,6 +47,7 @@ export default function TabLayout() {
         name="search"
         options={{
           title: "Search",
+          headerShown: false,
           tabBarIcon: ({ color }) => <MapPinHouse color={color as any} />,
         }}
       />
@@ -53,14 +55,22 @@ export default function TabLayout() {
         name="services"
         options={{
           title: "Services",
+          headerShown: false,
           tabBarIcon: ({ color }) => <Briefcase color={color as any} />,
         }}
       />
       <Tabs.Screen
         name="settings"
         options={{
+          headerShown: false,
           title: "Settings",
           tabBarIcon: ({ color }) => <Settings color={color as any} />,
+        }}
+      />
+      <Tabs.Screen
+        name="(listings)"
+        options={{
+          href: null, // This hides the tab from the bottom navigation
         }}
       />
     </Tabs>

@@ -2,41 +2,34 @@ import { View, Text, YStack, XStack, Image, Card, Button } from "tamagui";
 import { Heart } from "@tamagui/lucide-icons";
 import { useState } from "react";
 import { Link } from "expo-router";
-
-export type ListingItem = {
-  id: number;
-  title: string;
-  location: string;
-  price: string;
-  image: string;
-  time: string;
-};
+import { Listing } from "app/types";
 
 type ListingCardProps = {
-  item: ListingItem;
+  item: Listing;
 };
 
 const ListingCard = ({ item }: ListingCardProps) => {
   const [liked, setLiked] = useState(false);
 
   return (
-    <Link href={`/listing/details/${item.id}`} asChild>
+    <Link href={"/(listings)/123"} asChild>
       <Card
         size="$3"
         bordered={false}
         animation="bouncy"
         scale={0.9}
-        hoverStyle={{ scale: 0.925 }}
-        pressStyle={{ scale: 0.875 }}
         borderRadius={16}
-        // mb="$4"
         bg="transparent"
         p={3}
       >
         <Card.Header padded={false} mb="$2" p="$2">
           <View style={{ borderRadius: 10, overflow: "hidden" }}>
             <Image
-              source={{ uri: item.image }}
+              source={{
+                uri:
+                  item.imageUrls[0] ??
+                  "https://images.unsplash.com/photo-1531384441138-2736e62e0919?&w=100&h=100&dpr=2&q=80",
+              }}
               style={{ width: "auto", height: 200 }}
             />
             {/* Dark Overlay for better text readability */}
@@ -54,11 +47,17 @@ const ListingCard = ({ item }: ListingCardProps) => {
             <YStack
               style={{ position: "absolute", top: 12, left: 12, zIndex: 10 }}
             >
-              <Text fontSize="$5" fontWeight="bold" color="white">
-                {item.price}
-              </Text>
+              {item.type === "rent" ? (
+                <Text fontSize="$5" fontWeight="bold" color="white">
+                  {Math.round(item.price / 1000)}k/Monthly
+                </Text>
+              ) : (
+                <Text fontSize="$5" fontWeight="bold" color="white">
+                  {Math.round(item.price / 1000)}k
+                </Text>
+              )}
               <Text fontSize="$3" color="#e4e4e7">
-                {item.location}
+                {item.address}, {item.location}
               </Text>
             </YStack>
 
@@ -92,7 +91,7 @@ const ListingCard = ({ item }: ListingCardProps) => {
               {item.title}
             </Text>
             <Text fontSize="$2" color="gray">
-              {item.time}
+              {item.createdAt.toDate().toLocaleString()}
             </Text>
           </YStack>
         </Card.Footer>

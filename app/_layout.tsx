@@ -1,9 +1,7 @@
-// import "../tamagui-web.css";
 import "../firebase.config";
 
 import { useEffect } from "react";
 import { useColorScheme } from "react-native";
-import { StatusBar } from "expo-status-bar";
 import {
   DarkTheme,
   DefaultTheme,
@@ -77,7 +75,7 @@ function RootLayoutNav() {
 
   return (
     <ThemeProvider value={colorScheme === "dark" ? DarkTheme : DefaultTheme}>
-      <StatusBar style={colorScheme === "dark" ? "light" : "dark"} />
+      {/* <StatusBar style={colorScheme === "dark" ? "light" : "dark"} /> */}
       <Stack>
         <Stack.Screen
           name="sign-in"
@@ -89,20 +87,6 @@ function RootLayoutNav() {
           name="(tabs)"
           options={{
             headerShown: false,
-          }}
-        />
-
-        <Stack.Screen
-          name="modal"
-          options={{
-            title: "Fakaba Listings",
-            presentation: "modal",
-            animation: "slide_from_right",
-            gestureEnabled: true,
-            gestureDirection: "horizontal",
-            contentStyle: {
-              backgroundColor: theme.background.val,
-            },
           }}
         />
       </Stack>

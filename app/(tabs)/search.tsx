@@ -2,15 +2,13 @@ import { YStack, H2, Text, Separator } from "tamagui";
 
 export default function SearchScreen() {
   return (
-    <YStack flex={1} padding="$4" bg="$background">
-      <YStack space="$2" paddingTop="$8">
+    <YStack flex={1} p="$4" bg="$background">
+      <YStack gap="$2" pt="$8">
         <H2>Search</H2>
         <Separator />
       </YStack>
-      <YStack flex={1} justifyContent="center" alignItems="center">
-        <Text fontSize={16} color="$gray11">
-          Search for items and locations
-        </Text>
+      <YStack flex={1} justify="center" items="center">
+        <Text fontSize={16}>Search for items and locations</Text>
       </YStack>
     </YStack>
   );

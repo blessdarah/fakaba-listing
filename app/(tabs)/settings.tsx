@@ -17,23 +17,23 @@ export default function SettingsScreen() {
   };
 
   return (
-    <YStack flex={1} padding="$4" bg="$background" space="$4">
-      <YStack space="$2" paddingTop="$8">
+    <YStack flex={1} p="$4" bg="$background" space="$4">
+      <YStack gap="$2" p="$8">
         <H2>Settings</H2>
         <Separator />
       </YStack>
 
-      <YStack space="$3" paddingTop="$4">
+      <YStack gap="$3" pt="$4">
         <Text fontSize="$5" fontWeight="bold">
           Account
         </Text>
         {user && (
-          <YStack space="$2" backgroundColor="$gray2" padding="$3" borderRadius="$4">
-            <Text color="$gray11">Email</Text>
+          <YStack gap="$2" bg="$white2" p="$3" rounded="$4">
+            <Text color="gray">Email</Text>
             <Text fontSize="$4">{user.email}</Text>
             {user.displayName && (
               <>
-                <Text color="$gray11" paddingTop="$2">
+                <Text color="gray" pt="$2">
                   Name
                 </Text>
                 <Text fontSize="$4">{user.displayName}</Text>
@@ -43,12 +43,12 @@ export default function SettingsScreen() {
         )}
       </YStack>
 
-      <YStack paddingTop="$4">
+      <YStack pt="$4">
         <Button
           size="$4"
           onPress={handleSignOut}
-          backgroundColor="$red10"
-          pressStyle={{ backgroundColor: "$red9" }}
+          bg="$red10"
+          pressStyle={{ bg: "$red9" }}
           color="white"
         >
           Sign Out

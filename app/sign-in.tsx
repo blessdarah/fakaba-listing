@@ -8,11 +8,12 @@ import {
   Spinner,
   Circle,
   useTheme,
+  Paragraph,
 } from "tamagui";
 import { LinearGradient } from "@tamagui/linear-gradient";
 import { useAuth } from "../contexts/AuthContext";
 import { router } from "expo-router";
-import { Alert, Dimensions } from "react-native";
+import { Alert, Dimensions, Pressable } from "react-native";
 
 const { width, height } = Dimensions.get("window");
 
@@ -38,7 +39,7 @@ export default function SignIn() {
   };
 
   return (
-    <YStack flex={1} width={width} height={height} backgroundColor="$background">
+    <YStack flex={1} width={width} height={height} bg="$background">
       <LinearGradient
         colors={["#4A9DEC", "#8B5CF6", "#EC4899"]}
         start={[0, 0]}
@@ -46,25 +47,30 @@ export default function SignIn() {
         flex={0.4}
         width="100%"
       >
-        <YStack flex={1} justifyContent="center" alignItems="center" padding="$6">
+        <YStack flex={1} content="center" items="center" p="$6">
           <Circle
             size={100}
-            backgroundColor="$backgroundTransparent"
+            bg="transparent"
             borderWidth={3}
             borderColor="white"
-            marginBottom="$4"
-            justifyContent="center"
-            alignItems="center"
+            mt="$4"
+            justify="center"
+            items="center"
             opacity={0.9}
           >
-            <Text fontSize={50} color="white">
+            <Text fontSize={50} color="white" fontWeight={700}>
               F
             </Text>
           </Circle>
-          <H1 color="white" fontSize={36} fontWeight="800" textAlign="center">
+          <H1 color="white" fontSize={36} fontWeight="800" items="center">
             Fakaba
           </H1>
-          <Text color="white" fontSize={16} opacity={0.9} textAlign="center" marginTop="$2">
+          <Text
+            color="white"
+            fontSize={16}
+            opacity={0.9}
+            style={{ textAlign: "center" }}
+          >
             Your marketplace companion
           </Text>
         </YStack>
@@ -72,56 +78,50 @@ export default function SignIn() {
 
       <YStack
         flex={0.6}
-        backgroundColor="$background"
+        bg="$background"
         borderTopLeftRadius="$8"
         borderTopRightRadius="$8"
-        marginTop={-30}
-        padding="$6"
-        justifyContent="space-between"
+        mt={-30}
+        p="$6"
+        justify="space-between"
       >
-        <YStack space="$4" paddingTop="$6">
-          <YStack space="$2">
+        <YStack gap="$4" pt="$6">
+          <YStack>
             <H1 fontSize={28} fontWeight="700">
               Welcome Back
             </H1>
-            <Text fontSize={16} color="$gray11" lineHeight={24}>
+            <Paragraph fontSize={16} color="gray">
               Sign in to access your account and continue your journey
-            </Text>
+            </Paragraph>
           </YStack>
 
-          <YStack space="$3" paddingTop="$4">
-            <XStack space="$3" alignItems="center">
-              <Circle size={8} backgroundColor="$blue10" />
-              <Text fontSize={15} color="$gray11">
-                Secure authentication
-              </Text>
+          <YStack gap="$3" pt="$4">
+            <XStack gap="$3" items="center">
+              <Circle size={8} bg="$blue10" />
+              <Text fontSize={15}>Secure authentication</Text>
             </XStack>
-            <XStack space="$3" alignItems="center">
-              <Circle size={8} backgroundColor="$purple10" />
-              <Text fontSize={15} color="$gray11">
-                Access all your saved items
-              </Text>
+            <XStack gap="$3" items="center">
+              <Circle size={8} bg="$blue10" />
+              <Text fontSize={15}>Access all your saved items</Text>
             </XStack>
-            <XStack space="$3" alignItems="center">
-              <Circle size={8} backgroundColor="$pink10" />
-              <Text fontSize={15} color="$gray11">
-                Personalized experience
-              </Text>
+            <XStack gap="$3" items="center">
+              <Circle size={8} bg="$blue10" />
+              <Text fontSize={15}>Personalized experience</Text>
             </XStack>
           </YStack>
         </YStack>
 
-        <YStack space="$4" paddingBottom="$4">
+        <YStack gap="$4" pb="$4">
           <Button
             size="$5"
             onPress={handleGoogleSignIn}
             disabled={loading}
-            backgroundColor="$blue10"
+            bg="$blue10"
             pressStyle={{
-              backgroundColor: "$blue9",
+              bg: "$blue9",
               scale: 0.98,
             }}
-            borderRadius="$6"
+            rounded="$6"
             height={56}
             icon={loading ? <Spinner color="white" /> : undefined}
             fontWeight="600"
@@ -134,12 +134,23 @@ export default function SignIn() {
             {loading ? "Signing in..." : "Continue with Google"}
           </Button>
 
+          <XStack justify="center" items="center" gap="$2" pt="$2">
+            <Text fontSize={14} color="gray">
+              Don't have an account?
+            </Text>
+            <Pressable onPress={() => router.push("/sign-up")}>
+              <Text fontSize={14} color="$blue10" fontWeight="600">
+                Sign up
+              </Text>
+            </Pressable>
+          </XStack>
+
           <Text
             fontSize={12}
-            color="$gray10"
-            textAlign="center"
-            paddingHorizontal="$4"
+            color="gray"
+            px="$4"
             lineHeight={18}
+            style={{ textAlign: "center" }}
           >
             By continuing, you agree to our Terms of Service and Privacy Policy
           </Text>

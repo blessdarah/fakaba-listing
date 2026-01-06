@@ -1,40 +1,54 @@
-import { Search } from '@tamagui/lucide-icons'
-import { Input, InputProps, StackProps, View } from 'tamagui'
+import { Search, Sliders } from "@tamagui/lucide-icons";
+import {
+  Button,
+  Sheet,
+  Input,
+  InputProps,
+  StackProps,
+  XStack,
+  Paragraph,
+} from "tamagui";
+import React from "react";
 
 type SearchBarProps = InputProps & {
-    containerProps?: StackProps
-}
+  containerProps?: StackProps;
+};
 
 const SearchBar = ({ containerProps, ...props }: SearchBarProps) => {
-    return (
-        <View
-            flexDirection='row'
-            items="center"
-            justify="space-between"
-            bg="$background"
-            borderColor="$borderColor"
-            borderWidth={1}
-            px="$4"
-            borderStartEndRadius={6}
-            borderStartStartRadius={6}
-            borderEndEndRadius={6}
-            borderEndStartRadius={6}
-            width="100%"
-            {...containerProps}
-        >
-            <Search size="$1" color="$color" mr="$4" />
-            <Input
-                flex={1}
-                bg="transparent"
-                borderWidth={0}
-                placeholder={props.placeholder}
-                pl={0}
-                focusStyle={{ borderWidth: 0 }}
-                hoverStyle={{ borderWidth: 0 }}
-                {...props}
-            />
-        </View>
-    )
-}
+  const [open, setOpen] = React.useState(false);
+  return (
+    <>
+      <Sheet open={open}>
+        <Sheet.Overlay />
+        <Sheet.Handle />
+        <Sheet.Frame>
+          <Paragraph>Sheet body</Paragraph>
+        </Sheet.Frame>
+      </Sheet>
+      <XStack
+        justify="space-between"
+        items={"center"}
+        bg="$background"
+        {...containerProps}
+      >
+        <Search size="$1" color="$color" mr="$4" />
+        <Input
+          flex={1}
+          bg="transparent"
+          borderWidth={0}
+          placeholder={props.placeholder}
+          pl={0}
+          focusStyle={{ borderWidth: 0 }}
+          hoverStyle={{ borderWidth: 0 }}
+          {...props}
+        />
+        <Button
+          onPress={() => setOpen(!open)}
+          icon={<Sliders size={16} />}
+        ></Button>
+      </XStack>
+    </>
+  );
+};
 
-export default SearchBar
+export default SearchBar;

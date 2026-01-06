@@ -18,6 +18,7 @@ interface AuthContextType {
   user: User | null;
   loading: boolean;
   signInWithGoogle: () => Promise<void>;
+  signUpWithGoogle: () => Promise<void>;
   signOut: () => Promise<void>;
 }
 
@@ -46,38 +47,51 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
     return unsubscribe;
   }, []);
 
+  const authenticateWithGoogle = async () => {
+    if (Platform.OS === "web") {
+      await signInWithPopup(auth, googleProvider);
+    } else {
+      const redirectUri = AuthSession.makeRedirectUri({
+        useProxy: true,
+      });
+
+      const request = new AuthSession.AuthRequest({
+        clientId:
+          "35301983706-YOUR_CLIENT_ID.apps.googleusercontent.com",
+        scopes: ["openid", "profile", "email"],
+        redirectUri,
+      });
+
+      await request.makeAuthUrlAsync({
+        authorizationEndpoint: "https://accounts.google.com/o/oauth2/v2/auth",
+      });
+
+      const result = await request.promptAsync({
+        authorizationEndpoint: "https://accounts.google.com/o/oauth2/v2/auth",
+      });
+
+      if (result.type === "success") {
+        const { params } = result;
+        const credential = GoogleAuthProvider.credential(params.id_token);
+        await signInWithCredential(auth, credential);
+      }
+    }
+  };
+
   const signInWithGoogle = async () => {
     try {
-      if (Platform.OS === "web") {
-        await signInWithPopup(auth, googleProvider);
-      } else {
-        const redirectUri = AuthSession.makeRedirectUri({
-          useProxy: true,
-        });
-
-        const request = new AuthSession.AuthRequest({
-          clientId:
-            "35301983706-YOUR_CLIENT_ID.apps.googleusercontent.com",
-          scopes: ["openid", "profile", "email"],
-          redirectUri,
-        });
-
-        await request.makeAuthUrlAsync({
-          authorizationEndpoint: "https://accounts.google.com/o/oauth2/v2/auth",
-        });
-
-        const result = await request.promptAsync({
-          authorizationEndpoint: "https://accounts.google.com/o/oauth2/v2/auth",
-        });
-
-        if (result.type === "success") {
-          const { params } = result;
-          const credential = GoogleAuthProvider.credential(params.id_token);
-          await signInWithCredential(auth, credential);
-        }
-      }
+      await authenticateWithGoogle();
     } catch (error) {
       console.error("Error signing in with Google:", error);
+      throw error;
+    }
+  };
+
+  const signUpWithGoogle = async () => {
+    try {
+      await authenticateWithGoogle();
+    } catch (error) {
+      console.error("Error signing up with Google:", error);
       throw error;
     }
   };
@@ -97,6 +111,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
         user,
         loading,
         signInWithGoogle,
+        signUpWithGoogle,
         signOut,
       }}
     >
