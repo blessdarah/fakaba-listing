@@ -16,7 +16,7 @@ import {
 import { SafeAreaView } from "react-native-safe-area-context";
 import HomeCategories from "components/HomeCategories";
 import HorizontalListing from "components/HorizontalListing";
-import { Sliders } from "@tamagui/lucide-icons";
+import { Search, Sliders } from "@tamagui/lucide-icons";
 import ScreenContainer from "components/ScreenContainer";
 import { getListings } from "lib/firestore/listings";
 import { useAuth } from "contexts/AuthContext";
@@ -77,7 +77,7 @@ export default function TabOneScreen() {
               <Text fontSize="$5">Good morning</Text>
             </YStack>
 
-            <Avatar circular size="$5" borderColor="$blue10" borderWidth={2}>
+            <Avatar circular size="$4.5" borderColor="$blue10" borderWidth={2}>
               <Avatar.Image src="https://images.unsplash.com/photo-1531384441138-2736e62e0919?&w=100&h=100&dpr=2&q=80" />
               <Avatar.Fallback delayMs={600} backgroundColor="$blue10" />
             </Avatar>
@@ -92,11 +92,17 @@ export default function TabOneScreen() {
             my="$3"
           >
             {/* <Search size="$1" color="$color" mr="$4" /> */}
-            <Input flex={1} placeholder="Search property" bg="transparent" />
+            <View width="100%" items="center" flexDirection="row" justify="center" mb="$4" bg="#ececec" borderColor="$borderColor" rounded={100} borderWidth={1}>
+            <Input flex={1} placeholder="Search property" bg="transparent" color="#333" borderWidth={0} />
             <Button
+            rounded={100}
+              size="$3"
+              mr="$1.5"
+              bg="white"
               onPress={() => router.push("/(modals)/filter")}
-              icon={<Sliders size={16} />}
+              icon={<Sliders size={12} />}
             ></Button>
+            </View>
           </XStack>
 
           <View width="100%" items="center" justify="center" mb="$4">

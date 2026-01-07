@@ -147,7 +147,6 @@ const ListingDetailsScreen = () => {
           r={0}
           justify="center"
           gap="$2"
-          zIndex={10}
         >
           {details.images.map((_: any, index: number) => (
             <View
