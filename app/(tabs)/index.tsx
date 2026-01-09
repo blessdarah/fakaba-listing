@@ -16,7 +16,7 @@ import {
 import { SafeAreaView } from "react-native-safe-area-context";
 import HomeCategories from "components/HomeCategories";
 import HorizontalListing from "components/HorizontalListing";
-import { Sliders } from "@tamagui/lucide-icons";
+import { Search, Sliders } from "@tamagui/lucide-icons";
 import ScreenContainer from "components/ScreenContainer";
 import { getListings } from "lib/firestore/listings";
 import { useAuth } from "contexts/AuthContext";
@@ -31,30 +31,33 @@ export default function TabOneScreen() {
   const [open, setOpen] = React.useState(false);
   const [selectedType, setSelectedType] = React.useState("rental");
   const [listings, setListings] = React.useState<Listing[]>([]);
-  const [_, setLoading] = React.useState(false);
+  const [loading, setLoading] = React.useState(true);
+  const [error, setError] = React.useState<string | null>(null);
   const router = useRouter();
 
   React.useEffect(() => {
     async function loadListings() {
       try {
         setLoading(true);
+        setError(null);
         const fetchedListings = await getListings();
         console.log("listings: ", fetchedListings);
         setListings(fetchedListings);
       } catch (error: any) {
         console.error("Failed to load listings:", error);
+        setError(error.message || "Failed to load listings");
 
         if (error.message.includes("Permission denied")) {
           Alert.alert(
             t("errors.authRequired"),
             t("errors.authRequiredMessage"),
-            [{ text: t("common.ok") }],
+            [{ text: t("common.ok") }]
           );
         } else {
           Alert.alert(
             t("common.error"),
             error.message || t("errors.loadListingsError"),
-            [{ text: t("common.ok") }],
+            [{ text: t("common.ok") }]
           );
         }
       } finally {
@@ -80,7 +83,7 @@ export default function TabOneScreen() {
               <Text fontSize="$5">{t("home.welcomeBack")}</Text>
             </YStack>
 
-            <Avatar circular size="$5" borderColor="$blue10" borderWidth={2}>
+            <Avatar circular size="$4.5" borderColor="$blue10" borderWidth={2}>
               <Avatar.Image src="https://images.unsplash.com/photo-1531384441138-2736e62e0919?&w=100&h=100&dpr=2&q=80" />
               <Avatar.Fallback delayMs={600} backgroundColor="$blue10" />
             </Avatar>
@@ -94,17 +97,33 @@ export default function TabOneScreen() {
             my="$3"
           >
             {/* <Search size="$1" color="$color" mr="$4" /> */}
-            <Input
-              flex={1}
-              // color="gray"
-              placeholder={t("home.searchPlaceholder")}
-            />
-
-            <Button
-              onPress={() => router.push("/(modals)/filter")}
-              borderColor="$white5"
-              icon={<Sliders size={16} />}
-            ></Button>
+            <View
+              width="100%"
+              items="center"
+              flexDirection="row"
+              justify="center"
+              mb="$4"
+              bg="#ececec"
+              borderColor="$borderColor"
+              rounded={100}
+              borderWidth={1}
+            >
+              <Input
+                flex={1}
+                placeholder="Search property"
+                bg="transparent"
+                color="#333"
+                borderWidth={0}
+              />
+              <Button
+                rounded={100}
+                size="$3"
+                mr="$1.5"
+                bg="white"
+                onPress={() => router.push("/(modals)/filter")}
+                icon={<Sliders size={12} />}
+              ></Button>
+            </View>
           </XStack>
 
           <View width="100%" items="center" justify="center" mb="$4">
@@ -115,6 +134,8 @@ export default function TabOneScreen() {
             <HorizontalListing
               title={t("home.popularRentals")}
               listings={listings}
+              loading={loading}
+              error={error}
             />
           </View>
 
@@ -122,6 +143,8 @@ export default function TabOneScreen() {
             <HorizontalListing
               title={t("home.popularOnSale")}
               listings={listings}
+              loading={loading}
+              error={error}
             />
           </View>
 
