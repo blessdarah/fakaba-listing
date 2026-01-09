@@ -33,6 +33,21 @@
             "expo-router",
             "expo-font",
             [
+                "expo-localization",
+                {
+                    "supportedLocales": {
+                        "ios": [
+                            "en",
+                            "fr"
+                        ],
+                        "android": [
+                            "en-US",
+                            "fr"
+                        ]
+                    }
+                }
+            ],
+            [
                 "expo-build-properties",
                 {
                     "ios": {

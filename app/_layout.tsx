@@ -1,17 +1,13 @@
 import "../firebase.config";
 
 import { useEffect } from "react";
-import { useColorScheme } from "react-native";
-import {
-  DarkTheme,
-  DefaultTheme,
-  ThemeProvider,
-} from "@react-navigation/native";
+import { StatusBar, useColorScheme } from "react-native";
 import { useFonts } from "expo-font";
 import { SplashScreen, Stack, router } from "expo-router";
 import { Provider } from "components/Provider";
 import { useTheme } from "tamagui";
 import { useAuth } from "../contexts/AuthContext";
+import { SafeAreaProvider } from "react-native-safe-area-context";
 
 export {
   // Catch any errors thrown by the Layout component.
@@ -74,11 +70,32 @@ function RootLayoutNav() {
   }
 
   return (
-    <ThemeProvider value={colorScheme === "dark" ? DarkTheme : DefaultTheme}>
-      {/* <StatusBar style={colorScheme === "dark" ? "light" : "dark"} /> */}
-      <Stack>
+    <SafeAreaProvider>
+      <StatusBar
+        barStyle={colorScheme === "dark" ? "dark-content" : "light-content"}
+      />
+      <Stack
+        screenOptions={{
+          headerStyle: {
+            backgroundColor: theme.background.val,
+          },
+          headerTintColor: theme.color.val,
+          headerTitleStyle: {
+            color: theme.color.val,
+          },
+          contentStyle: {
+            backgroundColor: theme.background.val,
+          },
+        }}
+      >
         <Stack.Screen
           name="sign-in"
+          options={{
+            headerShown: false,
+          }}
+        />
+        <Stack.Screen
+          name="sign-up"
           options={{
             headerShown: false,
           }}
@@ -90,6 +107,6 @@ function RootLayoutNav() {
           }}
         />
       </Stack>
-    </ThemeProvider>
+    </SafeAreaProvider>
   );
 }

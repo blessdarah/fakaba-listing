@@ -20,12 +20,14 @@ import { Sliders } from "@tamagui/lucide-icons";
 import ScreenContainer from "components/ScreenContainer";
 import { getListings } from "lib/firestore/listings";
 import { useAuth } from "contexts/AuthContext";
-import { Alert, StatusBar } from "react-native";
+import { Alert, StatusBar, useColorScheme } from "react-native";
 import { Listing } from "lib/types";
 import { useRouter } from "expo-router";
+import { useTranslation } from "lib/i18n/useTranslation";
 
 export default function TabOneScreen() {
   const { user } = useAuth();
+  const { t } = useTranslation();
   const [open, setOpen] = React.useState(false);
   const [selectedType, setSelectedType] = React.useState("rental");
   const [listings, setListings] = React.useState<Listing[]>([]);
@@ -44,15 +46,15 @@ export default function TabOneScreen() {
 
         if (error.message.includes("Permission denied")) {
           Alert.alert(
-            "Authentication Required",
-            "Please sign in to view listings.",
-            [{ text: "OK" }],
+            t("errors.authRequired"),
+            t("errors.authRequiredMessage"),
+            [{ text: t("common.ok") }],
           );
         } else {
           Alert.alert(
-            "Error",
-            error.message || "Failed to load listings. Please try again.",
-            [{ text: "OK" }],
+            t("common.error"),
+            error.message || t("errors.loadListingsError"),
+            [{ text: t("common.ok") }],
           );
         }
       } finally {
@@ -65,16 +67,17 @@ export default function TabOneScreen() {
   }, [user]);
 
   return (
-    <SafeAreaView>
-      <StatusBar />
+    <>
       <ScrollView showsVerticalScrollIndicator={false}>
         <ScreenContainer>
           <XStack items="center" justify="space-between" width="100%">
             <YStack gap="$1.5">
               <Text fontSize="$7" fontWeight={"bold"}>
-                Hi, Georges
+                {user?.isAnonymous || !user?.displayName
+                  ? t("home.defaultGreeting")
+                  : t("home.greeting", { name: user.displayName })}
               </Text>
-              <Text fontSize="$5">Good morning</Text>
+              <Text fontSize="$5">{t("home.welcomeBack")}</Text>
             </YStack>
 
             <Avatar circular size="$5" borderColor="$blue10" borderWidth={2}>
@@ -87,14 +90,19 @@ export default function TabOneScreen() {
             justify="space-between"
             items={"center"}
             width="100%"
-            bg="$background"
             gap="$2"
             my="$3"
           >
             {/* <Search size="$1" color="$color" mr="$4" /> */}
-            <Input flex={1} placeholder="Search property" bg="transparent" />
+            <Input
+              flex={1}
+              // color="gray"
+              placeholder={t("home.searchPlaceholder")}
+            />
+
             <Button
               onPress={() => router.push("/(modals)/filter")}
+              borderColor="$white5"
               icon={<Sliders size={16} />}
             ></Button>
           </XStack>
@@ -104,11 +112,17 @@ export default function TabOneScreen() {
           </View>
 
           <View width="100%" items="center" justify="center" mb="$4">
-            <HorizontalListing title="Popular rentals" listings={listings} />
+            <HorizontalListing
+              title={t("home.popularRentals")}
+              listings={listings}
+            />
           </View>
 
           <View width="100%" items="center" justify="center" mb="$4">
-            <HorizontalListing title="Popular on sale" listings={listings} />
+            <HorizontalListing
+              title={t("home.popularOnSale")}
+              listings={listings}
+            />
           </View>
 
           {/* bottom sheet */}
@@ -132,27 +146,29 @@ export default function TabOneScreen() {
             <Sheet.Handle />
             <Sheet.Frame>
               <Sheet.ScrollView p="$4">
-                <H5>Filter</H5>
+                <H5>{t("filter.title")}</H5>
                 <Separator my="$2" />
                 {/* <XStack gap="$4"> */}
                 <Text>Type</Text>
                 <Select value={selectedType} onValueChange={setSelectedType}>
                   <Select.Trigger>
-                    <Select.Value placeholder="Select type..." />
+                    <Select.Value placeholder={t("filter.selectType")} />
                   </Select.Trigger>
                   <Select.Content>
                     <Select.ScrollUpButton />
                     <Select.Viewport>
                       <Select.Group>
-                        <Select.Label>Property Type</Select.Label>
+                        <Select.Label>{t("filter.propertyType")}</Select.Label>
                         <Select.Item index={0} key={"rental"} value="rental">
-                          <Select.ItemText>Rental</Select.ItemText>
+                          <Select.ItemText>
+                            {t("filter.rental")}
+                          </Select.ItemText>
                         </Select.Item>
                         <Select.Item index={1} key={"sale"} value="sale">
-                          <Select.ItemText>Sale</Select.ItemText>
+                          <Select.ItemText>{t("filter.sale")}</Select.ItemText>
                         </Select.Item>
                         <Select.Item index={2} key={"lease"} value="lease">
-                          <Select.ItemText>Lease</Select.ItemText>
+                          <Select.ItemText>{t("filter.lease")}</Select.ItemText>
                         </Select.Item>
                       </Select.Group>
                     </Select.Viewport>
@@ -165,6 +181,6 @@ export default function TabOneScreen() {
           </Sheet>
         </ScreenContainer>
       </ScrollView>
-    </SafeAreaView>
+    </>
   );
 }

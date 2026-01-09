@@ -1,0 +1,110 @@
+{
+  "common": {
+    "loading": "Loading...",
+    "error": "Error",
+    "retry": "Try again",
+    "cancel": "Cancel",
+    "ok": "OK",
+    "save": "Save",
+    "delete": "Delete",
+    "edit": "Edit",
+    "search": "Search",
+    "filter": "Filter",
+    "seeAll": "See all",
+    "back": "Back",
+    "next": "Next",
+    "previous": "Previous",
+    "done": "Done"
+  },
+  "tabs": {
+    "home": "Home",
+    "favorites": "Favorites", 
+    "search": "Search",
+    "services": "Services",
+    "settings": "Settings"
+  },
+  "home": {
+    "greeting": "Hi, {{name}}",
+    "defaultGreeting": "Hi, There...",
+    "welcomeBack": "Welcome back",
+    "searchPlaceholder": "Search property",
+    "popularRentals": "Popular rentals",
+    "popularOnSale": "Popular on sale",
+    "categories": {
+      "tinyHomes": "Tiny Homes",
+      "nationalParks": "National Parks", 
+      "beachfront": "Beachfront",
+      "cabins": "Cabins",
+      "amazingPools": "Amazing Pools",
+      "mansions": "Mansions",
+      "historicHomes": "Historic Homes",
+      "countryside": "Countryside",
+      "surfing": "Surfing",
+      "bedBreakfasts": "Bed & Breakfasts",
+      "restaurants": "Restaurants",
+      "hotels": "Hotels"
+    }
+  },
+  "filter": {
+    "title": "Filter",
+    "propertyType": "Property Type",
+    "selectType": "Select type...",
+    "rental": "Rental",
+    "sale": "Sale", 
+    "lease": "Lease"
+  },
+  "auth": {
+    "signIn": "Sign In",
+    "signUp": "Sign Up",
+    "signOut": "Sign Out",
+    "welcomeBack": "Welcome Back",
+    "createAccount": "Create Account",
+    "signInDescription": "Sign in to access your account and continue your journey",
+    "signUpDescription": "Join our community and start exploring amazing opportunities",
+    "continueWithGoogle": "Continue with Google",
+    "signUpWithGoogle": "Sign up with Google",
+    "signingIn": "Signing in...",
+    "creatingAccount": "Creating account...",
+    "dontHaveAccount": "Don't have an account?",
+    "alreadyHaveAccount": "Already have an account?",
+    "termsText": "By continuing, you agree to our Terms of Service and Privacy Policy",
+    "termsTextSignUp": "By creating an account, you agree to our Terms of Service and Privacy Policy",
+    "features": {
+      "secureAuth": "Secure authentication",
+      "savedItems": "Access all your saved items", 
+      "personalizedExp": "Personalized experience",
+      "quickSetup": "Quick and secure setup",
+      "saveFavorites": "Save your favorite listings",
+      "getRecommendations": "Get personalized recommendations"
+    }
+  },
+  "settings": {
+    "title": "Settings",
+    "account": "Account",
+    "email": "Email",
+    "name": "Name",
+    "language": "Language",
+    "theme": "Theme",
+    "notifications": "Notifications",
+    "privacy": "Privacy",
+    "support": "Support"
+  },
+  "errors": {
+    "authRequired": "Authentication Required",
+    "authRequiredMessage": "Please sign in to view listings.",
+    "signInError": "Sign In Error",
+    "signInErrorMessage": "Failed to sign in with Google. Please try again.",
+    "signUpError": "Sign Up Error", 
+    "signUpErrorMessage": "Failed to create account with Google. Please try again.",
+    "signOutError": "Failed to sign out. Please try again.",
+    "loadListingsError": "Failed to load listings. Please try again.",
+    "permissionDenied": "Permission denied: Unable to access listings."
+  },
+  "listings": {
+    "monthly": "{{price}}k/Monthly",
+    "price": "{{price}}k",
+    "viewDetails": "View Details",
+    "addToFavorites": "Add to Favorites",
+    "removeFromFavorites": "Remove from Favorites"
+  }
+}

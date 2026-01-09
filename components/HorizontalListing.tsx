@@ -1,7 +1,7 @@
 import { View, Text, XStack, YStack, ScrollView } from "tamagui";
 import { Link } from "expo-router";
 import ListingCard from "./ListingCard";
-import { Listing } from "app/types";
+import { Listing } from "lib/types";
 
 type HorizontalListingProps = {
   title: string;

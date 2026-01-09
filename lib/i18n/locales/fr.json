@@ -1,0 +1,110 @@
+{
+  "common": {
+    "loading": "Chargement...",
+    "error": "Erreur",
+    "retry": "Réessayer",
+    "cancel": "Annuler",
+    "ok": "OK",
+    "save": "Sauvegarder",
+    "delete": "Supprimer",
+    "edit": "Modifier",
+    "search": "Rechercher",
+    "filter": "Filtrer",
+    "seeAll": "Voir tout",
+    "back": "Retour",
+    "next": "Suivant",
+    "previous": "Précédent",
+    "done": "Terminé"
+  },
+  "tabs": {
+    "home": "Accueil",
+    "favorites": "Favoris",
+    "search": "Recherche", 
+    "services": "Services",
+    "settings": "Paramètres"
+  },
+  "home": {
+    "greeting": "Salut, {{name}}",
+    "defaultGreeting": "Salut...",
+    "welcomeBack": "Bon retour",
+    "searchPlaceholder": "Rechercher une propriété",
+    "popularRentals": "Locations populaires",
+    "popularOnSale": "Populaires en vente",
+    "categories": {
+      "tinyHomes": "Petites Maisons",
+      "nationalParks": "Parcs Nationaux",
+      "beachfront": "Front de Mer",
+      "cabins": "Cabanes",
+      "amazingPools": "Piscines Incroyables",
+      "mansions": "Manoirs",
+      "historicHomes": "Maisons Historiques", 
+      "countryside": "Campagne",
+      "surfing": "Surf",
+      "bedBreakfasts": "Chambres d'Hôtes",
+      "restaurants": "Restaurants",
+      "hotels": "Hôtels"
+    }
+  },
+  "filter": {
+    "title": "Filtrer",
+    "propertyType": "Type de Propriété",
+    "selectType": "Sélectionner le type...",
+    "rental": "Location",
+    "sale": "Vente",
+    "lease": "Bail"
+  },
+  "auth": {
+    "signIn": "Se Connecter",
+    "signUp": "S'Inscrire",
+    "signOut": "Se Déconnecter",
+    "welcomeBack": "Bon Retour",
+    "createAccount": "Créer un Compte",
+    "signInDescription": "Connectez-vous pour accéder à votre compte et continuer votre parcours",
+    "signUpDescription": "Rejoignez notre communauté et commencez à explorer des opportunités incroyables",
+    "continueWithGoogle": "Continuer avec Google",
+    "signUpWithGoogle": "S'inscrire avec Google",
+    "signingIn": "Connexion en cours...",
+    "creatingAccount": "Création du compte...",
+    "dontHaveAccount": "Vous n'avez pas de compte ?",
+    "alreadyHaveAccount": "Vous avez déjà un compte ?",
+    "termsText": "En continuant, vous acceptez nos Conditions de Service et Politique de Confidentialité",
+    "termsTextSignUp": "En créant un compte, vous acceptez nos Conditions de Service et Politique de Confidentialité",
+    "features": {
+      "secureAuth": "Authentification sécurisée",
+      "savedItems": "Accédez à tous vos éléments sauvegardés",
+      "personalizedExp": "Expérience personnalisée", 
+      "quickSetup": "Configuration rapide et sécurisée",
+      "saveFavorites": "Sauvegardez vos annonces préférées",
+      "getRecommendations": "Obtenez des recommandations personnalisées"
+    }
+  },
+  "settings": {
+    "title": "Paramètres",
+    "account": "Compte",
+    "email": "Email",
+    "name": "Nom",
+    "language": "Langue",
+    "theme": "Thème",
+    "notifications": "Notifications",
+    "privacy": "Confidentialité",
+    "support": "Support"
+  },
+  "errors": {
+    "authRequired": "Authentification Requise",
+    "authRequiredMessage": "Veuillez vous connecter pour voir les annonces.",
+    "signInError": "Erreur de Connexion",
+    "signInErrorMessage": "Échec de la connexion avec Google. Veuillez réessayer.",
+    "signUpError": "Erreur d'Inscription",
+    "signUpErrorMessage": "Échec de la création du compte avec Google. Veuillez réessayer.",
+    "signOutError": "Échec de la déconnexion. Veuillez réessayer.",
+    "loadListingsError": "Échec du chargement des annonces. Veuillez réessayer.",
+    "permissionDenied": "Permission refusée : Impossible d'accéder aux annonces."
+  },
+  "listings": {
+    "monthly": "{{price}}k/Mensuel",
+    "price": "{{price}}k",
+    "viewDetails": "Voir les Détails",
+    "addToFavorites": "Ajouter aux Favoris",
+    "removeFromFavorites": "Retirer des Favoris"
+  }
+}

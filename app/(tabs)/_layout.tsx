@@ -7,9 +7,11 @@ import {
   Briefcase,
   Settings,
 } from "@tamagui/lucide-icons";
+import { useTranslation } from "lib/i18n/useTranslation";
 
 export default function TabLayout() {
   const theme = useTheme();
+  const { t } = useTranslation();
 
   return (
     <Tabs
@@ -29,7 +31,7 @@ export default function TabLayout() {
       <Tabs.Screen
         name="index"
         options={{
-          title: "Home",
+          title: t("tabs.home"),
           tabBarIcon: ({ color }) => <Home color={color as any} />,
           headerShown: false,
           // headerTransparent: false,
@@ -38,7 +40,7 @@ export default function TabLayout() {
       <Tabs.Screen
         name="favorites"
         options={{
-          title: "Favorites",
+          title: t("tabs.favorites"),
           headerShown: false,
           tabBarIcon: ({ color }) => <Heart color={color as any} />,
         }}
@@ -46,7 +48,7 @@ export default function TabLayout() {
       <Tabs.Screen
         name="search"
         options={{
-          title: "Search",
+          title: t("tabs.search"),
           headerShown: false,
           tabBarIcon: ({ color }) => <MapPinHouse color={color as any} />,
         }}
@@ -54,7 +56,7 @@ export default function TabLayout() {
       <Tabs.Screen
         name="services"
         options={{
-          title: "Services",
+          title: t("tabs.services"),
           headerShown: false,
           tabBarIcon: ({ color }) => <Briefcase color={color as any} />,
         }}
@@ -63,7 +65,7 @@ export default function TabLayout() {
         name="settings"
         options={{
           headerShown: false,
-          title: "Settings",
+          title: t("tabs.settings"),
           tabBarIcon: ({ color }) => <Settings color={color as any} />,
         }}
       />

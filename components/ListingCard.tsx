@@ -2,7 +2,7 @@ import { View, Text, YStack, XStack, Image, Card, Button } from "tamagui";
 import { Heart } from "@tamagui/lucide-icons";
 import { useState } from "react";
 import { Link } from "expo-router";
-import { Listing } from "app/types";
+import { Listing } from "lib/types";
 
 type ListingCardProps = {
   item: Listing;

@@ -9,7 +9,7 @@ import {
   limit,
 } from "firebase/firestore";
 import { app } from "../../firebase.config.js";
-import { Listing } from "app/types.js";
+import { Listing } from "lib/types.js";
 
 const db = getFirestore(app);
 
