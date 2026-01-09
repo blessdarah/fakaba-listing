@@ -29,30 +29,33 @@ export default function TabOneScreen() {
   const [open, setOpen] = React.useState(false);
   const [selectedType, setSelectedType] = React.useState("rental");
   const [listings, setListings] = React.useState<Listing[]>([]);
-  const [_, setLoading] = React.useState(false);
+  const [loading, setLoading] = React.useState(true);
+  const [error, setError] = React.useState<string | null>(null);
   const router = useRouter();
 
   React.useEffect(() => {
     async function loadListings() {
       try {
         setLoading(true);
+        setError(null);
         const fetchedListings = await getListings();
         console.log("listings: ", fetchedListings);
         setListings(fetchedListings);
       } catch (error: any) {
         console.error("Failed to load listings:", error);
+        setError(error.message || "Failed to load listings");
 
         if (error.message.includes("Permission denied")) {
           Alert.alert(
             "Authentication Required",
             "Please sign in to view listings.",
-            [{ text: "OK" }],
+            [{ text: "OK" }]
           );
         } else {
           Alert.alert(
             "Error",
             error.message || "Failed to load listings. Please try again.",
-            [{ text: "OK" }],
+            [{ text: "OK" }]
           );
         }
       } finally {
@@ -92,16 +95,32 @@ export default function TabOneScreen() {
             my="$3"
           >
             {/* <Search size="$1" color="$color" mr="$4" /> */}
-            <View width="100%" items="center" flexDirection="row" justify="center" mb="$4" bg="#ececec" borderColor="$borderColor" rounded={100} borderWidth={1}>
-            <Input flex={1} placeholder="Search property" bg="transparent" color="#333" borderWidth={0} />
-            <Button
-            rounded={100}
-              size="$3"
-              mr="$1.5"
-              bg="white"
-              onPress={() => router.push("/(modals)/filter")}
-              icon={<Sliders size={12} />}
-            ></Button>
+            <View
+              width="100%"
+              items="center"
+              flexDirection="row"
+              justify="center"
+              mb="$4"
+              bg="#ececec"
+              borderColor="$borderColor"
+              rounded={100}
+              borderWidth={1}
+            >
+              <Input
+                flex={1}
+                placeholder="Search property"
+                bg="transparent"
+                color="#333"
+                borderWidth={0}
+              />
+              <Button
+                rounded={100}
+                size="$3"
+                mr="$1.5"
+                bg="white"
+                onPress={() => router.push("/(modals)/filter")}
+                icon={<Sliders size={12} />}
+              ></Button>
             </View>
           </XStack>
 
@@ -110,11 +129,21 @@ export default function TabOneScreen() {
           </View>
 
           <View width="100%" items="center" justify="center" mb="$4">
-            <HorizontalListing title="Popular rentals" listings={listings} />
+            <HorizontalListing
+              title="Popular rentals"
+              listings={listings}
+              loading={loading}
+              error={error}
+            />
           </View>
 
           <View width="100%" items="center" justify="center" mb="$4">
-            <HorizontalListing title="Popular on sale" listings={listings} />
+            <HorizontalListing
+              title="Popular on sale"
+              listings={listings}
+              loading={loading}
+              error={error}
+            />
           </View>
 
           {/* bottom sheet */}
