@@ -9,6 +9,7 @@ export interface Listing {
   location: string; // town or city
   ownerId: string;
   imageUrls: string[];
+features: string[];
   description: string;
   status: string;
   bedrooms: number;
@@ -18,3 +19,27 @@ export interface Listing {
   createdAt: FireStoreTimestamp;
   updatedAt: FireStoreTimestamp;
 }
+
+interface BaseUserInfo {
+  authProvider: string;
+  createdAt: FireStoreTimestamp;
+  email: string;
+  hasOnboarded: boolean;
+  interests?: string[];
+  location?: string;
+  profileImage?: string;
+  role?: "agent" | "investor";
+  userRole?: "agent" | "investor";
+  updatedAt?: FireStoreTimestamp;
+}
+
+interface CompanyAccount {
+
+}
+
+export interface User extends BaseUserInfo {
+  accountType: "company" | "individual";
+
+}
+
+export interface

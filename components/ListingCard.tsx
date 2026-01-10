@@ -12,7 +12,7 @@ const ListingCard = ({ item }: ListingCardProps) => {
   const [liked, setLiked] = useState(false);
 
   return (
-    <Link href={"/(listings)/123"} asChild>
+    <Link href={`/(listings)/${item.id}`} asChild>
       <Card
         size="$3"
         bordered={false}

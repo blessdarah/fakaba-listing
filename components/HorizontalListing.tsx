@@ -3,6 +3,7 @@ import { Link } from "expo-router";
 import ListingCard from "./ListingCard";
 import { Listing } from "lib/types";
 import { AlertCircle } from "@tamagui/lucide-icons";
+import { useTranslation } from "lib/i18n/useTranslation";
 
 type HorizontalListingProps = {
   title: string;
@@ -17,6 +18,7 @@ const HorizontalListing = ({
   loading = false,
   error = null,
 }: HorizontalListingProps) => {
+  const { t } = useTranslation();
   // Loading state
   if (loading) {
     return (
@@ -33,7 +35,7 @@ const HorizontalListing = ({
         >
           <Spinner size="large" color="$blue8" />
           <Text fontSize="$4" color="#6b7280" mt="$3">
-            Loading listings...
+            {t("common.loading")}
           </Text>
         </YStack>
       </YStack>

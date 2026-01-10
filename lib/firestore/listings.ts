@@ -19,7 +19,7 @@ export const getListings = async (): Promise<Listing[]> => {
     const q = query(
       collection(db, "properties"),
       where("status", "==", "active"),
-      limit(10),
+      limit(10)
     );
     const snapshot = await getDocs(q);
 
@@ -50,13 +50,13 @@ export const getListing = async (id: string) => {
     return {
       id: record.id,
       ...record.data(),
-    };
+    } as Listing;
   } catch (error: any) {
     console.error("Error fetching listing:", error);
 
     if (error.code === "permission-denied") {
       throw new Error(
-        "Permission denied: You don't have access to view this listing. Please sign in.",
+        "Permission denied: You don't have access to view this listing. Please sign in."
       );
     }
 
