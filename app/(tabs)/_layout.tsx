@@ -9,6 +9,10 @@ import {
 } from "@tamagui/lucide-icons";
 import { useTranslation } from "lib/i18n/useTranslation";
 
+export const unstable_settings = {
+  initialRouteName: "index",
+};
+
 export default function TabLayout() {
   const theme = useTheme();
   const { t } = useTranslation();
@@ -73,6 +77,7 @@ export default function TabLayout() {
         name="(listings)"
         options={{
           href: null, // This hides the tab from the bottom navigation
+          headerShown: false,
         }}
       />
     </Tabs>

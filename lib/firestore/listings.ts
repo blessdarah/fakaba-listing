@@ -9,7 +9,7 @@ import {
   limit,
 } from "firebase/firestore";
 import { app } from "../../firebase.config.js";
-import { Listing } from "lib/types.js";
+import { Listing, User } from "lib/types.js";
 
 const db = getFirestore(app);
 
@@ -47,10 +47,82 @@ export const getListing = async (id: string) => {
       return null;
     }
 
-    return {
+    const listingData = {
       id: record.id,
       ...record.data(),
     } as Listing;
+
+    // Fetch user data if ownerId exists
+    if (listingData.ownerId) {
+      try {
+        const userRef = doc(db, "users", listingData.ownerId);
+        const userRecord = await getDoc(userRef);
+
+        if (userRecord.exists()) {
+          listingData.owner = {
+            id: userRecord.id,
+            ...userRecord.data(),
+          } as User;
+        }
+      } catch (userError: any) {
+        console.error("Error fetching user data:", userError);
+        // Continue without user data if there's an error
+      }
+    }
+
+    return listingData;
+  } catch (error: any) {
+    console.error("Error fetching listing:", error);
+
+    if (error.code === "permission-denied") {
+      throw new Error(
+        "Permission denied: You don't have access to view this listing. Please sign in."
+      );
+    }
+
+    throw new Error("Failed to load listing. Please try again.");
+  }
+};
+
+export const getListingByUserId = async (id: string) => {
+  try {
+    const q = query(
+      collection(db, "properties"),
+      where("status", "==", "active"),
+      where("ownerId", "==", id)
+    );
+    const snapshot = await getDocs(q);
+
+    const listings = snapshot.docs.map((doc) => ({
+      id: doc.id,
+      ...(doc.data() as Omit<Listing, "id">),
+    }));
+
+    // Fetch user data once since all listings have the same ownerId
+    let owner: User | undefined;
+    if (id) {
+      try {
+        const userRef = doc(db, "users", id);
+        const userRecord = await getDoc(userRef);
+
+        if (userRecord.exists()) {
+          owner = {
+            id: userRecord.id,
+            ...userRecord.data(),
+          } as User;
+        }
+      } catch (userError: any) {
+        console.error("Error fetching user data:", userError);
+        // Continue without user data if there's an error
+      }
+    }
+
+    console.log("owner: ", owner);
+    // Add owner to each listing
+    return listings.map((listing) => ({
+      ...listing,
+      owner,
+    }));
   } catch (error: any) {
     console.error("Error fetching listing:", error);
 

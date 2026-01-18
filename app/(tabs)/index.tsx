@@ -44,8 +44,7 @@ export default function TabOneScreen() {
         console.log("listings: ", fetchedListings);
         setListings(fetchedListings);
       } catch (error: any) {
-        console.error("Failed to load listings:", error);
-        setError(error.message || "Failed to load listings");
+        setError(error.message || "Failed to load properties.");
 
         if (error.message.includes("Permission denied")) {
           Alert.alert(
@@ -84,7 +83,12 @@ export default function TabOneScreen() {
             </YStack>
 
             <Avatar circular size="$4.5" borderColor="$blue10" borderWidth={2}>
-              <Avatar.Image src="https://images.unsplash.com/photo-1531384441138-2736e62e0919?&w=100&h=100&dpr=2&q=80" />
+              <Avatar.Image
+                src={
+                  user?.photoURL ||
+                  "https://images.unsplash.com/photo-1531384441138-2736e62e0919?&w=100&h=100&dpr=2&q=80"
+                }
+              />
               <Avatar.Fallback delayMs={600} backgroundColor="$blue10" />
             </Avatar>
           </XStack>
@@ -133,7 +137,7 @@ export default function TabOneScreen() {
           <View width="100%" items="center" justify="center" mb="$4">
             <HorizontalListing
               title={t("home.popularRentals")}
-              listings={listings}
+              listings={listings.filter((item) => item.type === "rent")}
               loading={loading}
               error={error}
             />
@@ -142,7 +146,7 @@ export default function TabOneScreen() {
           <View width="100%" items="center" justify="center" mb="$4">
             <HorizontalListing
               title={t("home.popularOnSale")}
-              listings={listings}
+              listings={listings.filter((item) => item.type === "sale")}
               loading={loading}
               error={error}
             />

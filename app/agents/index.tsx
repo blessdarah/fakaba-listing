@@ -1,7 +1,6 @@
-import { ChevronRight, MapPin, Search, StarFull } from "@tamagui/lucide-icons";
+import { ChevronRight, MapPin, Search } from "@tamagui/lucide-icons";
 import { StartRating } from "components/StarRating";
 import { Link } from "expo-router";
-import { JSX } from "react";
 import {
   Avatar,
   Input,

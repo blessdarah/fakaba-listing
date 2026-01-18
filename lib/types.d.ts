@@ -8,8 +8,9 @@ export interface Listing {
   address: string; // specific location
   location: string; // town or city
   ownerId: string;
+  owner?: User; // populated user data
   imageUrls: string[];
-features: string[];
+  features: string[];
   description: string;
   status: string;
   bedrooms: number;
@@ -33,13 +34,10 @@ interface BaseUserInfo {
   updatedAt?: FireStoreTimestamp;
 }
 
-interface CompanyAccount {
-
-}
-
 export interface User extends BaseUserInfo {
+  id?: string;
   accountType: "company" | "individual";
-
+  imageUrls: string[];
+  firstName?: string;
+  lastName?: string;
 }
-
-export interface

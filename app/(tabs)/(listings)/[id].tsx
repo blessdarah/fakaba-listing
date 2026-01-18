@@ -10,10 +10,18 @@ import {
   Paragraph,
   Circle,
   H5,
+  Separator,
 } from "tamagui";
 import { Link, Stack, useLocalSearchParams } from "expo-router";
 import React, { useState } from "react";
-import { Heart, MessageCircle, Map as MapIcon } from "@tamagui/lucide-icons";
+import {
+  Heart,
+  MessageCircle,
+  Map as MapIcon,
+  BedDouble,
+  Bath,
+  Ruler,
+} from "@tamagui/lucide-icons";
 import {
   Dimensions,
   NativeScrollEvent,
@@ -23,6 +31,31 @@ import { getListing } from "lib/firestore/listings";
 import { Listing } from "lib/types";
 
 const { width } = Dimensions.get("window");
+
+const formatRelativeTime = (date: Date): string => {
+  const now = new Date();
+  const diffInMs = now.getTime() - date.getTime();
+  const diffInSeconds = Math.floor(diffInMs / 1000);
+  const diffInMinutes = Math.floor(diffInSeconds / 60);
+  const diffInHours = Math.floor(diffInMinutes / 60);
+  const diffInDays = Math.floor(diffInHours / 24);
+  const diffInMonths = Math.floor(diffInDays / 30);
+  const diffInYears = Math.floor(diffInDays / 365);
+
+  if (diffInYears > 0) {
+    return `${diffInYears} ${diffInYears === 1 ? "year" : "years"} ago`;
+  } else if (diffInMonths > 0) {
+    return `${diffInMonths} ${diffInMonths === 1 ? "month" : "months"} ago`;
+  } else if (diffInDays > 0) {
+    return `${diffInDays} ${diffInDays === 1 ? "day" : "days"} ago`;
+  } else if (diffInHours > 0) {
+    return `${diffInHours} ${diffInHours === 1 ? "hour" : "hours"} ago`;
+  } else if (diffInMinutes > 0) {
+    return `${diffInMinutes} ${diffInMinutes === 1 ? "minute" : "minutes"} ago`;
+  } else {
+    return "Just now";
+  }
+};
 
 const ListingDetailsScreen = () => {
   const { id } = useLocalSearchParams<{ id: string }>();
@@ -40,6 +73,7 @@ const ListingDetailsScreen = () => {
   React.useEffect(() => {
     const loadListing = async (id: string) => {
       const listing = await getListing(id);
+      console.log("listing detail: ", listing);
       setListing(listing);
       if (listing) {
         setPricing(
@@ -48,7 +82,6 @@ const ListingDetailsScreen = () => {
             : listing.price / 1000 + "k"
         );
       }
-      console.log("listing: ", listing);
     };
     loadListing(id);
   }, []);
@@ -158,7 +191,10 @@ const ListingDetailsScreen = () => {
               </Button>
             </XStack>
             <Text fontSize="$3" color="gray">
-              Posted: {listing?.updatedAt.toDate().toLocaleString()}
+              Posted:{" "}
+              {listing?.updatedAt
+                ? formatRelativeTime(listing.updatedAt.toDate())
+                : ""}
             </Text>
 
             <XStack gap="$3" mt="$2">
@@ -186,8 +222,31 @@ const ListingDetailsScreen = () => {
             </XStack>
           </YStack>
 
-          <View height={1} bg="#f0f0f0" />
-          <H5>{listing?.title}</H5>
+          <Separator my={1} />
+
+          {/* Property Details */}
+          <XStack gap="$4" justifyContent="space-around">
+            <XStack items="center" gap="$2">
+              <BedDouble size={20} color="gray" />
+              <Text fontSize="$4" color="gray">
+                {listing?.bedrooms || 0} Beds
+              </Text>
+            </XStack>
+            <XStack items="center" gap="$2">
+              <Bath size={20} color="gray" />
+              <Text fontSize="$4" color="gray">
+                {listing?.bathrooms || 0} Baths
+              </Text>
+            </XStack>
+            <XStack items="center" gap="$2">
+              <Ruler size={20} color="gray" />
+              <Text fontSize="$4" color="gray">
+                {listing?.size || 0} m²
+              </Text>
+            </XStack>
+          </XStack>
+
+          <Separator my={1} />
 
           {/* Facilities */}
           <YStack gap="$4">
@@ -227,7 +286,11 @@ const ListingDetailsScreen = () => {
                   >
                     <Avatar.Image
                       src={
-                        "https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1770&q=80"
+                        listing?.owner?.profileImage ||
+                        (Array.isArray(listing?.owner?.imageUrls) &&
+                        listing.owner.imageUrls.length > 0
+                          ? listing.owner.imageUrls[0]
+                          : undefined)
                       }
                     />
                     <Avatar.Fallback backgroundColor="gray" />
@@ -235,10 +298,10 @@ const ListingDetailsScreen = () => {
                 </Link>
                 <YStack>
                   <Text fontSize="$4" fontWeight="600">
-                    Agent name
+                    {`${listing?.owner?.firstName ?? "Agent"}`}
                   </Text>
                   <Text fontSize="$3" color="gray">
-                    Molyko, Buea
+                    {listing?.owner?.location || "Location not available"}
                   </Text>
                 </YStack>
               </XStack>

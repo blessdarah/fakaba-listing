@@ -6,6 +6,7 @@ import { User } from "lib/types.js";
 export const useUsers = () => {
   const [users, setUsers] = useState<User[]>([]);
   const [user, setUser] = useState<User | null>(null);
+
   const getUserById = async (id: string) => {
     // query firestore for user with id
     const ref = doc(db, "users", id);
