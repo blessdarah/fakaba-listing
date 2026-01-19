@@ -1,15 +1,23 @@
 import { View, Text, YStack, XStack, Image, Card, Button } from "tamagui";
 import { Heart } from "@tamagui/lucide-icons";
-import { useState } from "react";
 import { Link } from "expo-router";
 import { Listing } from "lib/types";
+import { useToggleFavorite } from "lib/query/useFavorites";
+import { formatRelativeTime } from "lib/utils";
 
 type ListingCardProps = {
   item: Listing;
 };
 
 const ListingCard = ({ item }: ListingCardProps) => {
-  const [liked, setLiked] = useState(false);
+  const { toggleFavorite, isFavorited } = useToggleFavorite();
+  const liked = isFavorited(item.id);
+
+  const handleToggleFavorite = (e: any) => {
+    e.preventDefault();
+    e.stopPropagation();
+    toggleFavorite(item.id);
+  };
 
   return (
     <Link href={`/(listings)/${item.id}`} asChild>
@@ -76,10 +84,7 @@ const ListingCard = ({ item }: ListingCardProps) => {
                 }
                 chromeless
                 unstyled
-                onPress={(e) => {
-                  e.stopPropagation();
-                  setLiked(!liked);
-                }}
+                onPress={handleToggleFavorite}
               />
             </XStack>
           </View>
@@ -91,7 +96,7 @@ const ListingCard = ({ item }: ListingCardProps) => {
               {item.title}
             </Text>
             <Text fontSize="$2" color="gray">
-              {item.createdAt.toDate().toLocaleString()}
+              {formatRelativeTime(item.createdAt.toDate())}
             </Text>
           </YStack>
         </Card.Footer>

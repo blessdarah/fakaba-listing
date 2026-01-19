@@ -15,7 +15,6 @@ const db = getFirestore(app);
 
 export const getListings = async (): Promise<Listing[]> => {
   try {
-    // Query only active properties that are publicly readable
     const q = query(
       collection(db, "properties"),
       where("status", "==", "active"),

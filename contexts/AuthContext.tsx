@@ -6,6 +6,8 @@ import {
   signOut as firebaseSignOut,
   onAuthStateChanged,
   GoogleAuthProvider,
+  signInWithEmailAndPassword,
+  createUserWithEmailAndPassword,
 } from "firebase/auth";
 import { auth, googleProvider } from "../firebase.config";
 import * as AuthSession from "expo-auth-session";
@@ -19,6 +21,8 @@ interface AuthContextType {
   loading: boolean;
   signInWithGoogle: () => Promise<void>;
   signUpWithGoogle: () => Promise<void>;
+  signInWithEmail: (email: string, password: string) => Promise<void>;
+  signUpWithEmail: (email: string, password: string) => Promise<void>;
   signOut: () => Promise<void>;
 }
 
@@ -56,8 +60,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
       });
 
       const request = new AuthSession.AuthRequest({
-        clientId:
-          "35301983706-YOUR_CLIENT_ID.apps.googleusercontent.com",
+        clientId: "35301983706-YOUR_CLIENT_ID.apps.googleusercontent.com",
         scopes: ["openid", "profile", "email"],
         redirectUri,
       });
@@ -96,6 +99,24 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
     }
   };
 
+  const signInWithEmail = async (email: string, password: string) => {
+    try {
+      await signInWithEmailAndPassword(auth, email, password);
+    } catch (error) {
+      console.error("Error signing in with email:", error);
+      throw error;
+    }
+  };
+
+  const signUpWithEmail = async (email: string, password: string) => {
+    try {
+      await createUserWithEmailAndPassword(auth, email, password);
+    } catch (error) {
+      console.error("Error signing up with email:", error);
+      throw error;
+    }
+  };
+
   const signOut = async () => {
     try {
       await firebaseSignOut(auth);
@@ -112,6 +133,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
         loading,
         signInWithGoogle,
         signUpWithGoogle,
+        signInWithEmail,
+        signUpWithEmail,
         signOut,
       }}
     >

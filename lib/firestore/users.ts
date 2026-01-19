@@ -1,4 +1,12 @@
-import { doc, getDoc, getDocs, collection } from "firebase/firestore";
+import {
+  doc,
+  getDoc,
+  getDocs,
+  collection,
+  updateDoc,
+  arrayUnion,
+  arrayRemove,
+} from "firebase/firestore";
 import { db } from "../../firebase.config.js";
 import { useState } from "react";
 import { User } from "lib/types.js";
@@ -7,17 +15,17 @@ export const useUsers = () => {
   const [users, setUsers] = useState<User[]>([]);
   const [user, setUser] = useState<User | null>(null);
 
-  const getUserById = async (id: string) => {
+  const getUserById = async (id: string): Promise<User | null> => {
     // query firestore for user with id
     const ref = doc(db, "users", id);
-    const user = await getDoc(ref);
-    if (!user.exists()) {
+    const userDoc = await getDoc(ref);
+    if (!userDoc.exists()) {
       return null;
     }
     return {
-      id: user.id,
-      ...user.data(),
-    };
+      id: userDoc.id,
+      ...userDoc.data(),
+    } as User;
   };
 
   const getUsers = async () => {
@@ -29,8 +37,36 @@ export const useUsers = () => {
     }));
   };
 
+  const addToFavorites = async (userId: string, listingId: string) => {
+    try {
+      const userRef = doc(db, "users", userId);
+      await updateDoc(userRef, {
+        favorites: arrayUnion(listingId),
+      });
+      return true;
+    } catch (error) {
+      console.error("Error adding to favorites:", error);
+      return false;
+    }
+  };
+
+  const removeFromFavorites = async (userId: string, listingId: string) => {
+    try {
+      const userRef = doc(db, "users", userId);
+      await updateDoc(userRef, {
+        favorites: arrayRemove(listingId),
+      });
+      return true;
+    } catch (error) {
+      console.error("Error removing from favorites:", error);
+      return false;
+    }
+  };
+
   return {
     getUserById,
     getUsers,
+    addToFavorites,
+    removeFromFavorites,
   };
 };

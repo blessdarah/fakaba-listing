@@ -40,4 +40,5 @@ export interface User extends BaseUserInfo {
   imageUrls: string[];
   firstName?: string;
   lastName?: string;
+  favorites?: string[]; // Array of listing IDs
 }

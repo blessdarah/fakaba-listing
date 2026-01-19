@@ -27,42 +27,27 @@ import {
   NativeScrollEvent,
   NativeSyntheticEvent,
 } from "react-native";
-import { getListing } from "lib/firestore/listings";
 import { Listing } from "lib/types";
+import { useListing } from "lib/query/useListings";
+import { useToggleFavorite } from "lib/query/useFavorites";
+import { formatRelativeTime } from "lib/utils";
 
 const { width } = Dimensions.get("window");
 
-const formatRelativeTime = (date: Date): string => {
-  const now = new Date();
-  const diffInMs = now.getTime() - date.getTime();
-  const diffInSeconds = Math.floor(diffInMs / 1000);
-  const diffInMinutes = Math.floor(diffInSeconds / 60);
-  const diffInHours = Math.floor(diffInMinutes / 60);
-  const diffInDays = Math.floor(diffInHours / 24);
-  const diffInMonths = Math.floor(diffInDays / 30);
-  const diffInYears = Math.floor(diffInDays / 365);
-
-  if (diffInYears > 0) {
-    return `${diffInYears} ${diffInYears === 1 ? "year" : "years"} ago`;
-  } else if (diffInMonths > 0) {
-    return `${diffInMonths} ${diffInMonths === 1 ? "month" : "months"} ago`;
-  } else if (diffInDays > 0) {
-    return `${diffInDays} ${diffInDays === 1 ? "day" : "days"} ago`;
-  } else if (diffInHours > 0) {
-    return `${diffInHours} ${diffInHours === 1 ? "hour" : "hours"} ago`;
-  } else if (diffInMinutes > 0) {
-    return `${diffInMinutes} ${diffInMinutes === 1 ? "minute" : "minutes"} ago`;
-  } else {
-    return "Just now";
-  }
-};
-
 const ListingDetailsScreen = () => {
   const { id } = useLocalSearchParams<{ id: string }>();
-  const [liked, setLiked] = useState(false);
   const [activeIndex, setActiveIndex] = useState(0);
-  const [listing, setListing] = useState<Listing | null>(null);
-  const [pricing, setPricing] = useState<string>("");
+
+  // Use TanStack Query hooks
+  const { data: listing, isLoading } = useListing(id as string);
+  const { toggleFavorite, isFavorited } = useToggleFavorite();
+
+  const liked = isFavorited(id as string);
+  const pricing = listing
+    ? listing.type === "rent"
+      ? listing.price / 1000 + "k/month"
+      : listing.price / 1000 + "k"
+    : "";
 
   const handleScroll = (event: NativeSyntheticEvent<NativeScrollEvent>) => {
     const slideSize = event.nativeEvent.layoutMeasurement.width;
@@ -70,21 +55,21 @@ const ListingDetailsScreen = () => {
     setActiveIndex(Math.round(index));
   };
 
-  React.useEffect(() => {
-    const loadListing = async (id: string) => {
-      const listing = await getListing(id);
-      console.log("listing detail: ", listing);
-      setListing(listing);
-      if (listing) {
-        setPricing(
-          listing.type === "rent"
-            ? listing.price / 1000 + "k/month"
-            : listing.price / 1000 + "k"
-        );
-      }
-    };
-    loadListing(id);
-  }, []);
+  const handleToggleFavorite = () => {
+    if (!id) return;
+    toggleFavorite(id as string);
+  };
+
+  if (isLoading || !listing) {
+    return (
+      <>
+        <Stack.Screen options={{ title: "Loading..." }} />
+        <View flex={1} justify="center" items="center">
+          <Text>Loading...</Text>
+        </View>
+      </>
+    );
+  }
 
   return (
     <>
@@ -146,7 +131,7 @@ const ListingDetailsScreen = () => {
               }
               chromeless
               unstyled
-              onPress={() => setLiked(!liked)}
+              onPress={handleToggleFavorite}
             />
           </XStack>
 
@@ -225,7 +210,7 @@ const ListingDetailsScreen = () => {
           <Separator my={1} />
 
           {/* Property Details */}
-          <XStack gap="$4" justifyContent="space-around">
+          <XStack gap="$4" justify="space-around">
             <XStack items="center" gap="$2">
               <BedDouble size={20} color="gray" />
               <Text fontSize="$4" color="gray">

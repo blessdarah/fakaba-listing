@@ -13,64 +13,50 @@ import {
   Separator,
   ScrollView,
 } from "tamagui";
-import { SafeAreaView } from "react-native-safe-area-context";
 import HomeCategories from "components/HomeCategories";
 import HorizontalListing from "components/HorizontalListing";
-import { Search, Sliders } from "@tamagui/lucide-icons";
+import { Sliders } from "@tamagui/lucide-icons";
 import ScreenContainer from "components/ScreenContainer";
-import { getListings } from "lib/firestore/listings";
 import { useAuth } from "contexts/AuthContext";
-import { Alert, StatusBar, useColorScheme } from "react-native";
-import { Listing } from "lib/types";
+import { RefreshControl } from "react-native";
 import { useRouter } from "expo-router";
 import { useTranslation } from "lib/i18n/useTranslation";
+import { useListings } from "lib/query/useListings";
+import { useFavorites } from "lib/query/useFavorites";
 
 export default function TabOneScreen() {
   const { user } = useAuth();
   const { t } = useTranslation();
+  const router = useRouter();
   const [open, setOpen] = React.useState(false);
   const [selectedType, setSelectedType] = React.useState("rental");
-  const [listings, setListings] = React.useState<Listing[]>([]);
-  const [loading, setLoading] = React.useState(true);
-  const [error, setError] = React.useState<string | null>(null);
-  const router = useRouter();
 
-  React.useEffect(() => {
-    async function loadListings() {
-      try {
-        setLoading(true);
-        setError(null);
-        const fetchedListings = await getListings();
-        console.log("listings: ", fetchedListings);
-        setListings(fetchedListings);
-      } catch (error: any) {
-        setError(error.message || "Failed to load properties.");
+  // Use TanStack Query hooks
+  const {
+    data: listings = [],
+    isLoading: loading,
+    error,
+    refetch,
+  } = useListings();
+  const { refetch: refetchFavorites } = useFavorites();
 
-        if (error.message.includes("Permission denied")) {
-          Alert.alert(
-            t("errors.authRequired"),
-            t("errors.authRequiredMessage"),
-            [{ text: t("common.ok") }]
-          );
-        } else {
-          Alert.alert(
-            t("common.error"),
-            error.message || t("errors.loadListingsError"),
-            [{ text: t("common.ok") }]
-          );
-        }
-      } finally {
-        setLoading(false);
-      }
-    }
-
-    // Load public listings (no authentication required)
-    loadListings();
-  }, [user]);
+  const handleRefresh = React.useCallback(() => {
+    refetch();
+    refetchFavorites();
+  }, [refetch, refetchFavorites]);
 
   return (
     <>
-      <ScrollView showsVerticalScrollIndicator={false}>
+      <ScrollView
+        showsVerticalScrollIndicator={false}
+        refreshControl={
+          <RefreshControl
+            refreshing={loading}
+            onRefresh={handleRefresh}
+            tintColor="$blue8"
+          />
+        }
+      >
         <ScreenContainer>
           <XStack items="center" justify="space-between" width="100%">
             <YStack gap="$1.5">
@@ -139,7 +125,7 @@ export default function TabOneScreen() {
               title={t("home.popularRentals")}
               listings={listings.filter((item) => item.type === "rent")}
               loading={loading}
-              error={error}
+              error={error?.message || null}
             />
           </View>
 
@@ -148,7 +134,7 @@ export default function TabOneScreen() {
               title={t("home.popularOnSale")}
               listings={listings.filter((item) => item.type === "sale")}
               loading={loading}
-              error={error}
+              error={error?.message || null}
             />
           </View>
 
