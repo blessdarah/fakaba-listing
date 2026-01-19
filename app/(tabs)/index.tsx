@@ -19,6 +19,8 @@ import { Sliders } from "@tamagui/lucide-icons";
 import ScreenContainer from "components/ScreenContainer";
 import { useAuth } from "contexts/AuthContext";
 import { RefreshControl } from "react-native";
+import { Alert, Pressable } from "react-native";
+import { Listing } from "lib/types";
 import { useRouter } from "expo-router";
 import { useTranslation } from "lib/i18n/useTranslation";
 import { useListings } from "lib/query/useListings";
@@ -68,15 +70,27 @@ export default function TabOneScreen() {
               <Text fontSize="$5">{t("home.welcomeBack")}</Text>
             </YStack>
 
-            <Avatar circular size="$4.5" borderColor="$blue10" borderWidth={2}>
-              <Avatar.Image
-                src={
-                  user?.photoURL ||
-                  "https://images.unsplash.com/photo-1531384441138-2736e62e0919?&w=100&h=100&dpr=2&q=80"
-                }
-              />
-              <Avatar.Fallback delayMs={600} backgroundColor="$blue10" />
-            </Avatar>
+            <Pressable
+              onPress={() => router.push("/profile")}
+              accessibilityRole="button"
+              accessibilityLabel={t("profile.title")}
+              hitSlop={10}
+            >
+              <Avatar
+                circular
+                size="$4.5"
+                borderColor="$blue10"
+                borderWidth={2}
+              >
+                <Avatar.Image
+                  src={
+                    user?.photoURL ||
+                    "https://images.unsplash.com/photo-1531384441138-2736e62e0919?&w=100&h=100&dpr=2&q=80"
+                  }
+                />
+                <Avatar.Fallback delayMs={600} backgroundColor="$blue10" />
+              </Avatar>
+            </Pressable>
           </XStack>
 
           <XStack
