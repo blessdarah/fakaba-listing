@@ -11,6 +11,7 @@
     "search": "Rechercher",
     "filter": "Filtrer",
     "seeAll": "Voir tout",
+    "apply": "Appliquer",
     "back": "Retour",
     "next": "Suivant",
     "previous": "Précédent",
@@ -45,13 +46,25 @@
       "hotels": "Hôtels"
     }
   },
+  "categories": {
+    "all": "Tous",
+    "room": "Chambres",
+    "apartment": "Appartements",
+    "house": "Maisons",
+    "commercial": "Commercial",
+    "land": "Terrain"
+  },
   "filter": {
-    "title": "Filtrer",
+    "title": "Filtres",
     "propertyType": "Type de Propriété",
     "selectType": "Sélectionner le type...",
     "rental": "Location",
     "sale": "Vente",
-    "lease": "Bail"
+    "lease": "Bail",
+    "category": "Catégorie",
+    "location": "Localisation",
+    "price": "Prix",
+    "type": "Type"
   },
   "auth": {
     "signIn": "Se Connecter",

@@ -11,6 +11,7 @@
     "search": "Search",
     "filter": "Filter",
     "seeAll": "See all",
+    "apply": "Apply",
     "back": "Back",
     "next": "Next",
     "previous": "Previous",
@@ -45,13 +46,23 @@
       "hotels": "Hotels"
     }
   },
-  "filter": {
-    "title": "Filter",
+  "categories": {
+    "all": "All",
+    "room": "Rooms",
+    "apartment": "Apartments",
+    "house": "Houses",
+    "commercial": "Commercial",
+    "land": "Land"
+  },
     "propertyType": "Property Type",
     "selectType": "Select type...",
     "rental": "Rental",
     "sale": "Sale",
-    "lease": "Lease"
+    "lease": "Lease",
+    "category": "Category",
+    "location": "Location",
+    "price": "Price",
+    "type": "Type"
   },
   "auth": {
     "signIn": "Sign In",
