@@ -54,6 +54,8 @@
     "commercial": "Commercial",
     "land": "Land"
   },
+  "filter": {
+    "title": "Filters",
     "propertyType": "Property Type",
     "selectType": "Select type...",
     "rental": "Rental",

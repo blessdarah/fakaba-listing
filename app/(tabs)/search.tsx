@@ -69,8 +69,8 @@ export default function SearchScreen() {
           category.id === "all"
             ? null
             : category.id === selectedCategory
-            ? null
-            : category.id
+              ? null
+              : category.id
         )
       }
     >
@@ -126,14 +126,16 @@ export default function SearchScreen() {
 
             <View
               width="100%"
-              items="center"
-              flexDirection="row"
-              justify="center"
               bg="#ececec"
               borderColor="$borderColor"
-              style={{ borderRadius: 100 }}
               borderWidth={1}
               px="$3"
+              style={{
+                borderRadius: 100,
+                flexDirection: "row",
+                alignItems: "center",
+                justifyContent: "center",
+              }}
             >
               <Search size={20} color="#999" style={{ marginRight: 8 }} />
               <Input
