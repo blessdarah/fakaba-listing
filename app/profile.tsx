@@ -136,7 +136,7 @@ export default function ProfileScreen() {
       <ScrollView showsVerticalScrollIndicator={false}>
         <ScreenContainer>
           <YStack gap="$4" py="$4">
-            <XStack alignItems="center" justifyContent="space-between">
+            <XStack items="center" justify="space-between">
               <Button
                 size="$2"
                 circular
@@ -163,10 +163,10 @@ export default function ProfileScreen() {
               p="$4"
               borderWidth={1}
               borderColor="$borderColor"
-              borderRadius="$7"
-              backgroundColor="$backgroundFocus"
+              rounded="$7"
+              bg="$backgroundFocus"
             >
-              <XStack gap="$3" alignItems="center">
+              <XStack gap="$3" items="center">
                 <Avatar
                   circular
                   size="$7"
@@ -174,7 +174,7 @@ export default function ProfileScreen() {
                   borderWidth={3}
                 >
                   <Avatar.Image src={avatarSource} />
-                  <Avatar.Fallback delayMs={600} backgroundColor="$blue10" />
+                  <Avatar.Fallback delayMs={600} bg="$blue10" />
                 </Avatar>
 
                 <YStack flex={1} gap="$1">
@@ -202,29 +202,29 @@ export default function ProfileScreen() {
 
               <Separator />
 
-              <XStack justifyContent="space-between" flexWrap="wrap" gap="$3">
-                <XStack gap="$2" alignItems="center">
+              <XStack justify="space-between" flexWrap="wrap" gap="$3">
+                <XStack gap="$2" items="center">
                   <View
                     width={40}
                     height={40}
-                    borderRadius={20}
-                    backgroundColor="$blue4"
-                    alignItems="center"
-                    justifyContent="center"
+                    rounded={20}
+                    bg="$blue4"
+                    items="center"
+                    justify="center"
                   >
                     <MapPin color="#1d4ed8" size={18} />
                   </View>
                   <Text color="$color10">{locationLabel}</Text>
                 </XStack>
 
-                <XStack gap="$2" alignItems="center">
+                <XStack gap="$2" items="center">
                   <View
                     width={40}
                     height={40}
-                    borderRadius={20}
-                    backgroundColor="$yellow4"
-                    alignItems="center"
-                    justifyContent="center"
+                    rounded={20}
+                    bg="$yellow4"
+                    items="center"
+                    justify="center"
                   >
                     <Star color="#b45309" fill="#facc15" size={18} />
                   </View>
@@ -295,8 +295,8 @@ const SectionCard = ({ title, children }: SectionCardProps) => {
       p="$4"
       borderWidth={1}
       borderColor="$borderColor"
-      borderRadius="$6"
-      backgroundColor="$backgroundFocus"
+      rounded="$6"
+      bg="$backgroundFocus"
     >
       <Text fontSize="$5" fontWeight="600">
         {title}
@@ -315,37 +315,42 @@ interface ProfileInfoRowProps {
 
 const ProfileInfoRow = ({ label, value, fallback }: ProfileInfoRowProps) => {
   return (
-    <XStack justifyContent="space-between" alignItems="center" py="$1" gap="$2">
+    <XStack justify="space-between" items="center" py="$1" gap="$2">
       <Text color="$color11">{label}</Text>
-      <Text fontWeight="600" textAlign="right" flexShrink={1}>
+      <Text fontWeight="600" text="right">
         {value || fallback}
       </Text>
     </XStack>
   );
 };
 
-const SettingsRow = ({ label, value, icon: Icon, onPress }: SettingsItemProps) => {
+const SettingsRow = ({
+  label,
+  value,
+  icon: Icon,
+  onPress,
+}: SettingsItemProps) => {
   return (
     <XStack
       py="$2"
-      alignItems="center"
-      justifyContent="space-between"
+      items="center"
+      justify="space-between"
       onPress={onPress}
       cursor={onPress ? "pointer" : "default"}
       pressStyle={onPress ? { opacity: 0.7, scale: 0.98 } : undefined}
     >
-      <XStack gap="$3" alignItems="center" flexShrink={1}>
+      <XStack gap="$3" items="center">
         <View
           width={40}
           height={40}
-          borderRadius={20}
-          backgroundColor="$color3"
-          alignItems="center"
-          justifyContent="center"
+          rounded={20}
+          bg="$color3"
+          items="center"
+          justify="center"
         >
           <Icon size={18} color="#0f172a" />
         </View>
-        <YStack gap="$1" flexShrink={1}>
+        <YStack gap="$1">
           <Text fontWeight="600">{label}</Text>
           <Text color="$color10">{value}</Text>
         </YStack>

@@ -9,11 +9,10 @@ import {
   Avatar,
   Paragraph,
   Circle,
-  H5,
   Separator,
 } from "tamagui";
 import { Link, Stack, useLocalSearchParams } from "expo-router";
-import React, { useState } from "react";
+import { useState } from "react";
 import {
   Heart,
   MessageCircle,
@@ -26,8 +25,10 @@ import {
   Dimensions,
   NativeScrollEvent,
   NativeSyntheticEvent,
+  Linking,
+  Alert,
+  Platform,
 } from "react-native";
-import { Listing } from "lib/types";
 import { useListing } from "lib/query/useListings";
 import { useToggleFavorite } from "lib/query/useFavorites";
 import { formatRelativeTime } from "lib/utils";
@@ -54,6 +55,43 @@ const ListingDetailsScreen = () => {
     const index = event.nativeEvent.contentOffset.x / slideSize;
     setActiveIndex(Math.round(index));
   };
+
+  async function sendWhatsAppMessage() {
+    // Deep link to the app first then fallback to web
+    // with a default message
+    const message = "Hello from Expo";
+    // Linking.openURL(`whatsapp://send?phone=+237672374414&text=${message}`);
+    const tel = "+237672374414";
+    const url = `whatsapp://send?phone=${tel}&text=${encodeURIComponent(message || "")}`;
+
+    try {
+      const supported = await Linking.canOpenURL(url);
+
+      if (supported) {
+        await Linking.openURL(url);
+      } else {
+        Alert.alert(
+          "WhatsApp Not Installed",
+          "Please install WhatsApp to continue",
+          [
+            { text: "Cancel", style: "cancel" },
+            {
+              text: "Install",
+              onPress: () => {
+                const storeUrl =
+                  Platform.OS === "ios"
+                    ? "https://apps.apple.com/app/whatsapp-messenger/id310633997"
+                    : "https://play.google.com/store/apps/details?id=com.whatsapp";
+                Linking.openURL(storeUrl);
+              },
+            },
+          ]
+        );
+      }
+    } catch (error) {
+      Alert.alert("Error", "Unable to open WhatsApp");
+    }
+  }
 
   const handleToggleFavorite = () => {
     if (!id) return;
@@ -92,7 +130,7 @@ const ListingDetailsScreen = () => {
             {listing?.imageUrls.map((img: string, index: number) => (
               <Image
                 key={index}
-                source={{ uri: img }}
+                src={img}
                 style={{ width: width, height: 300 }}
               />
             ))}
@@ -169,8 +207,6 @@ const ListingDetailsScreen = () => {
                 borderColor="#eee"
                 borderWidth={1}
                 bg="white"
-                color="gray"
-                fontSize="$3"
               >
                 Map view
               </Button>
@@ -278,7 +314,7 @@ const ListingDetailsScreen = () => {
                           : undefined)
                       }
                     />
-                    <Avatar.Fallback backgroundColor="gray" />
+                    <Avatar.Fallback bg="gray" />
                   </Avatar>
                 </Link>
                 <YStack>
@@ -291,13 +327,13 @@ const ListingDetailsScreen = () => {
                 </YStack>
               </XStack>
               <Button
+                onPress={sendWhatsAppMessage}
                 bg="#4CAF50"
-                color="white"
                 rounded="$10"
                 icon={<MessageCircle size={18} />}
                 px="$4"
               >
-                Message
+                WhatsApp
               </Button>
             </XStack>
           </YStack>

@@ -1,6 +1,6 @@
 import { YStack, Text, Button, H2, Separator } from "tamagui";
 import { useAuth } from "../../contexts/AuthContext";
-import { router } from "expo-router";
+
 import { Alert } from "react-native";
 import { useTranslation } from "lib/i18n/useTranslation";
 import { LanguageSelector } from "components/LanguageSelector";
@@ -12,7 +12,6 @@ export default function SettingsScreen() {
   const handleSignOut = async () => {
     try {
       await signOut();
-      router.replace("/sign-in");
     } catch (error) {
       console.error("Sign out error:", error);
       Alert.alert(t("common.error"), t("errors.signOutError"));

@@ -19,9 +19,8 @@ import { Sliders } from "@tamagui/lucide-icons";
 import ScreenContainer from "components/ScreenContainer";
 import { useAuth } from "contexts/AuthContext";
 import { RefreshControl } from "react-native";
-import { Alert, Pressable } from "react-native";
-import { Listing } from "lib/types";
-import { useRouter } from "expo-router";
+import { Pressable } from "react-native";
+import { Link, useRouter } from "expo-router";
 import { useTranslation } from "lib/i18n/useTranslation";
 import { useListings } from "lib/query/useListings";
 import { useFavorites } from "lib/query/useFavorites";
@@ -88,7 +87,7 @@ export default function TabOneScreen() {
                     "https://images.unsplash.com/photo-1531384441138-2736e62e0919?&w=100&h=100&dpr=2&q=80"
                   }
                 />
-                <Avatar.Fallback delayMs={600} backgroundColor="$blue10" />
+                <Avatar.Fallback delayMs={600} bg="$blue10" />
               </Avatar>
             </Pressable>
           </XStack>
@@ -130,6 +129,18 @@ export default function TabOneScreen() {
             </View>
           </XStack>
 
+          <Link href="/(tabs)/setup">
+            <Button
+              size="$5"
+              bg="white"
+              boxShadow="0 1px 8px rgba(0, 0, 0, 0.1)"
+            >
+              <Text fontSize="$4" color="gray">
+                Setup
+              </Text>
+            </Button>
+          </Link>
+
           <View width="100%" items="center" justify="center" mb="$4">
             <HomeCategories />
           </View>
@@ -155,17 +166,15 @@ export default function TabOneScreen() {
           {/* bottom sheet */}
           <Sheet
             open={open}
-            forceRemoveScrollEnabled={open}
+            disableRemoveScroll={open}
             modal={true}
             onOpenChange={setOpen}
             snapPoints={[85, 50, 25]}
             snapPointsMode={"percent"}
             dismissOnSnapToBottom
             zIndex={100_000}
-            animation="medium"
           >
             <Sheet.Overlay
-              animation="lazy"
               bg="$shadow6"
               enterStyle={{ opacity: 0 }}
               exitStyle={{ opacity: 0 }}

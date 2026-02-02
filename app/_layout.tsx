@@ -3,7 +3,13 @@ import "../firebase.config";
 import { useEffect } from "react";
 import { StatusBar, useColorScheme } from "react-native";
 import { useFonts } from "expo-font";
-import { SplashScreen, Stack, router } from "expo-router";
+import {
+  SplashScreen,
+  Stack,
+  router,
+  useSegments,
+  useRootNavigationState,
+} from "expo-router";
 import { Provider } from "components/Provider";
 import { useTheme } from "tamagui";
 import { useAuth } from "../contexts/AuthContext";
@@ -50,20 +56,32 @@ const Providers = ({ children }: { children: React.ReactNode }) => {
   return <Provider>{children}</Provider>;
 };
 
+const PUBLIC_SEGMENTS = ["sign-in", "sign-up", "setup"];
+
+function useProtectedRoute(user: any, loading: boolean) {
+  const segments = useSegments();
+  const navigationState = useRootNavigationState();
+
+  useEffect(() => {
+    if (loading) return;
+    if (!navigationState?.key) return;
+
+    const inPublicRoute = PUBLIC_SEGMENTS.includes(segments[0] as string);
+
+    if (!user && !inPublicRoute) {
+      router.replace("/sign-in");
+    } else if (user && inPublicRoute) {
+      router.replace("/(tabs)");
+    }
+  }, [user, loading, segments, navigationState?.key]);
+}
+
 function RootLayoutNav() {
   const colorScheme = useColorScheme();
   const theme = useTheme();
   const { user, loading } = useAuth();
 
-  useEffect(() => {
-    if (!loading) {
-      if (user) {
-        router.replace("/(tabs)");
-      } else {
-        router.replace("/sign-in");
-      }
-    }
-  }, [user, loading]);
+  useProtectedRoute(user, loading);
 
   if (loading) {
     return null;
@@ -113,7 +131,7 @@ function RootLayoutNav() {
           }}
         />
         <Stack.Screen
-          name="(listings)"
+          name="setup"
           options={{
             headerShown: false,
           }}

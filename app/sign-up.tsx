@@ -7,17 +7,15 @@ import {
   Text,
   Spinner,
   Circle,
-  useTheme,
   Input,
   Label,
   ScrollView,
   Paragraph,
 } from "tamagui";
-import { LinearGradient } from "@tamagui/linear-gradient";
 import { useAuth } from "../contexts/AuthContext";
 import { router } from "expo-router";
 import { Alert, Dimensions, Pressable } from "react-native";
-import { Mail, Lock, User } from "@tamagui/lucide-icons";
+import { Mail, Lock } from "@tamagui/lucide-icons";
 
 const { width, height } = Dimensions.get("window");
 
@@ -28,13 +26,11 @@ export default function SignUp() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
-  const theme = useTheme();
 
   const handleGoogleSignUp = async () => {
     try {
       setLoading(true);
       await signUpWithGoogle();
-      router.replace("/(tabs)");
     } catch (error) {
       console.error("Sign up error:", error);
       Alert.alert(
@@ -65,7 +61,6 @@ export default function SignUp() {
     try {
       setEmailLoading(true);
       await signUpWithEmail(email, password);
-      router.replace("/(tabs)");
     } catch (error: any) {
       console.error("Email sign up error:", error);
       let errorMessage = "Failed to create account. Please try again.";
@@ -93,43 +88,28 @@ export default function SignUp() {
       contentContainerStyle={{ minH: height }}
     >
       <YStack flex={1} width={width} minH={height}>
-        <LinearGradient
-          colors={["#EC4899", "#8B5CF6", "#4A9DEC"]}
-          start={[0, 0]}
-          end={[1, 1]}
-          height={height * 0.35}
-          width="100%"
-        >
-          <YStack flex={1} justify="center" items="center" p="$6">
-            <Circle
-              size={100}
-              bg="transparent"
-              borderWidth={3}
-              borderColor="white"
-              mb="$4"
-              justify="center"
-              items="center"
-              opacity={0.9}
-            >
-              <Text fontSize={50} color="white">
-                F
-              </Text>
-            </Circle>
-            <H1 color="white" fontSize={36} fontWeight="800" text="center">
-              Fakaba
-            </H1>
-            <Text
-              color="white"
-              fontSize={16}
-              opacity={0.9}
-              text="center"
-              mt="$2"
-            >
-              Your marketplace companion
+        <YStack flex={1} justify="center" items="center" p="$6">
+          <Circle
+            size={100}
+            bg="transparent"
+            borderWidth={3}
+            borderColor="white"
+            mb="$4"
+            justify="center"
+            items="center"
+            opacity={0.9}
+          >
+            <Text fontSize={50} color="white">
+              F
             </Text>
-          </YStack>
-        </LinearGradient>
-
+          </Circle>
+          <H1 color="white" fontSize={36} fontWeight="800" text="center">
+            Fakaba
+          </H1>
+          <Text color="white" fontSize={16} opacity={0.9} text="center" mt="$2">
+            Your marketplace companion
+          </Text>
+        </YStack>
         <YStack
           flex={1}
           bg="$background"
@@ -251,13 +231,11 @@ export default function SignUp() {
                 bg: "pink",
                 scale: 0.98,
               }}
-              color="white"
               rounded="$6"
               height={56}
               icon={emailLoading ? <Spinner color="white" /> : undefined}
-              fontWeight="600"
-              fontSize={16}
-              elevate
+              // text={16}
+              // elevate
               shadowColor="$blue8"
               shadowOpacity={0.3}
               shadowRadius={10}
@@ -287,9 +265,6 @@ export default function SignUp() {
               rounded="$6"
               height={56}
               icon={loading ? <Spinner /> : undefined}
-              fontWeight="600"
-              fontSize={16}
-              color="gray"
             >
               {loading ? "Creating account..." : "Sign up with Google"}
             </Button>

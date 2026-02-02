@@ -33,7 +33,6 @@ export default function SignIn() {
     try {
       setLoading(true);
       await signInWithGoogle();
-      router.replace("/(tabs)");
     } catch (error) {
       console.error("Sign in error:", error);
       Alert.alert(
@@ -54,7 +53,6 @@ export default function SignIn() {
     try {
       setEmailLoading(true);
       await signInWithEmail(email, password);
-      router.replace("/(tabs)");
     } catch (error: any) {
       console.error("Email sign in error:", error);
       let errorMessage = "Failed to sign in. Please try again.";
@@ -212,15 +210,13 @@ export default function SignIn() {
               rounded="$6"
               height={56}
               icon={emailLoading ? <Spinner color="white" /> : undefined}
-              fontWeight="600"
-              fontSize={16}
-              elevate
-              color="white"
               shadowColor="$blue10"
               shadowOpacity={0.3}
               shadowRadius={10}
             >
-              {emailLoading ? "Signing in..." : "Sign In"}
+              <Text fontSize="$4" fontWeight="bold">
+                {emailLoading ? "Signing in..." : "Sign In"}
+              </Text>
             </Button>
 
             <XStack items="center" gap="$3">
@@ -245,9 +241,6 @@ export default function SignIn() {
               rounded="$6"
               height={56}
               icon={loading ? <Spinner /> : undefined}
-              fontWeight="600"
-              fontSize={16}
-              color="gray"
             >
               {loading ? "Signing in..." : "Continue with Google"}
             </Button>
