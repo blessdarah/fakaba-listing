@@ -5,13 +5,10 @@ import {
   getDocs,
   query,
   where,
-  getFirestore,
   limit,
 } from "firebase/firestore";
-import { app } from "../../firebase.config.js";
+import { db } from "../../firebase.config.js";
 import { Listing, User } from "lib/types.js";
-
-const db = getFirestore(app);
 
 export const getListings = async (): Promise<Listing[]> => {
   try {

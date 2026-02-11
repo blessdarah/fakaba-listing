@@ -40,7 +40,7 @@ const ListingDetailsScreen = () => {
   const [activeIndex, setActiveIndex] = useState(0);
 
   // Use TanStack Query hooks
-  const { data: listing, isLoading } = useListing(id as string);
+  const { data: listing, isLoading } = useListing(id);
   const { toggleFavorite, isFavorited } = useToggleFavorite();
 
   const liked = isFavorited(id as string);
@@ -115,7 +115,7 @@ const ListingDetailsScreen = () => {
       <ScrollView
         showsVerticalScrollIndicator={false}
         flex={1}
-        bg="white"
+        bg="$background"
         contentContainerStyle={{ pb: 50 }}
       >
         {/* Hero Carousel */}
@@ -128,11 +128,7 @@ const ListingDetailsScreen = () => {
             scrollEventThrottle={16}
           >
             {listing?.imageUrls.map((img: string, index: number) => (
-              <Image
-                key={index}
-                src={img}
-                style={{ width: width, height: 300 }}
-              />
+              <Image key={index} src={img} width={width} height={300} />
             ))}
           </ScrollView>
 
@@ -140,9 +136,7 @@ const ListingDetailsScreen = () => {
             pointerEvents="none"
             style={{
               position: "absolute",
-              top: 0,
-              left: 0,
-              right: 0,
+              inset: 0,
               height: "100%",
               backgroundColor:
                 "linear-gradient(180deg, rgba(0,0,0,0.2) 0%, rgba(0,0,0,0.7) 100%)",
@@ -151,14 +145,17 @@ const ListingDetailsScreen = () => {
 
           <XStack
             position="absolute"
-            t={20}
+            t={60}
             l={20}
             r={20}
             justify="flex-end"
             items="flex-start"
           >
             <Button
-              size="$3"
+              borderWidth={1}
+              bg={"$background"}
+              borderColor={"$borderColor"}
+              size="$4"
               circular
               icon={
                 <Heart
@@ -167,8 +164,6 @@ const ListingDetailsScreen = () => {
                   fill={liked ? "red" : "transparent"}
                 />
               }
-              chromeless
-              unstyled
               onPress={handleToggleFavorite}
             />
           </XStack>
@@ -198,20 +193,19 @@ const ListingDetailsScreen = () => {
           {/* Price & Map Button */}
           <YStack gap="$1">
             <XStack justify="space-between" items="center">
-              <Text fontSize="$7" fontWeight="bold" color="black">
+              <Text fontSize="$7" fontWeight="bold" color="$color">
                 {pricing}
               </Text>
               <Button
                 size="$3"
                 icon={<MapIcon size={16} color="#D4A017" />}
-                borderColor="#eee"
+                borderColor="$borderColor"
                 borderWidth={1}
-                bg="white"
               >
-                Map view
+                <Button.Text>Map view</Button.Text>
               </Button>
             </XStack>
-            <Text fontSize="$3" color="gray">
+            <Text fontSize="$3" color="$white8">
               Posted:{" "}
               {listing?.updatedAt
                 ? formatRelativeTime(listing.updatedAt.toDate())
@@ -221,7 +215,7 @@ const ListingDetailsScreen = () => {
             <XStack gap="$3" mt="$2">
               <View
                 borderWidth={1}
-                borderColor="#eee"
+                borderColor="gray"
                 rounded="$4"
                 px="$3"
                 py="$2"
@@ -230,7 +224,7 @@ const ListingDetailsScreen = () => {
               </View>
               <XStack
                 borderWidth={1}
-                borderColor="#eee"
+                borderColor="gray"
                 rounded="$4"
                 px="$3"
                 py="$2"
@@ -238,7 +232,9 @@ const ListingDetailsScreen = () => {
                 items="center"
               >
                 <Text color="#D4A017">★</Text>
-                <Text fontWeight="600">{4.5}</Text>
+                <Text fontWeight="600" color="gray">
+                  {4.5}
+                </Text>
               </XStack>
             </XStack>
           </YStack>
@@ -279,7 +275,7 @@ const ListingDetailsScreen = () => {
               {listing?.features.map((fac: any, index: number) => (
                 <XStack items="center" gap="$2" key={`fac-${index}`}>
                   <Circle size={8} bg="$blue8" />
-                  <Paragraph>{fac}</Paragraph>
+                  <Paragraph color="$color">{fac}</Paragraph>
                 </XStack>
               ))}
             </YStack>
@@ -289,7 +285,7 @@ const ListingDetailsScreen = () => {
             </Text>
           </YStack>
 
-          <View height={1} bg="#f0f0f0" />
+          <Separator />
 
           {/* Posted by */}
           <YStack gap="$4">

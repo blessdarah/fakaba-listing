@@ -13,7 +13,6 @@ import {
   PenSquare,
   Star,
 } from "@tamagui/lucide-icons";
-import ScreenContainer from "components/ScreenContainer";
 import { useAuth } from "contexts/AuthContext";
 import { useTranslation } from "lib/i18n/useTranslation";
 
@@ -134,21 +133,59 @@ export default function ProfileScreen() {
   return (
     <SafeAreaView style={{ flex: 1 }}>
       <ScrollView showsVerticalScrollIndicator={false}>
-        <ScreenContainer>
-          <YStack gap="$4" py="$4">
-            <XStack items="center" justify="space-between">
+        <YStack gap="$4" p="$4">
+          <XStack items="center" justify="space-between">
+            <Button
+              size="$2"
+              circular
+              variant="outlined"
+              onPress={() => router.back()}
+              icon={<ArrowLeft size={16} />}
+            />
+            <Text fontSize="$7" fontWeight="700">
+              {t("profile.title")}
+            </Text>
+            <Button
+              size="$2"
+              circular
+              variant="outlined"
+              onPress={goToSettings}
+              icon={<PenSquare size={16} />}
+            />
+          </XStack>
+
+          <Text color="$color10">{t("profile.subtitle")}</Text>
+
+          <YStack
+            gap="$3"
+            p="$4"
+            borderWidth={1}
+            borderColor="$borderColor"
+            rounded="$7"
+            bg="$backgroundFocus"
+          >
+            <XStack gap="$3" items="center">
+              <Avatar circular size="$7" borderColor="$blue10" borderWidth={3}>
+                <Avatar.Image src={avatarSource} />
+                <Avatar.Fallback delayMs={600} bg="$blue10" />
+              </Avatar>
+
+              <YStack flex={1} gap="$1">
+                <Text fontSize="$6" fontWeight="700">
+                  {user?.displayName || fallbackValue}
+                </Text>
+                {user?.email ? (
+                  <Text color="$color10">{user.email}</Text>
+                ) : null}
+                <Text color="$color10">
+                  {joinedDate
+                    ? t("profile.joined", { date: joinedDate })
+                    : fallbackValue}
+                </Text>
+              </YStack>
+
               <Button
-                size="$2"
-                circular
-                variant="outlined"
-                onPress={() => router.back()}
-                icon={<ArrowLeft size={16} />}
-              />
-              <Text fontSize="$7" fontWeight="700">
-                {t("profile.title")}
-              </Text>
-              <Button
-                size="$2"
+                size="$4"
                 circular
                 variant="outlined"
                 onPress={goToSettings}
@@ -156,128 +193,81 @@ export default function ProfileScreen() {
               />
             </XStack>
 
-            <Text color="$color10">{t("profile.subtitle")}</Text>
+            <Separator />
 
-            <YStack
-              gap="$3"
-              p="$4"
-              borderWidth={1}
-              borderColor="$borderColor"
-              rounded="$7"
-              bg="$backgroundFocus"
-            >
-              <XStack gap="$3" items="center">
-                <Avatar
-                  circular
-                  size="$7"
-                  borderColor="$blue10"
-                  borderWidth={3}
+            <XStack justify="space-between" flexWrap="wrap" gap="$3">
+              <XStack gap="$2" items="center">
+                <View
+                  width={40}
+                  height={40}
+                  rounded={20}
+                  bg="$blue4"
+                  items="center"
+                  justify="center"
                 >
-                  <Avatar.Image src={avatarSource} />
-                  <Avatar.Fallback delayMs={600} bg="$blue10" />
-                </Avatar>
+                  <MapPin color="#1d4ed8" size={18} />
+                </View>
+                <Text color="$color10">{locationLabel}</Text>
+              </XStack>
 
-                <YStack flex={1} gap="$1">
-                  <Text fontSize="$6" fontWeight="700">
-                    {user?.displayName || fallbackValue}
-                  </Text>
-                  {user?.email ? (
-                    <Text color="$color10">{user.email}</Text>
-                  ) : null}
-                  <Text color="$color10">
-                    {joinedDate
-                      ? t("profile.joined", { date: joinedDate })
-                      : fallbackValue}
-                  </Text>
+              <XStack gap="$2" items="center">
+                <View
+                  width={40}
+                  height={40}
+                  rounded={20}
+                  bg="$yellow4"
+                  items="center"
+                  justify="center"
+                >
+                  <Star color="#b45309" fill="#facc15" size={18} />
+                </View>
+                <YStack>
+                  <Text fontWeight="700">{ratingLabel}</Text>
+                  <Text color="$color10">{reviewsLabel}</Text>
                 </YStack>
-
-                <Button
-                  size="$2"
-                  circular
-                  variant="outlined"
-                  onPress={goToSettings}
-                  icon={<PenSquare size={16} />}
-                />
               </XStack>
-
-              <Separator />
-
-              <XStack justify="space-between" flexWrap="wrap" gap="$3">
-                <XStack gap="$2" items="center">
-                  <View
-                    width={40}
-                    height={40}
-                    rounded={20}
-                    bg="$blue4"
-                    items="center"
-                    justify="center"
-                  >
-                    <MapPin color="#1d4ed8" size={18} />
-                  </View>
-                  <Text color="$color10">{locationLabel}</Text>
-                </XStack>
-
-                <XStack gap="$2" items="center">
-                  <View
-                    width={40}
-                    height={40}
-                    rounded={20}
-                    bg="$yellow4"
-                    items="center"
-                    justify="center"
-                  >
-                    <Star color="#b45309" fill="#facc15" size={18} />
-                  </View>
-                  <YStack>
-                    <Text fontWeight="700">{ratingLabel}</Text>
-                    <Text color="$color10">{reviewsLabel}</Text>
-                  </YStack>
-                </XStack>
-              </XStack>
-            </YStack>
-
-            <SectionCard title={t("profile.aboutTitle")}>
-              <Text color="$color10" lineHeight={22}>
-                {aboutText}
-              </Text>
-            </SectionCard>
-
-            <SectionCard title={t("profile.personalInfo")}>
-              {infoRows.map((item) => (
-                <ProfileInfoRow
-                  key={item.label}
-                  label={item.label}
-                  value={item.value}
-                  fallback={fallbackValue}
-                />
-              ))}
-            </SectionCard>
-
-            <SectionCard title={t("profile.accountDetails")}>
-              {accountRows.map((item) => (
-                <ProfileInfoRow
-                  key={item.label}
-                  label={item.label}
-                  value={item.value}
-                  fallback={fallbackValue}
-                />
-              ))}
-            </SectionCard>
-
-            <SectionCard title={t("profile.otherSettings")}>
-              <YStack>
-                {settingsItems.map((item, index) => (
-                  <React.Fragment key={item.label}>
-                    {index > 0 ? (
-                      <Separator borderColor="$borderColor" />
-                    ) : null}
-                    <SettingsRow {...item} />
-                  </React.Fragment>
-                ))}
-              </YStack>
-            </SectionCard>
+            </XStack>
           </YStack>
-        </ScreenContainer>
+
+          <SectionCard title={t("profile.aboutTitle")}>
+            <Text color="$color10" lineHeight={22}>
+              {aboutText}
+            </Text>
+          </SectionCard>
+
+          <SectionCard title={t("profile.personalInfo")}>
+            {infoRows.map((item) => (
+              <ProfileInfoRow
+                key={item.label}
+                label={item.label}
+                value={item.value}
+                fallback={fallbackValue}
+              />
+            ))}
+          </SectionCard>
+
+          <SectionCard title={t("profile.accountDetails")}>
+            {accountRows.map((item) => (
+              <ProfileInfoRow
+                key={item.label}
+                label={item.label}
+                value={item.value}
+                fallback={fallbackValue}
+              />
+            ))}
+          </SectionCard>
+
+          <SectionCard title={t("profile.otherSettings")}>
+            <YStack>
+              {settingsItems.map((item, index) => (
+                <React.Fragment key={item.label}>
+                  {index > 0 ? <Separator borderColor="$borderColor" /> : null}
+                  <SettingsRow {...item} />
+                </React.Fragment>
+              ))}
+            </YStack>
+          </SectionCard>
+        </YStack>
       </ScrollView>
     </SafeAreaView>
   );
@@ -348,7 +338,7 @@ const SettingsRow = ({
           items="center"
           justify="center"
         >
-          <Icon size={18} color="#0f172a" />
+          <Icon size={18} color="$white8" />
         </View>
         <YStack gap="$1">
           <Text fontWeight="600">{label}</Text>

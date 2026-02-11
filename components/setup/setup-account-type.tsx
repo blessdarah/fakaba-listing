@@ -29,6 +29,7 @@ export const SetupAccountType = () => {
               I'm looking to buy, sell, or rent properties for personal use
             </Paragraph>
           </YStack>
+
           <YStack
             gap="$2"
             p="$4"

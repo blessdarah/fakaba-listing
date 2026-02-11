@@ -30,6 +30,7 @@ export default function TabLayout() {
           borderBottomColor: theme.borderColor.val,
         },
         headerTintColor: theme.color.val,
+        sceneStyle: { backgroundColor: theme.background.val },
       }}
     >
       <Tabs.Screen
@@ -80,6 +81,7 @@ export default function TabLayout() {
           headerShown: false,
         }}
       />
+
     </Tabs>
   );
 }

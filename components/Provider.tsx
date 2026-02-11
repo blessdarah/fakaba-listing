@@ -16,8 +16,8 @@ export function Provider({
   return (
     <TamaguiProvider
       config={config}
-      defaultTheme="light"
-      // defaultTheme={colorScheme === 'dark' ? 'dark' : 'light'}
+      // defaultTheme="dark"
+      defaultTheme={colorScheme == "dark" ? "dark" : "light"}
       {...rest}
     >
       <QueryProvider>

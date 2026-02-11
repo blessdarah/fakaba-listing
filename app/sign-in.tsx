@@ -7,7 +7,6 @@ import {
   Text,
   Spinner,
   Circle,
-  useTheme,
   Paragraph,
   Input,
   Label,
@@ -17,32 +16,16 @@ import { LinearGradient } from "@tamagui/linear-gradient";
 import { useAuth } from "../contexts/AuthContext";
 import { router } from "expo-router";
 import { Alert, Dimensions, Pressable } from "react-native";
-import { Mail, Lock } from "@tamagui/lucide-icons";
+import { Mail, Lock, LogIn } from "@tamagui/lucide-icons";
 
 const { width, height } = Dimensions.get("window");
 
 export default function SignIn() {
-  const { signInWithGoogle, signInWithEmail } = useAuth();
-  const [loading, setLoading] = useState(false);
+  const { signInWithEmail } = useAuth();
+  const [loading] = useState(false);
   const [emailLoading, setEmailLoading] = useState(false);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const theme = useTheme();
-
-  const handleGoogleSignIn = async () => {
-    try {
-      setLoading(true);
-      await signInWithGoogle();
-    } catch (error) {
-      console.error("Sign in error:", error);
-      Alert.alert(
-        "Sign In Error",
-        "Failed to sign in with Google. Please try again."
-      );
-    } finally {
-      setLoading(false);
-    }
-  };
 
   const handleEmailSignIn = async () => {
     if (!email || !password) {
@@ -56,16 +39,6 @@ export default function SignIn() {
     } catch (error: any) {
       console.error("Email sign in error:", error);
       let errorMessage = "Failed to sign in. Please try again.";
-
-      if (error.code === "auth/invalid-email") {
-        errorMessage = "Invalid email address.";
-      } else if (error.code === "auth/user-not-found") {
-        errorMessage = "No account found with this email.";
-      } else if (error.code === "auth/wrong-password") {
-        errorMessage = "Incorrect password.";
-      } else if (error.code === "auth/invalid-credential") {
-        errorMessage = "Invalid email or password.";
-      }
 
       Alert.alert("Sign In Error", errorMessage);
     } finally {
@@ -138,23 +111,22 @@ export default function SignIn() {
             </YStack>
 
             <YStack gap="$3" pt="$2">
-              <YStack gap="$2">
+              <YStack gap="$1">
                 <Label htmlFor="email" fontSize={14} fontWeight="600">
                   Email
                 </Label>
                 <XStack
-                  bg="$white1"
                   borderWidth={1}
                   borderColor="$borderColor"
-                  rounded="$4"
+                  rounded="$6"
                   items="center"
                   px="$3"
-                  height={50}
                 >
                   <Mail size={20} />
                   <Input
                     id="email"
                     flex={1}
+                    size={"$5"}
                     bg="transparent"
                     borderWidth={0}
                     placeholder="Enter your email"
@@ -167,25 +139,26 @@ export default function SignIn() {
                 </XStack>
               </YStack>
 
-              <YStack gap="$2">
+              <YStack gap="$1">
                 <Label htmlFor="password" fontSize={14} fontWeight="600">
                   Password
                 </Label>
                 <XStack
-                  bg="$white1"
                   borderWidth={1}
                   borderColor="$borderColor"
-                  rounded="$4"
+                  bg="$background"
+                  rounded="$6"
                   items="center"
                   px="$3"
-                  height={50}
+                  // height={50}
                 >
                   <Lock size={20} color="gray" />
                   <Input
                     id="password"
+                    size={"$5"}
                     flex={1}
+                    bg="$colorTransparent"
                     borderWidth={0}
-                    bg="transparent"
                     placeholder="Enter your password"
                     value={password}
                     onChangeText={setPassword}
@@ -203,10 +176,6 @@ export default function SignIn() {
               onPress={handleEmailSignIn}
               disabled={emailLoading || loading}
               bg="$blue10"
-              pressStyle={{
-                bg: "$blue9",
-                scale: 0.98,
-              }}
               rounded="$6"
               height={56}
               icon={emailLoading ? <Spinner color="white" /> : undefined}
@@ -214,35 +183,17 @@ export default function SignIn() {
               shadowOpacity={0.3}
               shadowRadius={10}
             >
-              <Text fontSize="$4" fontWeight="bold">
+              <Button.Text
+                fontSize="$4"
+                fontWeight="bold"
+                text="center"
+                transform="uppercase"
+              >
                 {emailLoading ? "Signing in..." : "Sign In"}
-              </Text>
-            </Button>
-
-            <XStack items="center" gap="$3">
-              <YStack flex={1} height={1} bg="$borderColor" />
-              <Text fontSize={14} color="$white8">
-                OR
-              </Text>
-              <YStack flex={1} height={1} bg="$borderColor" />
-            </XStack>
-
-            <Button
-              size="$5"
-              onPress={handleGoogleSignIn}
-              disabled={loading || emailLoading}
-              bg="white"
-              borderWidth={1}
-              borderColor="$borderColor"
-              pressStyle={{
-                bg: "$white2",
-                scale: 0.98,
-              }}
-              rounded="$6"
-              height={56}
-              icon={loading ? <Spinner /> : undefined}
-            >
-              {loading ? "Signing in..." : "Continue with Google"}
+              </Button.Text>
+              <Button.Icon>
+                <LogIn size={20} />
+              </Button.Icon>
             </Button>
 
             <XStack justify="center" items="center" gap="$2" pt="$2">

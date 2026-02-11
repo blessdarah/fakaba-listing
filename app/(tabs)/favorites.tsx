@@ -83,6 +83,7 @@ export default function FavoritesScreen() {
     <ScrollView
       showsVerticalScrollIndicator={false}
       flex={1}
+      background="$background"
       refreshControl={
         <RefreshControl
           refreshing={loading}

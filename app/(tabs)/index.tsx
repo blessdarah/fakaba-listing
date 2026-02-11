@@ -20,7 +20,7 @@ import ScreenContainer from "components/ScreenContainer";
 import { useAuth } from "contexts/AuthContext";
 import { RefreshControl } from "react-native";
 import { Pressable } from "react-native";
-import { Link, useRouter } from "expo-router";
+import { useRouter } from "expo-router";
 import { useTranslation } from "lib/i18n/useTranslation";
 import { useListings } from "lib/query/useListings";
 import { useFavorites } from "lib/query/useFavorites";
@@ -51,22 +51,20 @@ export default function TabOneScreen() {
       <ScrollView
         showsVerticalScrollIndicator={false}
         refreshControl={
-          <RefreshControl
-            refreshing={loading}
-            onRefresh={handleRefresh}
-            tintColor="$blue8"
-          />
+          <RefreshControl refreshing={loading} onRefresh={handleRefresh} />
         }
       >
         <ScreenContainer>
           <XStack items="center" justify="space-between" width="100%">
             <YStack gap="$1.5">
-              <Text fontSize="$7" fontWeight={"bold"}>
+              <Text fontSize="$7" fontWeight={"bold"} color="$color">
                 {user?.isAnonymous || !user?.displayName
                   ? t("home.defaultGreeting")
                   : t("home.greeting", { name: user.displayName })}
               </Text>
-              <Text fontSize="$5">{t("home.welcomeBack")}</Text>
+              <Text color="$color" fontSize="$5">
+                {t("home.welcomeBack")}
+              </Text>
             </YStack>
 
             <Pressable
@@ -106,42 +104,31 @@ export default function TabOneScreen() {
               flexDirection="row"
               justify="center"
               mb="$4"
-              bg="#ececec"
+              // bg="#ececec"
               borderColor="$borderColor"
               rounded={100}
               borderWidth={1}
             >
               <Input
                 flex={1}
+                size="$5"
                 placeholder="Search property"
                 bg="transparent"
                 color="#333"
                 borderWidth={0}
               />
               <Button
-                rounded={100}
-                size="$3"
+                circular
+                size="$4"
                 mr="$1.5"
-                bg="white"
+                // bg="white"
                 onPress={() => router.push("/(modals)/filter")}
-                icon={<Sliders size={12} />}
+                icon={<Sliders size={18} fontWeight={500} />}
               ></Button>
             </View>
           </XStack>
 
-          <Link href="/(tabs)/setup">
-            <Button
-              size="$5"
-              bg="white"
-              boxShadow="0 1px 8px rgba(0, 0, 0, 0.1)"
-            >
-              <Text fontSize="$4" color="gray">
-                Setup
-              </Text>
-            </Button>
-          </Link>
-
-          <View width="100%" items="center" justify="center" mb="$4">
+          <View width="100%" items="center" justify="center" mb="$5">
             <HomeCategories />
           </View>
 

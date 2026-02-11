@@ -19,11 +19,13 @@ WebBrowser.maybeCompleteAuthSession();
 interface AuthContextType {
   user: User | null;
   loading: boolean;
+  needsSetup: boolean;
   signInWithGoogle: () => Promise<void>;
   signUpWithGoogle: () => Promise<void>;
   signInWithEmail: (email: string, password: string) => Promise<void>;
   signUpWithEmail: (email: string, password: string) => Promise<void>;
   signOut: () => Promise<void>;
+  completeSetup: () => void;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -41,6 +43,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
 }) => {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
+  const [needsSetup, setNeedsSetup] = useState(false);
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (user) => {
@@ -93,6 +96,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
   const signUpWithGoogle = async () => {
     try {
       await authenticateWithGoogle();
+      setNeedsSetup(true);
     } catch (error) {
       console.error("Error signing up with Google:", error);
       throw error;
@@ -101,7 +105,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
 
   const signInWithEmail = async (email: string, password: string) => {
     try {
-      await signInWithEmailAndPassword(auth, email, password);
+      const creds = await signInWithEmailAndPassword(auth, email, password);
+      setUser(creds.user);
     } catch (error) {
       console.error("Error signing in with email:", error);
       throw error;
@@ -111,10 +116,15 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
   const signUpWithEmail = async (email: string, password: string) => {
     try {
       await createUserWithEmailAndPassword(auth, email, password);
+      setNeedsSetup(true);
     } catch (error) {
       console.error("Error signing up with email:", error);
       throw error;
     }
+  };
+
+  const completeSetup = () => {
+    setNeedsSetup(false);
   };
 
   const signOut = async () => {
@@ -131,11 +141,13 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
       value={{
         user,
         loading,
+        needsSetup,
         signInWithGoogle,
         signUpWithGoogle,
         signInWithEmail,
         signUpWithEmail,
         signOut,
+        completeSetup,
       }}
     >
       {children}

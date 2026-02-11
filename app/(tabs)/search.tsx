@@ -124,18 +124,14 @@ export default function SearchScreen() {
               {t("common.search")}
             </Text>
 
-            <View
-              width="100%"
+            <XStack
               bg="#ececec"
+              items="center"
+              rounded={100}
               borderColor="$borderColor"
+              background="$background"
               borderWidth={1}
               px="$3"
-              style={{
-                borderRadius: 100,
-                flexDirection: "row",
-                alignItems: "center",
-                justifyContent: "center",
-              }}
             >
               <Search size={20} color="#999" style={{ marginRight: 8 }} />
               <Input
@@ -147,7 +143,7 @@ export default function SearchScreen() {
                 value={searchQuery}
                 onChangeText={setSearchQuery}
               />
-            </View>
+            </XStack>
           </YStack>
 
           <YStack gap="$2" mt="$4">

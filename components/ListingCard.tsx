@@ -13,6 +13,8 @@ const ListingCard = ({ item }: ListingCardProps) => {
   const { toggleFavorite, isFavorited } = useToggleFavorite();
   const liked = isFavorited(item.id);
 
+  console.log("imtem: ", item.imageUrls);
+
   const handleToggleFavorite = (e: any) => {
     e.preventDefault();
     e.stopPropagation();
@@ -23,31 +25,27 @@ const ListingCard = ({ item }: ListingCardProps) => {
     <Link href={`/(listings)/${item.id}`} asChild>
       <Card
         size="$3"
-        bordered={false}
-        animation="bouncy"
         scale={0.9}
-        borderRadius={16}
-        bg="transparent"
+        borderWidth={1}
+        borderColor={"$borderColor"}
+        rounded="$6"
         p={3}
       >
-        <Card.Header padded={false} mb="$2" p="$2">
+        <Card.Header mb="$2" p="$2">
           <View style={{ borderRadius: 10, overflow: "hidden" }}>
             <Image
-              source={{
-                uri:
-                  item.imageUrls[0] ??
-                  "https://images.unsplash.com/photo-1531384441138-2736e62e0919?&w=100&h=100&dpr=2&q=80",
-              }}
-              style={{ width: "auto", height: 200 }}
+              src={
+                item.imageUrls[0] ??
+                "https://images.unsplash.com/photo-1531384441138-2736e62e0919?&w=100&h=100&dpr=2&q=80"
+              }
+              width="auto"
+              height={200}
             />
             {/* Dark Overlay for better text readability */}
             <View
               style={{
                 position: "absolute",
-                top: 0,
-                left: 0,
-                right: 0,
-                bottom: 0,
+                inset: 0,
                 backgroundColor: "rgba(0,0,0,0.4)",
               }}
             />
@@ -90,9 +88,9 @@ const ListingCard = ({ item }: ListingCardProps) => {
           </View>
         </Card.Header>
 
-        <Card.Footer padded={false} bg="transparent" px="$2.5" py="$1.5">
+        <Card.Footer bg="transparent" px="$2.5" py="$1.5">
           <YStack gap="$1">
-            <Text fontSize="$5" fontWeight="bold" color="black">
+            <Text fontSize="$5" fontWeight="bold">
               {item.title}
             </Text>
             <Text fontSize="$2" color="gray">

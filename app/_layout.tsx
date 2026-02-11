@@ -58,7 +58,7 @@ const Providers = ({ children }: { children: React.ReactNode }) => {
 
 const PUBLIC_SEGMENTS = ["sign-in", "sign-up", "setup"];
 
-function useProtectedRoute(user: any, loading: boolean) {
+function useProtectedRoute(user: any, loading: boolean, needsSetup: boolean) {
   const segments = useSegments();
   const navigationState = useRootNavigationState();
 
@@ -70,18 +70,20 @@ function useProtectedRoute(user: any, loading: boolean) {
 
     if (!user && !inPublicRoute) {
       router.replace("/sign-in");
-    } else if (user && inPublicRoute) {
+    } else if (user && needsSetup && segments[0] !== "setup") {
+      router.replace("/setup");
+    } else if (user && !needsSetup && inPublicRoute) {
       router.replace("/(tabs)");
     }
-  }, [user, loading, segments, navigationState?.key]);
+  }, [user, loading, segments, navigationState?.key, needsSetup]);
 }
 
 function RootLayoutNav() {
   const colorScheme = useColorScheme();
   const theme = useTheme();
-  const { user, loading } = useAuth();
+  const { user, loading, needsSetup } = useAuth();
 
-  useProtectedRoute(user, loading);
+  useProtectedRoute(user, loading, needsSetup);
 
   if (loading) {
     return null;
@@ -90,20 +92,11 @@ function RootLayoutNav() {
   return (
     <SafeAreaProvider>
       <StatusBar
-        barStyle={colorScheme === "dark" ? "dark-content" : "light-content"}
+        barStyle={colorScheme === "dark" ? "light-content" : "dark-content"}
       />
       <Stack
         screenOptions={{
-          headerStyle: {
-            backgroundColor: theme.background.val,
-          },
-          headerTintColor: theme.color.val,
-          headerTitleStyle: {
-            color: theme.color.val,
-          },
-          contentStyle: {
-            backgroundColor: theme.background.val,
-          },
+          contentStyle: { backgroundColor: theme.background.val },
         }}
       >
         <Stack.Screen
