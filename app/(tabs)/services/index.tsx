@@ -1,8 +1,8 @@
-import { YStack, H1, Text } from "tamagui";
+import { YStack, H1, Text, XStack, View } from "tamagui";
 import { Pressable, StatusBar, useColorScheme } from "react-native";
 import { Image, ScrollView } from "react-native";
-import { useRouter } from "expo-router";
-import { ChevronRight } from "@tamagui/lucide-icons";
+import { Link } from "expo-router";
+import { ChevronRight, Sparkles } from "@tamagui/lucide-icons";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 const SERVICES = [
@@ -34,7 +34,6 @@ const SERVICES = [
 ];
 
 export default function ServicesScreen() {
-  const router = useRouter();
   const insets = useSafeAreaInsets();
   const colorScheme = useColorScheme();
 
@@ -44,95 +43,93 @@ export default function ServicesScreen() {
         barStyle={colorScheme === "dark" ? "light-content" : "dark-content"}
       />
       {/* Hero Section */}
-      <YStack mt="$2">
+      <View height={260} width="100%">
+        <Image
+          source={require("../../../assets/images/service.png")}
+          style={{ width: "100%", height: "100%", resizeMode: "cover" }}
+        />
+        <View position="absolute" inset={0} bg="rgba(0,0,0,0.6)" />
         <YStack
-          flexDirection="row"
-          items="center"
-          justify="space-between"
-          height={Math.round(112 * 1.2) + insets.top}
-          bg="white"
-          borderBlockEndColor="$borderColor"
-          borderBlockEndWidth={1}
-          overflow="hidden"
+          position="absolute"
+          inset={0}
           px="$4"
+          pt={insets.top + 16}
+          pb="$4"
+          justify="space-between"
         >
-          {/* Left side - Title */}
-          <YStack justify="center" items="flex-start" pt={insets.top}>
-            <H1 fontSize={32} fontWeight="bold" color="#1a3a52">
+          <YStack gap="$2">
+            <H1 fontSize={36} fontWeight="900" color="white">
               Services
             </H1>
+            <Text color="white" opacity={0.9}>
+              Everything you need to buy, manage, and grow your property.
+            </Text>
           </YStack>
-          {/* Right side - Image */}
-          <YStack
-            width={Math.round(84 * 1.2)}
-            height={Math.round(84 * 1.2)}
-            overflow="hidden"
-            mt={insets.top}
-          >
-            <Image
-              source={require("../../../assets/images/service.png")}
-              style={{
-                width: "100%",
-                height: "100%",
-                resizeMode: "cover",
-              }}
-            />
-          </YStack>
+          <XStack gap="$2" items="center">
+            <View
+              width={32}
+              height={32}
+              rounded={16}
+              bg="rgba(255,255,255,0.2)"
+              items="center"
+              justify="center"
+            >
+              <Sparkles size={16} color="white" />
+            </View>
+            <Text color="white" fontWeight="600">
+              Expert-backed services
+            </Text>
+          </XStack>
         </YStack>
-      </YStack>
+      </View>
 
       {/* Content Section */}
       <ScrollView style={{ flex: 1 }} showsVerticalScrollIndicator={false}>
         <YStack p="$4" gap="$4">
-          <Text fontSize={16} fontWeight="600" color="#333" mt="$4">
-            We have a suit of services that should meet on your needs
+          <Text fontSize={16} fontWeight="600" color="$color">
+            We have a suite of services designed for every step of your journey.
           </Text>
 
           {/* Service Cards */}
-          <YStack gap="$5">
+          <YStack gap="$3">
             {SERVICES.map((service) => (
-              <Pressable
+              <Link
                 key={service.id.toString()}
-                onPress={() => {
-                  console.log("service-press", service.id);
-                  router.push(`/services/${service.id}`);
-                }}
-                style={({ pressed }) => ({ opacity: pressed ? 0.7 : 1 })}
+                href={`/services/${service.id}`}
+                asChild
               >
-                <YStack
-                  flexDirection="row"
-                  bg="white"
-                  rounded="$4"
-                  items="center"
-                  gap="$3"
-                  borderColor="$borderColor"
-                  borderWidth={1}
-                  overflow="hidden"
-                  hoverStyle={{ bg: "#f5f5f5" }}
-                >
-                  {/* Service Image */}
-                  <YStack width={98} height={70} overflow="hidden">
-                    <Image
-                      source={service.icon}
-                      style={{
-                        width: "100%",
-                        height: "100%",
-                        resizeMode: "cover",
-                      }}
-                    />
+                <Pressable style={({ pressed }) => ({ opacity: pressed ? 0.7 : 1 })}>
+                  <YStack
+                    bg="$background"
+                    rounded="$6"
+                    overflow="hidden"
+                    borderColor="$borderColor"
+                    borderWidth={1}
+                  >
+                    <XStack items="center" gap="$3" p="$3">
+                      <View width={92} height={70} rounded="$4" overflow="hidden">
+                        <Image
+                          source={service.icon}
+                          style={{
+                            width: "100%",
+                            height: "100%",
+                            resizeMode: "cover",
+                          }}
+                        />
+                      </View>
+                      <YStack flex={1} gap="$1">
+                        <Text fontSize={16} fontWeight="700" color="$color">
+                          {service.title}
+                        </Text>
+                        <Text fontSize="$3" color="$color8">
+                          Learn more about this service
+                        </Text>
+                      </YStack>
+                      <ChevronRight size={20} color="$color8" />
+                    </XStack>
                   </YStack>
-
-                  {/* Service Title */}
-                  <YStack flex={1} justify="center" p="$2">
-                    <Text fontSize={16} fontWeight="600" color="#333">
-                      {service.title}
-                    </Text>
-                  </YStack>
-
-                  {/* Chevron */}
-                  <ChevronRight size={24} color="#999" />
-                </YStack>
-              </Pressable>
+                </Pressable>
+              </Link>
             ))}
           </YStack>
         </YStack>

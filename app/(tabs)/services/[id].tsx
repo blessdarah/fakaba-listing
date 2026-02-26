@@ -1,4 +1,13 @@
-import { YStack, H1, Text, Button, ScrollView } from "tamagui";
+import {
+  YStack,
+  H1,
+  Text,
+  Button,
+  ScrollView,
+  XStack,
+  View,
+  AnimatePresence,
+} from "tamagui";
 import { Image, Pressable } from "react-native";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import {
@@ -8,6 +17,7 @@ import {
   ChevronLeft,
 } from "@tamagui/lucide-icons";
 import { useState } from "react";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 const servicesData: Record<string, any> = {
   "1": {
@@ -149,6 +159,7 @@ const servicesData: Record<string, any> = {
 export default function ServiceDetailScreen() {
   const { id } = useLocalSearchParams();
   const router = useRouter();
+  const insets = useSafeAreaInsets();
   const service = servicesData[id as string];
   const [expandedFAQ, setExpandedFAQ] = useState<number | null>(null);
 
@@ -168,7 +179,7 @@ export default function ServiceDetailScreen() {
     <YStack flex={1} bg="$background" px={0} m={0}>
       <ScrollView showsVerticalScrollIndicator={false}>
         {/* Hero Section */}
-        <YStack height={212} overflow="hidden" position="relative">
+        <YStack height={260} overflow="hidden" position="relative">
           <Image
             source={service.icon}
             style={{
@@ -177,15 +188,16 @@ export default function ServiceDetailScreen() {
               resizeMode: "cover",
             }}
           />
+          <View position="absolute" inset={0} bg="rgba(0,0,0,0.45)" />
           {/* Back Button */}
           <Pressable
             onPress={() => router.back()}
             style={{
               position: "absolute",
-              top: 56,
+              top: insets.top + 12,
               left: 16,
               zIndex: 10,
-              backgroundColor: "rgba(255, 255, 255, 0.9)",
+              backgroundColor: "rgba(0, 0, 0, 0.55)",
               borderRadius: 20,
               padding: 8,
               display: "flex",
@@ -193,32 +205,33 @@ export default function ServiceDetailScreen() {
               alignItems: "center",
             }}
           >
-            <ChevronLeft size={24} color="#1a3a52" />
+            <ChevronLeft size={22} color="white" />
           </Pressable>
+          <YStack position="absolute" bottom={16} left={16} right={16} gap="$1">
+            <H1 fontSize={30} fontWeight="800" color="white">
+              {service.title}
+            </H1>
+            <Text color="white" opacity={0.9}>
+              Learn more about this service
+            </Text>
+          </YStack>
         </YStack>
 
         {/* Content Section */}
         <YStack p="$4" gap="$4">
-          {/* Service Title */}
-          <YStack gap="$2">
-            <H1 fontSize={32} fontWeight="bold" color="#1a3a52">
-              {service.title}
-            </H1>
-          </YStack>
-
           {/* About Service */}
           <YStack gap="$3">
-            <Text fontSize={16} fontWeight="600" color="#333">
+            <Text fontSize={16} fontWeight="700" color="$color">
               About Service
             </Text>
-            <Text fontSize={14} color="#666" lineHeight={22}>
+            <Text fontSize={14} color="$color10" lineHeight={22}>
               {service.description}
             </Text>
           </YStack>
 
           {/* FAQs Section */}
           <YStack gap="$3">
-            <Text fontSize={16} fontWeight="600" color="#333">
+            <Text fontSize={16} fontWeight="700" color="$color">
               FAQs
             </Text>
 
@@ -227,8 +240,8 @@ export default function ServiceDetailScreen() {
               {service.faqs.map((faq: any) => (
                 <YStack
                   key={faq.id}
-                  bg="white"
-                  rounded="$3"
+                  bg="$background"
+                  rounded="$5"
                   borderColor="$borderColor"
                   borderWidth={1}
                   overflow="hidden"
@@ -239,33 +252,42 @@ export default function ServiceDetailScreen() {
                     items="center"
                     justify="space-between"
                     p="$4"
-                    bg={expandedFAQ === faq.id ? "#f9f9f9" : "white"}
+                    bg={
+                      expandedFAQ === faq.id
+                        ? "$backgroundStrong"
+                        : "$background"
+                    }
                     onPress={() => toggleFAQ(faq.id)}
                     cursor="pointer"
                   >
-                    <Text fontSize={14} fontWeight="600" color="#333" flex={1}>
+                    <Text fontSize={14} fontWeight="600" color="$color" flex={1}>
                       {faq.question}
                     </Text>
                     {expandedFAQ === faq.id ? (
-                      <ChevronUp size={20} color="#666" />
+                      <ChevronUp size={20} color="$color8" />
                     ) : (
-                      <ChevronDown size={20} color="#666" />
+                      <ChevronDown size={20} color="$color8" />
                     )}
                   </YStack>
 
                   {/* FAQ Answer */}
-                  {expandedFAQ === faq.id && (
-                    <YStack
-                      p="$4"
-                      borderTopColor="$borderColor"
-                      borderTopWidth={1}
-                      bg="white"
-                    >
-                      <Text fontSize={14} color="#666" lineHeight={20}>
-                        {faq.answer}
-                      </Text>
-                    </YStack>
-                  )}
+                  <AnimatePresence>
+                    {expandedFAQ === faq.id && (
+                      <YStack
+                        p="$4"
+                        borderTopColor="$borderColor"
+                        borderTopWidth={1}
+                        bg="$background"
+                        animation="quick"
+                        enterStyle={{ opacity: 0, scale: 0.98 }}
+                        exitStyle={{ opacity: 0, scale: 0.98 }}
+                      >
+                        <Text fontSize={14} color="$color10" lineHeight={20}>
+                          {faq.answer}
+                        </Text>
+                      </YStack>
+                    )}
+                  </AnimatePresence>
                 </YStack>
               ))}
             </YStack>
@@ -274,19 +296,19 @@ export default function ServiceDetailScreen() {
           {/* Contact Button */}
           <Button
             size="$5"
-            bg="#5B6FFF"
+            bg="$blue9"
             color="white"
             fontWeight="bold"
-            rounded="$3"
+            rounded="$6"
             mt="$4"
             mb="$4"
           >
-            <YStack flexDirection="row" items="center" gap="$2">
+            <XStack items="center" gap="$2">
               <Phone size={20} color="white" />
               <Text color="white" fontWeight="bold">
                 Contact us
               </Text>
-            </YStack>
+            </XStack>
           </Button>
         </YStack>
       </ScrollView>

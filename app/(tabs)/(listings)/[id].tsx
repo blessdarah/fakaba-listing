@@ -12,6 +12,7 @@ import {
   Separator,
   Spinner,
 } from "tamagui";
+import ListingCard from "components/ListingCard";
 import { Link, Stack, useLocalSearchParams } from "expo-router";
 import { useState } from "react";
 import {
@@ -30,7 +31,7 @@ import {
   Alert,
   Platform,
 } from "react-native";
-import { useListing } from "lib/query/useListings";
+import { useListing, useListings } from "lib/query/useListings";
 import { useToggleFavorite } from "lib/query/useFavorites";
 import { formatRelativeTime } from "lib/utils";
 
@@ -42,6 +43,7 @@ const ListingDetailsScreen = () => {
 
   // Use TanStack Query hooks
   const { data: listing, isLoading } = useListing(id);
+  const { data: allListings = [] } = useListings();
   const { toggleFavorite, isFavorited } = useToggleFavorite();
 
   const liked = isFavorited(id as string);
@@ -50,6 +52,15 @@ const ListingDetailsScreen = () => {
       ? listing.price / 1000 + "k/month"
       : listing.price / 1000 + "k"
     : "";
+
+  const similarListings = allListings
+    .filter((item) => item.id !== listing?.id)
+    .filter((item) =>
+      listing
+        ? item.category === listing.category || item.type === listing.type
+        : false
+    )
+    .slice(0, 10);
 
   const handleScroll = (event: NativeSyntheticEvent<NativeScrollEvent>) => {
     const slideSize = event.nativeEvent.layoutMeasurement.width;
@@ -327,14 +338,22 @@ const ListingDetailsScreen = () => {
           </YStack>
 
           {/* Similar Listings */}
-          {/*   <YStack gap="$3" mt="$4"> */}
-          {/*     <Text fontSize="$5" fontWeight="600"> */}
-          {/*       Similar listings */}
-          {/*     </Text> */}
-          {/*     <HorizontalListing */}
-          {/*       title="" */}
-          {/*     /> */}
-          {/*   </YStack> */}
+          {similarListings.length > 0 && (
+            <YStack gap="$3" mt="$4">
+              <Text fontSize="$5" fontWeight="600">
+                Similar listings
+              </Text>
+              <ScrollView horizontal showsHorizontalScrollIndicator={false}>
+                <XStack>
+                  {similarListings.map((item) => (
+                    <View key={item.id} width={280} mr="$3">
+                      <ListingCard item={item} />
+                    </View>
+                  ))}
+                </XStack>
+              </ScrollView>
+            </YStack>
+          )}
         </YStack>
       </ScrollView>
     </>
