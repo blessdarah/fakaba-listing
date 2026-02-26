@@ -8,6 +8,8 @@ import { useTranslation } from "lib/i18n/useTranslation";
 type HorizontalListingProps = {
   title: string;
   listings: Listing[];
+  filterType?: string;
+  filterCategory?: string;
   loading?: boolean;
   error?: string | null;
 };
@@ -15,6 +17,8 @@ type HorizontalListingProps = {
 const HorizontalListing = ({
   title,
   listings,
+  filterType,
+  filterCategory,
   loading = false,
   error = null,
 }: HorizontalListingProps) => {
@@ -107,7 +111,16 @@ const HorizontalListing = ({
         <Text fontSize="$6" fontWeight="bold">
           {title}
         </Text>
-        <Link href="/(listings)" asChild>
+        <Link
+          href={{
+            pathname: "/listings",
+            params: {
+              type: filterType ?? "",
+              category: filterCategory ?? "",
+            },
+          }}
+          asChild
+        >
           <Text color="$blue8" fontWeight="600">
             See all
           </Text>

@@ -13,6 +13,7 @@ export interface Listing {
   features: string[];
   description: string;
   status: string;
+  isPublic?: boolean;
   bedrooms: number;
   bathrooms: number;
   size: number;

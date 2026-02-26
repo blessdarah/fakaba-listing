@@ -206,6 +206,16 @@ export default function SignIn() {
                 </Text>
               </Pressable>
             </XStack>
+            <XStack justify="center" items="center" gap="$2">
+              <Text fontSize={12} color="gray">
+                Testing only:
+              </Text>
+              <Pressable onPress={() => router.push("/setup")}>
+                <Text fontSize={12} color="$blue10" fontWeight="600">
+                  Go to setup
+                </Text>
+              </Pressable>
+            </XStack>
 
             <Text
               fontSize={12}

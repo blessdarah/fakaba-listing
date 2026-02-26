@@ -1,12 +1,20 @@
-import { House, UserPlus, Map, Warehouse, Hotel } from "@tamagui/lucide-icons";
+import {
+  House,
+  UserPlus,
+  Map,
+  Warehouse,
+  Hotel,
+  CheckCircle,
+} from "@tamagui/lucide-icons";
 import { YStack, Text, Circle, XStack, Paragraph, View, H4 } from "tamagui";
+import { TouchableOpacity } from "react-native";
 
 type Interest = {
   name: string;
   icon: any;
 };
 
-const roles: Interest[] = [
+const interests: Interest[] = [
   {
     name: "Residential",
     icon: House,
@@ -32,7 +40,13 @@ const roles: Interest[] = [
     icon: Map,
   },
 ];
-export const SetupInterests = ({ show }: Props) => {
+
+type SetupInterestsProps = {
+  value: string[];
+  onChange: (value: string[]) => void;
+};
+
+export const SetupInterests = ({ value, onChange }: SetupInterestsProps) => {
   return (
     <>
       <View>
@@ -44,33 +58,54 @@ export const SetupInterests = ({ show }: Props) => {
         </Paragraph>
 
         <YStack gap={"$4"} mt={"$4"}>
-          {roles.map((role) => (
-            <YStack
-              key={role.name}
-              gap="$2"
-              p="$4"
-              bg="$blue2"
-              rounded="$4"
-              borderWidth={1}
-              borderColor="$blue6"
-            >
-              <XStack gap="$3" items="center" flexWrap="wrap">
-                <Circle
-                  size={48}
-                  bg="$white4"
-                  borderWidth={1}
-                  borderColor="$white8"
-                  justify="center"
-                  items="center"
+          {interests.map((interest) => {
+            const selected = value.includes(interest.name);
+            return (
+              <TouchableOpacity
+                key={interest.name}
+                onPress={() => {
+                  if (selected) {
+                    onChange(value.filter((item) => item !== interest.name));
+                  } else {
+                    onChange([...value, interest.name]);
+                  }
+                }}
+              >
+                <YStack
+                  gap="$2"
+                  p="$4"
+                  bg={selected ? "$backgroundPress" : "$background"}
+                  rounded="$4"
+                  borderWidth={2}
+                  borderColor={selected ? "$borderColorFocus" : "$borderColor"}
+                  shadowColor={selected ? "$shadowColor" : undefined}
+                  shadowOpacity={selected ? 0.2 : 0}
+                  shadowRadius={selected ? 8 : 0}
+                  shadowOffset={selected ? { width: 0, height: 4 } : undefined}
+                  elevation={selected ? 3 : 0}
                 >
-                  <role.icon size={24} />
-                </Circle>
-                <Text fontSize={"$6"} fontWeight={"bold"}>
-                  {role.name}
-                </Text>
-              </XStack>
-            </YStack>
-          ))}
+                  <XStack gap="$3" items="center" justify="space-between">
+                    <XStack gap="$3" items="center" flex={1}>
+                    <Circle
+                      size={48}
+                      bg="$backgroundStrong"
+                      borderWidth={1}
+                      borderColor="$borderColor"
+                      justify="center"
+                      items="center"
+                    >
+                      <interest.icon size={24} />
+                    </Circle>
+                    <Text fontSize={"$6"} fontWeight={"bold"}>
+                      {interest.name}
+                    </Text>
+                    </XStack>
+                    {selected && <CheckCircle size={20} color="$colorFocus" />}
+                  </XStack>
+                </YStack>
+              </TouchableOpacity>
+            );
+          })}
         </YStack>
       </View>
     </>

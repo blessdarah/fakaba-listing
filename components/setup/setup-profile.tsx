@@ -9,7 +9,19 @@ import {
   Avatar,
 } from "tamagui";
 
-export const SetupProfile = () => {
+type SetupProfileProps = {
+  firstName: string;
+  lastName: string;
+  onChangeFirstName: (value: string) => void;
+  onChangeLastName: (value: string) => void;
+};
+
+export const SetupProfile = ({
+  firstName,
+  lastName,
+  onChangeFirstName,
+  onChangeLastName,
+}: SetupProfileProps) => {
   return (
     <>
       <View>
@@ -33,25 +45,29 @@ export const SetupProfile = () => {
             <Input
               name="firstName"
               size={"$6"}
-              bg="white"
+              bg="$background"
               placeholder="John"
-              placeholderTextColor="gray"
-              color={"gray"}
+              placeholderTextColor="$color8"
+              color={"$color"}
               borderWidth={1}
-              borderColor={"$white6"}
+              borderColor={"$borderColor"}
+              value={firstName}
+              onChangeText={onChangeFirstName}
             />
           </YStack>
           <YStack gap={"$1"}>
-            <Label fontSize={"$5"}>First name</Label>
+            <Label fontSize={"$5"}>Last name</Label>
             <Input
               name="lastName"
               size={"$6"}
-              bg="white"
+              bg="$background"
               placeholder="Doe"
-              placeholderTextColor="gray"
-              color={"gray"}
+              placeholderTextColor="$color8"
+              color={"$color"}
               borderWidth={1}
-              borderColor={"$white6"}
+              borderColor={"$borderColor"}
+              value={lastName}
+              onChangeText={onChangeLastName}
             />
           </YStack>
         </YStack>

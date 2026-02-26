@@ -1,8 +1,9 @@
 import { YStack, H1, Text } from "tamagui";
-import { Pressable } from "react-native";
+import { Pressable, StatusBar, useColorScheme } from "react-native";
 import { Image, ScrollView } from "react-native";
 import { useRouter } from "expo-router";
 import { ChevronRight } from "@tamagui/lucide-icons";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 const SERVICES = [
   {
@@ -34,42 +35,49 @@ const SERVICES = [
 
 export default function ServicesScreen() {
   const router = useRouter();
-
-  const handleServicePress = (serviceId: number) => {
-    router.push(`/(tabs)/services/${serviceId}`);
-  };
+  const insets = useSafeAreaInsets();
+  const colorScheme = useColorScheme();
 
   return (
     <YStack flex={1} bg="$background" p={0} m={0}>
+      <StatusBar
+        barStyle={colorScheme === "dark" ? "light-content" : "dark-content"}
+      />
       {/* Hero Section */}
-      <YStack
-        flexDirection="row"
-        items="center"
-        justify="space-between"
-        height={112}
-        bg="white"
-        borderBlockEndColor="$borderColor"
-        borderBlockEndWidth={1}
-        mx="$4"
-        mt="$5"
-        overflow="hidden"
-      >
-        {/* Left side - Title */}
-        <YStack justify="center" items="flex-start">
-          <H1 fontSize={32} fontWeight="bold" color="#1a3a52">
-            Services
-          </H1>
-        </YStack>
-        {/* Right side - Image */}
-        <YStack width={84} height={84} overflow="hidden">
-          <Image
-            source={require("../../../assets/images/service.png")}
-            style={{
-              width: "100%",
-              height: "100%",
-              resizeMode: "cover",
-            }}
-          />
+      <YStack mt="$2">
+        <YStack
+          flexDirection="row"
+          items="center"
+          justify="space-between"
+          height={Math.round(112 * 1.2) + insets.top}
+          bg="white"
+          borderBlockEndColor="$borderColor"
+          borderBlockEndWidth={1}
+          overflow="hidden"
+          px="$4"
+        >
+          {/* Left side - Title */}
+          <YStack justify="center" items="flex-start" pt={insets.top}>
+            <H1 fontSize={32} fontWeight="bold" color="#1a3a52">
+              Services
+            </H1>
+          </YStack>
+          {/* Right side - Image */}
+          <YStack
+            width={Math.round(84 * 1.2)}
+            height={Math.round(84 * 1.2)}
+            overflow="hidden"
+            mt={insets.top}
+          >
+            <Image
+              source={require("../../../assets/images/service.png")}
+              style={{
+                width: "100%",
+                height: "100%",
+                resizeMode: "cover",
+              }}
+            />
+          </YStack>
         </YStack>
       </YStack>
 
@@ -85,7 +93,11 @@ export default function ServicesScreen() {
             {SERVICES.map((service) => (
               <Pressable
                 key={service.id.toString()}
-                onPress={() => handleServicePress(service.id)}
+                onPress={() => {
+                  console.log("service-press", service.id);
+                  router.push(`/services/${service.id}`);
+                }}
+                style={({ pressed }) => ({ opacity: pressed ? 0.7 : 1 })}
               >
                 <YStack
                   flexDirection="row"

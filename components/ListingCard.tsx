@@ -13,8 +13,6 @@ const ListingCard = ({ item }: ListingCardProps) => {
   const { toggleFavorite, isFavorited } = useToggleFavorite();
   const liked = isFavorited(item.id);
 
-  console.log("imtem: ", item.imageUrls);
-
   const handleToggleFavorite = (e: any) => {
     e.preventDefault();
     e.stopPropagation();

@@ -10,6 +10,7 @@ import {
   Paragraph,
   Circle,
   Separator,
+  Spinner,
 } from "tamagui";
 import { Link, Stack, useLocalSearchParams } from "expo-router";
 import { useState } from "react";
@@ -59,35 +60,23 @@ const ListingDetailsScreen = () => {
   async function sendWhatsAppMessage() {
     // Deep link to the app first then fallback to web
     // with a default message
-    const message = "Hello from Expo";
-    // Linking.openURL(`whatsapp://send?phone=+237672374414&text=${message}`);
-    const tel = "+237672374414";
-    const url = `whatsapp://send?phone=${tel}&text=${encodeURIComponent(message || "")}`;
+    const message = "Hello from Fakaba";
+    const tel = "237672374414";
+    const url = `whatsapp://send?phone=${tel}&text=${encodeURIComponent(
+      message || ""
+    )}`;
 
     try {
       const supported = await Linking.canOpenURL(url);
-
       if (supported) {
         await Linking.openURL(url);
-      } else {
-        Alert.alert(
-          "WhatsApp Not Installed",
-          "Please install WhatsApp to continue",
-          [
-            { text: "Cancel", style: "cancel" },
-            {
-              text: "Install",
-              onPress: () => {
-                const storeUrl =
-                  Platform.OS === "ios"
-                    ? "https://apps.apple.com/app/whatsapp-messenger/id310633997"
-                    : "https://play.google.com/store/apps/details?id=com.whatsapp";
-                Linking.openURL(storeUrl);
-              },
-            },
-          ]
-        );
+        return;
       }
+
+      const webUrl = `https://wa.me/${tel}?text=${encodeURIComponent(
+        message || ""
+      )}`;
+      await Linking.openURL(webUrl);
     } catch (error) {
       Alert.alert("Error", "Unable to open WhatsApp");
     }
@@ -102,8 +91,11 @@ const ListingDetailsScreen = () => {
     return (
       <>
         <Stack.Screen options={{ title: "Loading..." }} />
-        <View flex={1} justify="center" items="center">
-          <Text>Loading...</Text>
+        <View flex={1} justify="center" items="center" bg="$background">
+          <Spinner size="large" color="$blue8" />
+          <Text mt="$3" color="$color">
+            Loading...
+          </Text>
         </View>
       </>
     );

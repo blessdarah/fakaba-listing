@@ -10,7 +10,14 @@ import {
   XStack,
 } from "tamagui";
 
-export const SetupLocation = () => {
+const POPULAR_LOCATIONS = ["Douala", "Limbe", "Buea", "Yaounde"];
+
+type SetupLocationProps = {
+  value: string;
+  onChange: (value: string) => void;
+};
+
+export const SetupLocation = ({ value, onChange }: SetupLocationProps) => {
   return (
     <>
       <View>
@@ -27,35 +34,42 @@ export const SetupLocation = () => {
           </Label>
           <Input
             size={"$6"}
-            bg="white"
+            bg="$background"
             placeholder="Douala"
-            placeholderTextColor="gray"
-            color={"gray"}
+            placeholderTextColor="$color8"
+            color={"$color"}
             borderWidth={1}
-            borderColor={"$white6"}
+            borderColor={"$borderColor"}
+            value={value}
+            onChangeText={onChange}
           />
           <Text fontWeight={"bold"}>Popular locations</Text>
-          <XStack gap={"$3"}>
-            <TouchableOpacity>
-              <Text rounded={"$10"} py="$3" px="$4" bg={"$white4"}>
-                Douala
-              </Text>
-            </TouchableOpacity>
-            <TouchableOpacity>
-              <Text rounded={"$10"} py="$3" px="$4" bg={"$white4"}>
-                Limbe
-              </Text>
-            </TouchableOpacity>
-            <TouchableOpacity>
-              <Text rounded={"$10"} py="$3" px="$4" bg={"$white4"}>
-                Buea
-              </Text>
-            </TouchableOpacity>
-            <TouchableOpacity>
-              <Text rounded={"$10"} py="$3" px="$4" bg={"$white4"}>
-                Yaounde
-              </Text>
-            </TouchableOpacity>
+          <XStack gap={"$3"} flexWrap="wrap">
+            {POPULAR_LOCATIONS.map((location) => {
+              const selected = value === location;
+              return (
+                <TouchableOpacity
+                  key={location}
+                  onPress={() => onChange(location)}
+                >
+                  <Text
+                    rounded={"$10"}
+                    py="$3"
+                    px="$4"
+                    bg={selected ? "$backgroundPress" : "$backgroundStrong"}
+                    borderWidth={selected ? 2 : 1}
+                    borderColor={selected ? "$borderColorFocus" : "$borderColor"}
+                    shadowColor={selected ? "$shadowColor" : undefined}
+                    shadowOpacity={selected ? 0.2 : 0}
+                    shadowRadius={selected ? 6 : 0}
+                    shadowOffset={selected ? { width: 0, height: 3 } : undefined}
+                    elevation={selected ? 2 : 0}
+                  >
+                    {location}
+                  </Text>
+                </TouchableOpacity>
+              );
+            })}
           </XStack>
         </YStack>
       </View>
