@@ -54,7 +54,7 @@ export default function SetupScreen() {
     prevStep.current = step;
   }, [step, fadeAnim, slideAnim]);
 
-  function updateInfo() {
+  async function updateInfo() {
     console.log("setup-values", {
       accountType,
       role,
@@ -64,7 +64,7 @@ export default function SetupScreen() {
       interests,
     });
     // TODO: Update user info online
-    completeSetup();
+    await completeSetup();
     router.replace("/(tabs)");
   }
 

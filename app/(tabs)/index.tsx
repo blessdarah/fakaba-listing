@@ -18,16 +18,17 @@ import { Slider } from "@tamagui/slider";
 import HomeCategories, { HOME_CATEGORIES } from "components/HomeCategories";
 import HorizontalListing from "components/HorizontalListing";
 import ListingCard from "components/ListingCard";
-import { Sliders } from "@tamagui/lucide-icons";
+import { Sliders, MapPin, Check, ChevronRight } from "@tamagui/lucide-icons";
 import ScreenContainer from "components/ScreenContainer";
 import { useAuth } from "contexts/AuthContext";
 import { FlatList, RefreshControl } from "react-native";
 import { Pressable } from "react-native";
-import { ChevronRight, Check } from "@tamagui/lucide-icons";
 import { useRouter } from "expo-router";
 import { useTranslation } from "lib/i18n/useTranslation";
 import { useListings } from "lib/query/useListings";
 import { useFavorites } from "lib/query/useFavorites";
+import { useAgents } from "lib/query/useUsers";
+import { Link } from "expo-router";
 
 export default function TabOneScreen() {
   const { user } = useAuth();
@@ -136,6 +137,12 @@ export default function TabOneScreen() {
     (value: number) => value.toLocaleString(),
     []
   );
+
+  const { data: agents = [] } = useAgents();
+  const agentColumns: (typeof agents)[] = [];
+  for (let i = 0; i < agents.length; i += 4) {
+    agentColumns.push(agents.slice(i, i + 4));
+  }
 
   // Use TanStack Query hooks
   const {
@@ -339,6 +346,80 @@ export default function TabOneScreen() {
               )}
             </YStack>
           )}
+
+          <YStack gap="$3" mb="$4">
+            <XStack justify="space-between" items="center">
+              <Text fontSize="$6" fontWeight="700" color="$color">
+                Top agents
+              </Text>
+              <Link href="/agents" asChild>
+                <Text color="$blue8" fontWeight="600">
+                  See all
+                </Text>
+              </Link>
+            </XStack>
+            <ScrollView horizontal showsHorizontalScrollIndicator={false}>
+              <XStack gap="$3" pr="$2">
+                {agentColumns.map((column, columnIndex) => (
+                  <YStack key={`col-${columnIndex}`} gap="$3">
+                    {column.map((agent) => (
+                      <Link
+                        key={agent.id}
+                        href={{
+                          pathname: "/agents/detail",
+                          params: { id: agent.id },
+                        }}
+                        asChild
+                      >
+                        <XStack
+                          gap="$3"
+                          items="center"
+                          bg="$background"
+                          borderWidth={1}
+                          borderColor="$borderColor"
+                          rounded="$6"
+                          p="$2.5"
+                          width={260}
+                        >
+                          <Avatar
+                            circular
+                            size="$4.5"
+                            borderColor="$yellow10"
+                            borderWidth={2}
+                          >
+                            <Avatar.Image
+                              src={
+                                (agent as any).profileImage ||
+                                (agent as any).photoURL ||
+                                (agent as any).imageUrls?.[0] ||
+                                "https://images.unsplash.com/photo-1531384441138-2736e62e0919?&w=100&h=100&dpr=2&q=80"
+                              }
+                            />
+                            <Avatar.Fallback delayMs={600} bg="$blue10" />
+                          </Avatar>
+                          <YStack flex={1} gap="$1">
+                            <Text fontWeight="600">
+                              {(agent as any).displayName ||
+                                `${(agent as any).firstName ?? ""} ${(agent as any).lastName ?? ""}`.trim() ||
+                                (agent as any).name ||
+                                "Agent"}
+                            </Text>
+                            <XStack gap="$1" items="center">
+                              <MapPin size={14} color="$color8" />
+                              <Text color="$color8" fontSize="$2">
+                                {(agent as any).location || "Location"}
+                              </Text>
+                            </XStack>
+                          </YStack>
+                          <ChevronRight size={18} color="$color8" />
+                        </XStack>
+                      </Link>
+                    ))}
+                  </YStack>
+                ))}
+              </XStack>
+            </ScrollView>
+          </YStack>
         </ScreenContainer>
       </ScrollView>
       {/* bottom sheet */}
@@ -674,7 +755,6 @@ export default function TabOneScreen() {
                   size="$3"
                   circular
                   onPress={() => {
-                    bg = "$background";
                     setPickerOpen(null);
                     setPickerQuery("");
                   }}

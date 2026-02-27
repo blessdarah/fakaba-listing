@@ -1,8 +1,8 @@
-import { Mail, MapPin, MessageCircle } from "@tamagui/lucide-icons";
+import { Mail, MapPin, MessageCircle, ChevronLeft } from "@tamagui/lucide-icons";
 import ListingCard from "components/ListingCard";
 import { StartRating } from "components/StarRating";
-import React, { useEffect } from "react";
-import { Dimensions } from "react-native";
+import React from "react";
+import { Dimensions, Pressable } from "react-native";
 import {
   H5,
   SizableText,
@@ -18,52 +18,87 @@ import {
   View,
   Button,
 } from "tamagui";
-import { Listing } from "lib/types";
+import { useLocalSearchParams, useRouter } from "expo-router";
+import { useUser } from "lib/query/useUsers";
+import { useListingsByUser } from "lib/query/useListings";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 export default function AgentDetailScreen() {
   const [activeTab, setActiveTab] = React.useState("tab-about");
   const deviceWidth = Dimensions.get("window").width;
-  const [listings, setListings] = React.useState<Listing[]>([]);
+  const router = useRouter();
+  const insets = useSafeAreaInsets();
+  const { id } = useLocalSearchParams<{ id: string }>();
+  const { data: agent } = useUser(id || "");
+  const { data: listings = [] } = useListingsByUser(id || "");
 
-  useEffect(() => {});
+  const agentName =
+    (agent as any)?.displayName ||
+    `${(agent as any)?.firstName ?? ""} ${(agent as any)?.lastName ?? ""}`.trim() ||
+    (agent as any)?.name ||
+    "Agent";
+  const agentImage =
+    (agent as any)?.profileImage ||
+    (agent as any)?.photoURL ||
+    (agent as any)?.imageUrls?.[0] ||
+    "https://images.unsplash.com/photo-1531384441138-2736e62e0919?&w=100&h=100&dpr=2&q=80";
+  const agentLocation = (agent as any)?.location || "Location not available";
   return (
-    <ScrollView bg="white">
+    <ScrollView bg="$background" showsVerticalScrollIndicator={false}>
       <View pb="$2">
-        {/* header section */}
-        <XStack items="center" justify="space-between" px="$10" pt="$8">
-          <Circle bg="$green8" size={42}>
-            <MessageCircle size={24} color="white" />
-          </Circle>
-          <YStack items="center" gap="$2">
-            <Avatar circular size="$8" borderColor="$yellow10" borderWidth={3}>
-              <Avatar.Image src="https://images.unsplash.com/photo-1531384441138-2736e62e0919?&w=100&h=100&dpr=2&q=80" />
-              <Avatar.Fallback delayMs={600} backgroundColor="$blue10" />
-            </Avatar>
-            <Paragraph fontWeight="bold" fontSize="$6" color="gray">
-              Tua Manuera
-            </Paragraph>
+        <View height={220} width="100%">
+          <View position="absolute" inset={0} bg="$color1" />
+          <Pressable
+            onPress={() => router.back()}
+            style={{
+              position: "absolute",
+              top: insets.top + 12,
+              left: 16,
+              zIndex: 10,
+              backgroundColor: "rgba(0, 0, 0, 0.55)",
+              borderRadius: 20,
+              padding: 8,
+              display: "flex",
+              justifyContent: "center",
+              alignItems: "center",
+            }}
+          >
+            <ChevronLeft size={22} color="white" />
+          </Pressable>
+          <YStack
+            position="absolute"
+            inset={0}
+            pt={insets.top + 24}
+            px="$4"
+            pb="$4"
+            justify="space-between"
+          >
+            <XStack items="center" justify="space-between">
+              <Circle bg="$green8" size={42}>
+                <MessageCircle size={24} color="white" />
+              </Circle>
+              <Circle bg="$blue10" size={42}>
+                <Mail size={24} color="white" />
+              </Circle>
+            </XStack>
+            <YStack items="center" gap="$2">
+              <Avatar circular size="$8" borderColor="$yellow10" borderWidth={3}>
+                <Avatar.Image src={agentImage} />
+                <Avatar.Fallback delayMs={600} backgroundColor="$blue10" />
+              </Avatar>
+              <Paragraph fontWeight="700" fontSize="$6" color="$color">
+                {agentName}
+              </Paragraph>
+            </YStack>
+            <XStack items="center" justify="space-between">
+              <XStack gap="$1" items="center">
+                <MapPin size={16} color="$color8" />
+                <Text color="$color8">{agentLocation}</Text>
+              </XStack>
+              <StartRating count={(agent as any)?.stars ?? 4} />
+            </XStack>
           </YStack>
-          <Circle bg="$white9" size={42}>
-            <Mail size={24} color="white" />
-          </Circle>
-        </XStack>
-
-        {/* location and star rating */}
-        <XStack
-          gap="$3"
-          mt="$2"
-          items="center"
-          justify="space-between"
-          mx="$4"
-          py="$2"
-        >
-          <XStack gap="$1">
-            <MapPin size={16} color="gray" />
-            <Text color="gray">Molyko, Buea</Text>
-          </XStack>
-          <StartRating count={4} />
-        </XStack>
-        {/* End location and star rating */}
+        </View>
       </View>
 
       {/* Tabs  */}
@@ -77,7 +112,7 @@ export default function AgentDetailScreen() {
         mt={0}
         overflow="hidden"
         borderColor="$borderColor"
-        bg={"white"}
+        bg="$background"
       >
         <Tabs.List disablePassBorderRadius="bottom" aria-label="Agent profile">
           <Tabs.Tab
@@ -123,12 +158,9 @@ export default function AgentDetailScreen() {
         <Separator />
         <Tabs.Content value="tab-about" p="$4">
           <H5>About</H5>
-          <Paragraph fontSize="$5" color="gray">
-            Ab nulla molestiae reiciendis fuga provident tenetur. Amet sit
-            tempore ut dolores. Repellendus omnis aut quod reiciendis molestiae
-            eligendi et suscipit sed. Qui labore omnis quod minima. Ipsum
-            debitis sint veniam architecto quo eos. Et ratione nihil quia
-            voluptas.
+          <Paragraph fontSize="$5" color="$color10">
+            {(agent as any)?.about ||
+              "This agent is committed to helping you find the right property and guiding you through the process."}
           </Paragraph>
           <Separator my="$5" />
           <H5>Opening hours</H5>
@@ -141,29 +173,21 @@ export default function AgentDetailScreen() {
 
         <Tabs.Content value="tab-listings" p="$4">
           <H5>Listings</H5>
-          <Paragraph fontSize="$5" color="gray">
-            This is a collection of all listings posted/created by the agent.
+          <Paragraph fontSize="$5" color="$color10">
+            Listings posted by this agent.
           </Paragraph>
-          <ScrollView showsVerticalScrollIndicator={false}>
-            <YStack>
-              <View minW={320}>
-                <ListingCard
-                  item={{
-                    id: 1,
-                    title: "1 Bedroom studio",
-                    location: "Molyko, Buea",
-                    price: "120k Monthly",
-                    image:
-                      "https://images.unsplash.com/photo-1613490493576-7fde63acd811?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1771&q=80",
-                    time: "2 days ago",
-                  }}
-                />
-              </View>
-            </YStack>
-          </ScrollView>
+          <YStack gap="$3" mt="$3">
+            {listings.length === 0 ? (
+              <Text color="$color8">No listings yet.</Text>
+            ) : (
+              listings.map((listing) => (
+                <ListingCard key={listing.id} item={listing} />
+              ))
+            )}
+          </YStack>
         </Tabs.Content>
 
-        <Tabs.Content value="tab-reviews">
+        <Tabs.Content value="tab-reviews" p="$4">
           <ScrollView showsVerticalScrollIndicator={false} height={400}>
             <YStack maxW={deviceWidth}>
               {/* Review card */}
@@ -185,7 +209,7 @@ export default function AgentDetailScreen() {
                     very professional.
                   </Paragraph>
                   <XStack justify="space-between">
-                    <Text>2 days ago</Text>
+                    <Text color="$color8">2 days ago</Text>
                     <StartRating count={4} />
                   </XStack>
                 </YStack>
@@ -210,7 +234,7 @@ export default function AgentDetailScreen() {
                     He is very professional and has a great approach to the job.
                   </Paragraph>
                   <XStack justify="space-between">
-                    <Text>3 days ago</Text>
+                    <Text color="$color8">3 days ago</Text>
                     <StartRating count={3} />
                   </XStack>
                 </YStack>
@@ -235,7 +259,7 @@ export default function AgentDetailScreen() {
                     getting support
                   </Paragraph>
                   <XStack justify="space-between">
-                    <Text>1 week ago</Text>
+                    <Text color="$color8">1 week ago</Text>
                     <StartRating count={1} />
                   </XStack>
                 </YStack>
@@ -260,7 +284,7 @@ export default function AgentDetailScreen() {
                     very professional.
                   </Paragraph>
                   <XStack justify="space-between">
-                    <Text>2 days ago</Text>
+                    <Text color="$color8">2 days ago</Text>
                     <StartRating count={4} />
                   </XStack>
                 </YStack>
@@ -283,7 +307,7 @@ function OpeningHours({ day, time }: { day: string; time: string }) {
       <Text fontSize="$5" fontWeight="600">
         {day}
       </Text>
-      <Text fontSize="$3" color="gray">
+      <Text fontSize="$3" color="$color8">
         {time}
       </Text>
     </XStack>

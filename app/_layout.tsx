@@ -135,6 +135,13 @@ function RootLayoutNav() {
             headerShown: false,
           }}
         />
+        <Stack.Screen
+          name="agents"
+          options={{
+            headerShown: false,
+            headerBackTitle: "Back",
+          }}
+        />
       </Stack>
     </SafeAreaProvider>
   );

@@ -9,7 +9,15 @@ import {
   signInWithEmailAndPassword,
   createUserWithEmailAndPassword,
 } from "firebase/auth";
+import {
+  doc,
+  getDoc,
+  setDoc,
+  updateDoc,
+  serverTimestamp,
+} from "firebase/firestore";
 import { auth, googleProvider } from "../firebase.config";
+import { db } from "../firebase.config";
 import * as AuthSession from "expo-auth-session";
 import * as WebBrowser from "expo-web-browser";
 import { Platform } from "react-native";
@@ -25,7 +33,7 @@ interface AuthContextType {
   signInWithEmail: (email: string, password: string) => Promise<void>;
   signUpWithEmail: (email: string, password: string) => Promise<void>;
   signOut: () => Promise<void>;
-  completeSetup: () => void;
+  completeSetup: () => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -46,9 +54,41 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
   const [needsSetup, setNeedsSetup] = useState(false);
 
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, (user) => {
+    const unsubscribe = onAuthStateChanged(auth, async (user) => {
       setUser(user);
-      setLoading(false);
+
+      if (!user) {
+        setNeedsSetup(false);
+        setLoading(false);
+        return;
+      }
+
+      try {
+        const userRef = doc(db, "users", user.uid);
+        const snapshot = await getDoc(userRef);
+
+        if (!snapshot.exists()) {
+          await setDoc(
+            userRef,
+            {
+              email: user.email,
+              authProvider: user.providerData[0]?.providerId ?? "unknown",
+              hasOnboarded: false,
+              createdAt: serverTimestamp(),
+            },
+            { merge: true }
+          );
+          setNeedsSetup(true);
+        } else {
+          const data = snapshot.data() as { hasOnboarded?: boolean };
+          setNeedsSetup(!data?.hasOnboarded);
+        }
+      } catch (error) {
+        console.error("Error checking setup state:", error);
+        setNeedsSetup(false);
+      } finally {
+        setLoading(false);
+      }
     });
 
     return unsubscribe;
@@ -115,7 +155,18 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
 
   const signUpWithEmail = async (email: string, password: string) => {
     try {
-      await createUserWithEmailAndPassword(auth, email, password);
+      const creds = await createUserWithEmailAndPassword(auth, email, password);
+      const userRef = doc(db, "users", creds.user.uid);
+      await setDoc(
+        userRef,
+        {
+          email: creds.user.email,
+          authProvider: "password",
+          hasOnboarded: false,
+          createdAt: serverTimestamp(),
+        },
+        { merge: true }
+      );
       setNeedsSetup(true);
     } catch (error) {
       console.error("Error signing up with email:", error);
@@ -123,8 +174,20 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
     }
   };
 
-  const completeSetup = () => {
-    setNeedsSetup(false);
+  const completeSetup = async () => {
+    try {
+      const currentUser = auth.currentUser;
+      if (currentUser) {
+        const userRef = doc(db, "users", currentUser.uid);
+        await updateDoc(userRef, {
+          hasOnboarded: true,
+          updatedAt: serverTimestamp(),
+        });
+      }
+      setNeedsSetup(false);
+    } catch (error) {
+      console.error("Error completing setup:", error);
+    }
   };
 
   const signOut = async () => {
