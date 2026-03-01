@@ -86,10 +86,6 @@ export default function ServicesScreen() {
       {/* Content Section */}
       <ScrollView style={{ flex: 1 }} showsVerticalScrollIndicator={false}>
         <YStack p="$4" gap="$4">
-          <Text fontSize={16} fontWeight="600" color="$color">
-            We have a suite of services designed for every step of your journey.
-          </Text>
-
           {/* Service Cards */}
           <YStack gap="$3">
             {SERVICES.map((service) => (
@@ -98,7 +94,9 @@ export default function ServicesScreen() {
                 href={`/services/${service.id}`}
                 asChild
               >
-                <Pressable style={({ pressed }) => ({ opacity: pressed ? 0.7 : 1 })}>
+                <Pressable
+                  style={({ pressed }) => ({ opacity: pressed ? 0.7 : 1 })}
+                >
                   <YStack
                     bg="$background"
                     rounded="$6"
@@ -107,7 +105,12 @@ export default function ServicesScreen() {
                     borderWidth={1}
                   >
                     <XStack items="center" gap="$3" p="$3">
-                      <View width={92} height={70} rounded="$4" overflow="hidden">
+                      <View
+                        width={92}
+                        height={70}
+                        rounded="$4"
+                        overflow="hidden"
+                      >
                         <Image
                           source={service.icon}
                           style={{

@@ -11,6 +11,7 @@ import {
   Circle,
   Separator,
   Spinner,
+  Sheet,
 } from "tamagui";
 import ListingCard from "components/ListingCard";
 import { Link, Stack, useLocalSearchParams } from "expo-router";
@@ -34,6 +35,7 @@ import {
 import { useListing, useListings } from "lib/query/useListings";
 import { useToggleFavorite } from "lib/query/useFavorites";
 import { formatRelativeTime } from "lib/utils";
+import MapView, { Marker } from "react-native-maps";
 
 const { width } = Dimensions.get("window");
 
@@ -45,6 +47,7 @@ const ListingDetailsScreen = () => {
   const { data: listing, isLoading } = useListing(id);
   const { data: allListings = [] } = useListings();
   const { toggleFavorite, isFavorited } = useToggleFavorite();
+  const [mapOpen, setMapOpen] = useState(false);
 
   const liked = isFavorited(id as string);
   const pricing = listing
@@ -52,6 +55,39 @@ const ListingDetailsScreen = () => {
       ? listing.price / 1000 + "k/month"
       : listing.price / 1000 + "k"
     : "";
+
+  const fallbackCoords = { latitude: 3.848, longitude: 11.502 };
+  const latitude =
+    typeof listing?.latitude === "number"
+      ? listing.latitude
+      : fallbackCoords.latitude;
+  const longitude =
+    typeof listing?.longitude === "number"
+      ? listing.longitude
+      : fallbackCoords.longitude;
+
+  const openDirections = async () => {
+    const label = listing?.title ?? "Listing";
+    const latLng = `${latitude},${longitude}`;
+    const url =
+      Platform.OS === "ios"
+        ? `http://maps.apple.com/?daddr=${latLng}&q=${encodeURIComponent(
+            label
+          )}`
+        : `https://www.google.com/maps/dir/?api=1&destination=${latLng}&travelmode=driving`;
+    try {
+      const supported = await Linking.canOpenURL(url);
+      if (supported) {
+        await Linking.openURL(url);
+      } else {
+        await Linking.openURL(
+          `https://www.google.com/maps/search/?api=1&query=${latLng}`
+        );
+      }
+    } catch (error) {
+      Alert.alert("Directions", "Unable to open directions.");
+    }
+  };
 
   const similarListings = allListings
     .filter((item) => item.id !== listing?.id)
@@ -204,6 +240,7 @@ const ListingDetailsScreen = () => {
                 icon={<MapIcon size={16} color="#D4A017" />}
                 borderColor="$borderColor"
                 borderWidth={1}
+                onPress={() => setMapOpen(true)}
               >
                 <Button.Text>Map view</Button.Text>
               </Button>
@@ -356,6 +393,56 @@ const ListingDetailsScreen = () => {
           )}
         </YStack>
       </ScrollView>
+
+      <Sheet
+        open={mapOpen}
+        onOpenChange={setMapOpen}
+        modal
+        snapPoints={[70, 40, 0]}
+        snapPointsMode="percent"
+        dismissOnSnapToBottom
+        zIndex={100_000}
+      >
+        <Sheet.Overlay
+          bg="rgba(0,0,0,0.6)"
+          enterStyle={{ opacity: 0 }}
+          exitStyle={{ opacity: 0 }}
+        />
+        <Sheet.Handle />
+        <Sheet.Frame>
+          <YStack p="$4" gap="$3">
+            <Text fontSize="$5" fontWeight="700">
+              Location
+            </Text>
+            <View rounded="$6" overflow="hidden" borderWidth={1} borderColor="$borderColor">
+              <MapView
+                style={{ width: "100%", height: 260 }}
+                initialRegion={{
+                  latitude,
+                  longitude,
+                  latitudeDelta: 0.01,
+                  longitudeDelta: 0.01,
+                }}
+              >
+                <Marker
+                  coordinate={{ latitude, longitude }}
+                  title={listing?.title}
+                />
+              </MapView>
+            </View>
+            <Button
+              size="$4"
+              bg="$blue9"
+              color="white"
+              onPress={openDirections}
+            >
+              <Button.Text color="white" fontWeight="600">
+                Get Directions
+              </Button.Text>
+            </Button>
+          </YStack>
+        </Sheet.Frame>
+      </Sheet>
     </>
   );
 };

@@ -1,8 +1,15 @@
-import { Mail, MapPin, MessageCircle, ChevronLeft } from "@tamagui/lucide-icons";
+import {
+  Mail,
+  MapPin,
+  MessageCircle,
+  ChevronLeft,
+  Info,
+  LayoutGrid,
+} from "@tamagui/lucide-icons";
 import ListingCard from "components/ListingCard";
 import { StartRating } from "components/StarRating";
 import React from "react";
-import { Dimensions, Pressable } from "react-native";
+import { Pressable } from "react-native";
 import {
   H5,
   SizableText,
@@ -17,6 +24,7 @@ import {
   Circle,
   View,
   Button,
+  Image,
 } from "tamagui";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { useUser } from "lib/query/useUsers";
@@ -25,7 +33,6 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 export default function AgentDetailScreen() {
   const [activeTab, setActiveTab] = React.useState("tab-about");
-  const deviceWidth = Dimensions.get("window").width;
   const router = useRouter();
   const insets = useSafeAreaInsets();
   const { id } = useLocalSearchParams<{ id: string }>();
@@ -41,13 +48,45 @@ export default function AgentDetailScreen() {
     (agent as any)?.profileImage ||
     (agent as any)?.photoURL ||
     (agent as any)?.imageUrls?.[0] ||
-    "https://images.unsplash.com/photo-1531384441138-2736e62e0919?&w=100&h=100&dpr=2&q=80";
+    "https://i.pravatar.cc/400?img=32";
   const agentLocation = (agent as any)?.location || "Location not available";
+  const aboutText =
+    (agent as any)?.about ||
+    (agent as any)?.bio ||
+    (agent as any)?.description ||
+    "No bio data for now";
+  const openingHoursRaw =
+    (agent as any)?.openingHours ||
+    (agent as any)?.hours ||
+    (agent as any)?.availability;
+  const openingHours = Array.isArray(openingHoursRaw)
+    ? openingHoursRaw
+        .map((item: any) => ({
+          day: item?.day ?? item?.label ?? item?.name,
+          time: item?.time ?? item?.value ?? item?.hours,
+        }))
+        .filter((item: any) => item.day && item.time)
+    : openingHoursRaw && typeof openingHoursRaw === "object"
+      ? Object.entries(openingHoursRaw).map(([day, time]) => ({
+          day,
+          time: String(time),
+        }))
+      : [];
   return (
     <ScrollView bg="$background" showsVerticalScrollIndicator={false}>
-      <View pb="$2">
-        <View height={220} width="100%">
-          <View position="absolute" inset={0} bg="$color1" />
+      <View pb={24}>
+        <View height={360} width="100%">
+          <Image
+            source={{ uri: agentImage }}
+            width="100%"
+            height="100%"
+            resizeMode="cover"
+          />
+          <View
+            position="absolute"
+            inset={0}
+            style={{ backgroundColor: "rgba(5, 10, 18, 0.45)" }}
+          />
           <Pressable
             onPress={() => router.back()}
             style={{
@@ -67,36 +106,55 @@ export default function AgentDetailScreen() {
           </Pressable>
           <YStack
             position="absolute"
-            inset={0}
-            pt={insets.top + 24}
-            px="$4"
-            pb="$4"
-            justify="space-between"
+            left={0}
+            right={0}
+            top={insets.top + 32}
+            items="center"
+            gap="$3"
           >
-            <XStack items="center" justify="space-between">
-              <Circle bg="$green8" size={42}>
-                <MessageCircle size={24} color="white" />
-              </Circle>
-              <Circle bg="$blue10" size={42}>
-                <Mail size={24} color="white" />
-              </Circle>
-            </XStack>
-            <YStack items="center" gap="$2">
-              <Avatar circular size="$8" borderColor="$yellow10" borderWidth={3}>
-                <Avatar.Image src={agentImage} />
-                <Avatar.Fallback delayMs={600} backgroundColor="$blue10" />
-              </Avatar>
-              <Paragraph fontWeight="700" fontSize="$6" color="$color">
+            <Avatar circular size="$10" borderColor="$yellow10" borderWidth={3}>
+              <Avatar.Image src={agentImage} />
+              <Avatar.Fallback delayMs={600} backgroundColor="$blue10" />
+            </Avatar>
+            <YStack
+              bg="$background"
+              px="$4"
+              py="$3"
+              rounded="$5"
+              elevation="$3"
+              items="center"
+              gap="$1"
+              width="84%"
+            >
+              <Paragraph fontWeight="800" fontSize="$7">
                 {agentName}
               </Paragraph>
-            </YStack>
-            <XStack items="center" justify="space-between">
-              <XStack gap="$1" items="center">
-                <MapPin size={16} color="$color8" />
-                <Text color="$color8">{agentLocation}</Text>
+              <XStack gap="$2" items="center">
+                <MapPin size={16} color="$color11" />
+                <Text color="$color11">{agentLocation}</Text>
               </XStack>
               <StartRating count={(agent as any)?.stars ?? 4} />
-            </XStack>
+              <XStack gap="$2" mt="$2" width="100%">
+                <Button
+                  flex={1}
+                  bg="$green9"
+                  color="white"
+                  rounded="$7"
+                  iconAfter={<MessageCircle size={18} color="white" />}
+                >
+                  WhatsApp
+                </Button>
+                <Button
+                  flex={1}
+                  bg="$blue10"
+                  color="white"
+                  rounded="$7"
+                  iconAfter={<Mail size={18} color="white" />}
+                >
+                  Email
+                </Button>
+              </XStack>
+            </YStack>
           </YStack>
         </View>
       </View>
@@ -106,15 +164,24 @@ export default function AgentDetailScreen() {
         defaultValue="tab-about"
         orientation="horizontal"
         flexDirection="column"
-        rounded="$4"
+        rounded="$6"
         borderWidth="$0.25"
         m="$2"
-        mt={0}
+        mt={2}
         overflow="hidden"
         borderColor="$borderColor"
         bg="$background"
       >
-        <Tabs.List disablePassBorderRadius="bottom" aria-label="Agent profile">
+        <Tabs.List
+          disablePassBorderRadius="bottom"
+          aria-label="Agent profile"
+          bg="$color2"
+          p="$1"
+          mx="$3"
+          my="$3"
+          rounded="$8"
+          gap="$1"
+        >
           <Tabs.Tab
             focusStyle={{
               backgroundColor: "$blue8",
@@ -123,10 +190,22 @@ export default function AgentDetailScreen() {
             value="tab-about"
             active={activeTab === "tab-about"}
             onPress={() => setActiveTab("tab-about")}
+            rounded="$7"
+            bg={activeTab === "tab-about" ? "$blue9" : "transparent"}
           >
-            <SizableText fontFamily="$body" text="center">
-              About
-            </SizableText>
+            <XStack gap="$2" items="center">
+              <Info
+                size={16}
+                color={activeTab === "tab-about" ? "white" : "$color10"}
+              />
+              <SizableText
+                fontFamily="$body"
+                text="center"
+                color={activeTab === "tab-about" ? "white" : "$color10"}
+              >
+                About
+              </SizableText>
+            </XStack>
           </Tabs.Tab>
           <Tabs.Tab
             focusStyle={{
@@ -136,49 +215,55 @@ export default function AgentDetailScreen() {
             flex={1}
             value="tab-listings"
             onPress={() => setActiveTab("tab-listings")}
+            rounded="$7"
+            bg={activeTab === "tab-listings" ? "$color10" : "transparent"}
           >
-            <SizableText fontFamily="$body" text="center">
-              Listings
-            </SizableText>
-          </Tabs.Tab>
-          <Tabs.Tab
-            focusStyle={{
-              backgroundColor: "$color3",
-            }}
-            active={activeTab === "tab-reviews"}
-            flex={1}
-            value="tab-reviews"
-            onPress={() => setActiveTab("tab-reviews")}
-          >
-            <SizableText fontFamily="$body" text="center">
-              Reviews
-            </SizableText>
+            <XStack gap="$2" items="center">
+              <LayoutGrid
+                size={16}
+                color={activeTab === "tab-listings" ? "white" : "$color10"}
+              />
+              <SizableText
+                fontFamily="$body"
+                text="center"
+                color={activeTab === "tab-listings" ? "white" : "$color10"}
+              >
+                Listings
+              </SizableText>
+            </XStack>
           </Tabs.Tab>
         </Tabs.List>
         <Separator />
         <Tabs.Content value="tab-about" p="$4">
           <H5>About</H5>
-          <Paragraph fontSize="$5" color="$color10">
-            {(agent as any)?.about ||
-              "This agent is committed to helping you find the right property and guiding you through the process."}
+          <Paragraph fontSize="$5" color="$color11">
+            {aboutText}
           </Paragraph>
-          <Separator my="$5" />
-          <H5>Opening hours</H5>
-          <YStack gap="$4" mt="$4">
-            <OpeningHours day="Monday" time="9:00 AM - 5:00 PM" />
-            <OpeningHours day="Tuesday" time="9:00 AM - 5:00 PM" />
-            <OpeningHours day="Friday" time="9:00 AM - 5:00 PM" />
-          </YStack>
+          {openingHours.length > 0 ? (
+            <>
+              <Separator my="$5" />
+              <H5>Opening hours</H5>
+              <YStack gap="$4" mt="$4">
+                {openingHours.map((item: any) => (
+                  <OpeningHours
+                    key={`${item.day}-${item.time}`}
+                    day={item.day}
+                    time={item.time}
+                  />
+                ))}
+              </YStack>
+            </>
+          ) : null}
         </Tabs.Content>
 
         <Tabs.Content value="tab-listings" p="$4">
           <H5>Listings</H5>
-          <Paragraph fontSize="$5" color="$color10">
+          <Paragraph fontSize="$5" color="$color11">
             Listings posted by this agent.
           </Paragraph>
           <YStack gap="$3" mt="$3">
             {listings.length === 0 ? (
-              <Text color="$color8">No listings yet.</Text>
+              <Text color="$color11">No listings yet.</Text>
             ) : (
               listings.map((listing) => (
                 <ListingCard key={listing.id} item={listing} />
@@ -187,115 +272,6 @@ export default function AgentDetailScreen() {
           </YStack>
         </Tabs.Content>
 
-        <Tabs.Content value="tab-reviews" p="$4">
-          <ScrollView showsVerticalScrollIndicator={false} height={400}>
-            <YStack maxW={deviceWidth}>
-              {/* Review card */}
-              <XStack gap="$4" my="$4">
-                <Avatar
-                  circular
-                  size="$6"
-                  borderColor="$yellow10"
-                  borderWidth={3}
-                  elevation="$2"
-                >
-                  <Avatar.Image src="https://images.unsplash.com/photo-1531384441138-2736e62e0919?&w=100&h=100&dpr=2&q=80" />
-                  <Avatar.Fallback delayMs={600} backgroundColor="$blue10" />
-                </Avatar>
-                <YStack gap="$2" width={deviceWidth - 120}>
-                  <H5>Bless Darah</H5>
-                  <Paragraph fontStyle="italic" flexWrap="wrap">
-                    I worked with him for a land purchase and his approach was
-                    very professional.
-                  </Paragraph>
-                  <XStack justify="space-between">
-                    <Text color="$color8">2 days ago</Text>
-                    <StartRating count={4} />
-                  </XStack>
-                </YStack>
-              </XStack>
-              {/* Review card */}
-
-              {/* Review card */}
-              <XStack gap="$4" my="$4">
-                <Avatar
-                  circular
-                  size="$6"
-                  borderColor="$yellow10"
-                  borderWidth={3}
-                  elevation="$2"
-                >
-                  <Avatar.Image src="https://images.unsplash.com/photo-1531384441138-2736e62e0919?&w=100&h=100&dpr=2&q=80" />
-                  <Avatar.Fallback delayMs={600} backgroundColor="$blue10" />
-                </Avatar>
-                <YStack gap="$2" width={deviceWidth - 120}>
-                  <H5>Raymond Snow</H5>
-                  <Paragraph fontStyle="italic" flexWrap="wrap">
-                    He is very professional and has a great approach to the job.
-                  </Paragraph>
-                  <XStack justify="space-between">
-                    <Text color="$color8">3 days ago</Text>
-                    <StartRating count={3} />
-                  </XStack>
-                </YStack>
-              </XStack>
-              {/* Review card */}
-              {/* Review card */}
-              <XStack gap="$4" my="$4">
-                <Avatar
-                  circular
-                  size="$6"
-                  borderColor="$yellow10"
-                  borderWidth={3}
-                  elevation="$2"
-                >
-                  <Avatar.Image src="https://images.unsplash.com/photo-1531384441138-2736e62e0919?&w=100&h=100&dpr=2&q=80" />
-                  <Avatar.Fallback delayMs={600} backgroundColor="$blue10" />
-                </Avatar>
-                <YStack gap="$2" width={deviceWidth - 120}>
-                  <H5>William Smith</H5>
-                  <Paragraph fontStyle="italic" flexWrap="wrap">
-                    He was so poor and I had to call him several times before
-                    getting support
-                  </Paragraph>
-                  <XStack justify="space-between">
-                    <Text color="$color8">1 week ago</Text>
-                    <StartRating count={1} />
-                  </XStack>
-                </YStack>
-              </XStack>
-              {/* Review card */}
-              {/* Review card */}
-              <XStack gap="$4" my="$4">
-                <Avatar
-                  circular
-                  size="$6"
-                  borderColor="$yellow10"
-                  borderWidth={3}
-                  elevation="$2"
-                >
-                  <Avatar.Image src="https://images.unsplash.com/photo-1531384441138-2736e62e0919?&w=100&h=100&dpr=2&q=80" />
-                  <Avatar.Fallback delayMs={600} backgroundColor="$blue10" />
-                </Avatar>
-                <YStack gap="$2" width={deviceWidth - 120}>
-                  <H5>Bless Darah</H5>
-                  <Paragraph fontStyle="italic" flexWrap="wrap">
-                    I worked with him for a land purchase and his approach was
-                    very professional.
-                  </Paragraph>
-                  <XStack justify="space-between">
-                    <Text color="$color8">2 days ago</Text>
-                    <StartRating count={4} />
-                  </XStack>
-                </YStack>
-              </XStack>
-              {/* Review card */}
-            </YStack>
-          </ScrollView>
-          <Button mx="$6" bg={"$blue9"} color="white" rounded="$5" size={"$5"}>
-            Write Review
-          </Button>
-        </Tabs.Content>
       </Tabs>
     </ScrollView>
   );
@@ -307,7 +283,7 @@ function OpeningHours({ day, time }: { day: string; time: string }) {
       <Text fontSize="$5" fontWeight="600">
         {day}
       </Text>
-      <Text fontSize="$3" color="$color8">
+      <Text fontSize="$3" color="$color11">
         {time}
       </Text>
     </XStack>
