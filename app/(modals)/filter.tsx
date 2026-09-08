@@ -1,7 +1,7 @@
 import { Pressable } from "react-native";
 import { Text, YStack, XStack, Button, Input, Separator } from "tamagui";
 import { useRouter, Stack } from "expo-router";
-import { ChevronRight } from "@tamagui/lucide-icons";
+import { ChevronRight } from "@tamagui/lucide-icons-2";
 import { useTranslation } from "../../lib/i18n/useTranslation";
 import { useState } from "react";
 

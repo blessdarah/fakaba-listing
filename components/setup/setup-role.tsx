@@ -1,4 +1,4 @@
-import { House, Coins, UserPlus, Briefcase } from "@tamagui/lucide-icons";
+import { House, Coins, UserPlus, Briefcase } from "@tamagui/lucide-icons-2";
 import {
   YStack,
   Text,

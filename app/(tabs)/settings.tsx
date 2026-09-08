@@ -26,7 +26,7 @@ import {
   Languages,
   ListChecks,
   MessageCircle,
-} from "@tamagui/lucide-icons";
+} from "@tamagui/lucide-icons-2";
 import { SafeAreaProvider } from "react-native-safe-area-context";
 
 export default function SettingsScreen() {

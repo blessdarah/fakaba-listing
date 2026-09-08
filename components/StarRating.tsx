@@ -1,4 +1,4 @@
-import { StarFull } from "@tamagui/lucide-icons";
+import { StarFull } from "@tamagui/lucide-icons-2";
 import { JSX } from "react";
 import { XStack } from "tamagui";
 

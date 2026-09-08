@@ -2,7 +2,7 @@ import { YStack, Text, ScrollView, View, Spinner, XStack } from "tamagui";
 import React from "react";
 import ListingCard from "components/ListingCard";
 import ScreenContainer from "components/ScreenContainer";
-import { Heart } from "@tamagui/lucide-icons";
+import { Heart } from "@tamagui/lucide-icons-2";
 import { RefreshControl } from "react-native";
 import { useListings } from "lib/query/useListings";
 import { useFavorites } from "lib/query/useFavorites";

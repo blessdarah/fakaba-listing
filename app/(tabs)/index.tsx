@@ -18,7 +18,7 @@ import { Slider } from "@tamagui/slider";
 import HomeCategories, { HOME_CATEGORIES } from "components/HomeCategories";
 import HorizontalListing from "components/HorizontalListing";
 import ListingCard from "components/ListingCard";
-import { Sliders, MapPin, Check, ChevronRight } from "@tamagui/lucide-icons";
+import { Sliders, MapPin, Check, ChevronRight } from "@tamagui/lucide-icons-2";
 import ScreenContainer from "components/ScreenContainer";
 import { useAuth } from "contexts/AuthContext";
 import { FlatList, RefreshControl } from "react-native";

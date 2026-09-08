@@ -10,7 +10,7 @@ import {
   Button,
   useTheme,
 } from "tamagui";
-import { Search, Sliders } from "@tamagui/lucide-icons";
+import { Search, Sliders } from "@tamagui/lucide-icons-2";
 import { FlatList, RefreshControl, Pressable } from "react-native";
 import ScreenContainer from "components/ScreenContainer";
 import ListingCard from "components/ListingCard";

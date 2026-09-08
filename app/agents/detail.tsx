@@ -1,4 +1,4 @@
-import { Mail, MapPin, MessageCircle, ChevronLeft } from "@tamagui/lucide-icons";
+import { Mail, MapPin, MessageCircle, ChevronLeft } from "@tamagui/lucide-icons-2";
 import ListingCard from "components/ListingCard";
 import { StartRating } from "components/StarRating";
 import React from "react";

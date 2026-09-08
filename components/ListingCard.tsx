@@ -1,5 +1,5 @@
 import { View, Text, YStack, XStack, Image, Card, Button } from "tamagui";
-import { Heart } from "@tamagui/lucide-icons";
+import { Heart } from "@tamagui/lucide-icons-2";
 import { Link } from "expo-router";
 import { Listing } from "lib/types";
 import { useToggleFavorite } from "lib/query/useFavorites";

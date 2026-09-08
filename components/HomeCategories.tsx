@@ -1,5 +1,5 @@
 import { ScrollView, Text, View, YStack, styled, useTheme } from "tamagui";
-import { Home, Building, Palmtree, Hotel, Castle } from "@tamagui/lucide-icons";
+import { Home, Building, Palmtree, Hotel, Castle } from "@tamagui/lucide-icons-2";
 
 export const HOME_CATEGORIES = [
   { id: "Room", name: "Rooms", slug: "rooms", icon: Home },

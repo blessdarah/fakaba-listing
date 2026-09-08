@@ -5,7 +5,7 @@ import {
   Warehouse,
   Hotel,
   CheckCircle,
-} from "@tamagui/lucide-icons";
+} from "@tamagui/lucide-icons-2";
 import { YStack, Text, Circle, XStack, Paragraph, View, H4 } from "tamagui";
 import { TouchableOpacity } from "react-native";
 

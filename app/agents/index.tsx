@@ -1,4 +1,4 @@
-import { ChevronRight, MapPin, Search, Users, ChevronLeft } from "@tamagui/lucide-icons";
+import { ChevronRight, MapPin, Search, Users, ChevronLeft } from "@tamagui/lucide-icons-2";
 import { StartRating } from "components/StarRating";
 import { Link } from "expo-router";
 import { Image, ScrollView, Pressable } from "react-native";

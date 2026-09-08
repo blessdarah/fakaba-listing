@@ -2,7 +2,7 @@ import { YStack, H1, Text, XStack, View } from "tamagui";
 import { Pressable, StatusBar, useColorScheme } from "react-native";
 import { Image, ScrollView } from "react-native";
 import { Link } from "expo-router";
-import { ChevronRight, Sparkles } from "@tamagui/lucide-icons";
+import { ChevronRight, Sparkles } from "@tamagui/lucide-icons-2";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 const SERVICES = [

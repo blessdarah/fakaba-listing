@@ -12,7 +12,7 @@ import {
   MessageCircle,
   PenSquare,
   Star,
-} from "@tamagui/lucide-icons";
+} from "@tamagui/lucide-icons-2";
 import { useAuth } from "contexts/AuthContext";
 import { useTranslation } from "lib/i18n/useTranslation";
 

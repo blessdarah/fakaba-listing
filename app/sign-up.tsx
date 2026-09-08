@@ -14,7 +14,7 @@ import {
 import { useAuth } from "../contexts/AuthContext";
 import { router } from "expo-router";
 import { Alert, Dimensions, Pressable } from "react-native";
-import { Mail, Key, LogIn } from "@tamagui/lucide-icons";
+import { Mail, Key, LogIn } from "@tamagui/lucide-icons-2";
 
 const { width, height } = Dimensions.get("window");
 

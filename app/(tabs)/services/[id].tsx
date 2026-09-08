@@ -15,7 +15,7 @@ import {
   ChevronUp,
   Phone,
   ChevronLeft,
-} from "@tamagui/lucide-icons";
+} from "@tamagui/lucide-icons-2";
 import { useState } from "react";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 

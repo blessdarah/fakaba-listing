@@ -1,4 +1,4 @@
-import { Search, Sliders } from "@tamagui/lucide-icons";
+import { Search, Sliders } from "@tamagui/lucide-icons-2";
 import {
   Button,
   Sheet,

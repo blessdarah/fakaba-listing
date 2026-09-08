@@ -1,4 +1,4 @@
-import { Container } from "@tamagui/lucide-icons";
+import { Container } from "@tamagui/lucide-icons-2";
 import { Stack, useLocalSearchParams } from "expo-router";
 import { useListings } from "lib/query";
 import { Card, H2, H3, Paragraph } from "tamagui";

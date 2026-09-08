@@ -6,7 +6,7 @@ import {
   MapPinHouse,
   Briefcase,
   Settings,
-} from "@tamagui/lucide-icons";
+} from "@tamagui/lucide-icons-2";
 import { useTranslation } from "lib/i18n/useTranslation";
 
 export const unstable_settings = {

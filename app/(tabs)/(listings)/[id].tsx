@@ -22,7 +22,7 @@ import {
   BedDouble,
   Bath,
   Ruler,
-} from "@tamagui/lucide-icons";
+} from "@tamagui/lucide-icons-2";
 import {
   Dimensions,
   NativeScrollEvent,

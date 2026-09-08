@@ -2,7 +2,7 @@ import { View, Text, XStack, YStack, ScrollView, Spinner } from "tamagui";
 import { Link } from "expo-router";
 import ListingCard from "./ListingCard";
 import { Listing } from "lib/types";
-import { AlertCircle } from "@tamagui/lucide-icons";
+import { AlertCircle } from "@tamagui/lucide-icons-2";
 import { useTranslation } from "lib/i18n/useTranslation";
 
 type HorizontalListingProps = {

@@ -7,7 +7,7 @@ import { SetupRole } from "components/setup/setup-role";
 import { SetupLocation } from "components/setup/setup-location";
 import { SetupProfile } from "components/setup/setup-profile";
 import { SetupInterests } from "components/setup/setup-interests";
-import { ArrowLeft, ArrowRight, CheckCircle } from "@tamagui/lucide-icons";
+import { ArrowLeft, ArrowRight, CheckCircle } from "@tamagui/lucide-icons-2";
 import { useAuth } from "../contexts/AuthContext";
 import { router } from "expo-router";
 
