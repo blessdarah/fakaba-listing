@@ -54,6 +54,14 @@
     "commercial": "Commercial",
     "land": "Terrain"
   },
+  "search": {
+    "title": "Recherche",
+    "placeholder": "Rechercher par nom, lieu...",
+    "resultsCount": "{{count}} résultats",
+    "noResults": "Aucune annonce trouvée",
+    "noResultsHint": "Essayez d'ajuster votre recherche ou vos filtres",
+    "filterCount": "{{count}} filtres actifs"
+  },
   "filter": {
     "title": "Filtres",
     "propertyType": "Type de Propriété",
@@ -64,7 +72,11 @@
     "category": "Catégorie",
     "location": "Localisation",
     "price": "Prix",
-    "type": "Type"
+    "priceRange": "Fourchette de prix",
+    "type": "Type",
+    "townCity": "Ville",
+    "reset": "Réinitialiser",
+    "apply": "Appliquer les filtres"
   },
   "auth": {
     "signIn": "Se Connecter",
@@ -100,7 +112,18 @@
     "theme": "Thème",
     "notifications": "Notifications",
     "privacy": "Confidentialité",
-    "support": "Support"
+    "support": "Support",
+    "personalInfo": "Informations personnelles",
+    "preferences": "Préférences",
+    "listingsActivity": "Annonces & Activité",
+    "accountSecurity": "Compte & Sécurité",
+    "resetPassword": "Réinitialiser le mot de passe",
+    "resetPasswordSent": "Nous avons envoyé un lien de réinitialisation à votre adresse e-mail.",
+    "resetPasswordNoEmail": "Aucun e-mail trouvé pour ce compte.",
+    "resetPasswordFailed": "Impossible d'envoyer l'e-mail de réinitialisation.",
+    "themeDescription": "Le thème suit les paramètres de votre appareil.",
+    "memberSince": "Membre depuis",
+    "appVersion": "Fakaba v1.0.0"
   },
   "profile": {
     "title": "Paramètres du profil",
@@ -133,7 +156,10 @@
     "lastActive": "Dernière activité",
     "profileStrengthTitle": "Complétez votre profil",
     "profileStrengthDescription": "Ajoutez davantage de détails pour inspirer confiance aux hôtes et voyageurs.",
-    "updateProfile": "Mettre à jour le profil"
+    "updateProfile": "Mettre à jour le profil",
+    "photoUpdated": "Photo de profil mise à jour",
+    "photoUpdateFailed": "Échec de la mise à jour de la photo de profil",
+    "photoPermissionDenied": "L'accès à la bibliothèque photo est nécessaire pour changer votre photo de profil"
   },
   "errors": {
     "authRequired": "Authentification Requise",
@@ -152,5 +178,80 @@
     "viewDetails": "Voir les Détails",
     "addToFavorites": "Ajouter aux Favoris",
     "removeFromFavorites": "Retirer des Favoris"
+  },
+  "agent": {
+    "becomeAgent": "Devenir agent",
+    "becomeAgentDescription": "Commencez à publier et gérer des propriétés sur Fakaba",
+    "becomeAgentButton": "Devenir agent",
+    "becomeAgentSuccess": "Vous êtes maintenant agent !",
+    "becomeAgentError": "Impossible de mettre à jour votre compte. Veuillez réessayer."
+  },
+  "myListings": {
+    "title": "Vos annonces",
+    "empty": "Vous n'avez pas encore créé d'annonces.",
+    "createFirst": "Créez votre première annonce",
+    "active": "Active",
+    "inactive": "Inactive",
+    "unpublish": "Dépublier",
+    "publish": "Publier",
+    "deleteListing": "Supprimer l'annonce",
+    "deleteConfirmTitle": "Supprimer l'annonce",
+    "deleteConfirmMessage": "Cette action supprimera définitivement cette annonce. Elle ne peut pas être annulée.",
+    "unpublishSuccess": "Annonce dépubliée",
+    "publishSuccess": "Annonce publiée",
+    "deleteSuccess": "Annonce supprimée",
+    "statusError": "Impossible de mettre à jour le statut de l'annonce.",
+    "deleteError": "Impossible de supprimer l'annonce."
+  },
+  "changePassword": {
+    "title": "Changer le mot de passe",
+    "currentPassword": "Mot de passe actuel",
+    "newPassword": "Nouveau mot de passe",
+    "confirmPassword": "Confirmer le nouveau mot de passe",
+    "currentPasswordPlaceholder": "Entrez le mot de passe actuel",
+    "newPasswordPlaceholder": "Entrez le nouveau mot de passe",
+    "confirmPasswordPlaceholder": "Confirmez le nouveau mot de passe",
+    "submit": "Changer le mot de passe",
+    "changing": "Modification...",
+    "confirmTitle": "Changer le mot de passe",
+    "confirmMessage": "Êtes-vous sûr de vouloir changer votre mot de passe ? Vous serez déconnecté.",
+    "success": "Mot de passe modifié avec succès",
+    "errorCurrentRequired": "Le mot de passe actuel est requis.",
+    "errorNewRequired": "Le nouveau mot de passe est requis.",
+    "errorConfirmRequired": "Veuillez confirmer votre nouveau mot de passe.",
+    "errorWrongPassword": "Le mot de passe actuel est incorrect.",
+    "errorMismatch": "Les mots de passe ne correspondent pas.",
+    "errorTooShort": "Le mot de passe doit contenir au moins 6 caractères.",
+    "errorGeneric": "Impossible de changer le mot de passe. Veuillez réessayer."
+  },
+  "createListing": {
+    "title": "Créer une annonce",
+    "photos": "Photos",
+    "addPhoto": "Ajouter une photo",
+    "photosLimit": "10 photos max",
+    "basicInfo": "Informations de base",
+    "titleLabel": "Titre",
+    "titlePlaceholder": "ex. Appartement moderne 2 chambres",
+    "descriptionLabel": "Description",
+    "descriptionPlaceholder": "Décrivez la propriété...",
+    "categoryLabel": "Catégorie",
+    "typeLabel": "Type",
+    "locationSection": "Localisation",
+    "townLabel": "Ville",
+    "addressLabel": "Adresse",
+    "addressPlaceholder": "ex. Mile 17, Buea",
+    "propertyDetails": "Détails de la propriété",
+    "priceLabel": "Prix (FCFA)",
+    "pricePlaceholder": "ex. 50000",
+    "bedroomsLabel": "Chambres",
+    "bathroomsLabel": "Salles de bain",
+    "sizeLabel": "Superficie (m²)",
+    "featuresSection": "Caractéristiques",
+    "featurePlaceholder": "ex. Parking, Sécurité...",
+    "addFeature": "Ajouter",
+    "submit": "Publier l'annonce",
+    "publishing": "Publication...",
+    "success": "Annonce publiée avec succès !",
+    "error": "Échec de la publication. Veuillez réessayer."
   }
 }

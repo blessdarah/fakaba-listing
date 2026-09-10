@@ -15,39 +15,94 @@ import {
 import { LinearGradient } from "@tamagui/linear-gradient";
 import { useAuth } from "../contexts/AuthContext";
 import { router } from "expo-router";
-import { Alert, Dimensions, Pressable } from "react-native";
+import { Dimensions, KeyboardAvoidingView, Platform, Pressable } from "react-native";
 import { Mail, Lock, LogIn } from "@tamagui/lucide-icons-2";
+import { useToastController } from "@tamagui/toast";
 
 const { width, height } = Dimensions.get("window");
 
+const isValidEmail = (value: string) =>
+  /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value);
+
+type FieldErrors = {
+  email?: string;
+  password?: string;
+};
+
 export default function SignIn() {
-  const { signInWithEmail } = useAuth();
+  const { signInWithEmail, signInWithGoogle } = useAuth();
+  const toast = useToastController();
   const [loading] = useState(false);
   const [emailLoading, setEmailLoading] = useState(false);
+  const [googleLoading, setGoogleLoading] = useState(false);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [errors, setErrors] = useState<FieldErrors>({});
+
+  const validate = (): boolean => {
+    const next: FieldErrors = {};
+
+    if (!email.trim()) {
+      next.email = "Email is required.";
+    } else if (!isValidEmail(email.trim())) {
+      next.email = "Enter a valid email address.";
+    }
+
+    if (!password) {
+      next.password = "Password is required.";
+    } else if (password.length < 6) {
+      next.password = "Password must be at least 6 characters.";
+    }
+
+    setErrors(next);
+    return Object.keys(next).length === 0;
+  };
 
   const handleEmailSignIn = async () => {
-    if (!email || !password) {
-      Alert.alert("Error", "Please enter both email and password");
-      return;
-    }
+    if (!validate()) return;
 
     try {
       setEmailLoading(true);
-      await signInWithEmail(email, password);
+      await signInWithEmail(email.trim(), password);
     } catch (error: any) {
       console.error("Email sign in error:", error);
-      let errorMessage = "Failed to sign in. Please try again.";
+      let errorMessage = "Invalid email or password.";
 
-      Alert.alert("Sign In Error", errorMessage);
+      switch (error?.code) {
+        case "auth/too-many-requests":
+          errorMessage = "Too many failed attempts. Please try again later.";
+          break;
+        case "auth/network-request-failed":
+          errorMessage = "Network error. Please check your connection.";
+          break;
+      }
+
+      toast.show("Invalid credentials", { message: errorMessage });
     } finally {
       setEmailLoading(false);
     }
   };
 
+  const handleGoogleSignIn = async () => {
+    try {
+      setGoogleLoading(true);
+      await signInWithGoogle();
+    } catch (error: any) {
+      console.error("Google sign in error:", error);
+      toast.show("Google Sign In Failed", {
+        message: "Could not sign in with Google. Please try again.",
+      });
+    } finally {
+      setGoogleLoading(false);
+    }
+  };
+
   return (
-    <ScrollView
+    <KeyboardAvoidingView
+      style={{ flex: 1 }}
+      behavior={Platform.OS === "ios" ? "padding" : undefined}
+    >
+      <ScrollView
       flex={1}
       width={width}
       bg="$background"
@@ -112,60 +167,76 @@ export default function SignIn() {
 
             <YStack gap="$3" pt="$2">
               <YStack gap="$1">
-                <Label htmlFor="email" fontSize={14} fontWeight="600">
+                <Label htmlFor="signin-email" fontSize={14} fontWeight="600">
                   Email
                 </Label>
                 <XStack
                   borderWidth={1}
-                  borderColor="$borderColor"
+                  borderColor={errors.email ? "$red10" : "$borderColor"}
                   rounded="$6"
                   items="center"
                   px="$3"
                 >
-                  <Mail size={20} />
+                  <Mail size={20} color={errors.email ? "$red10" : undefined} />
                   <Input
-                    id="email"
+                    id="signin-email"
                     flex={1}
                     size={"$5"}
                     bg="transparent"
                     borderWidth={0}
                     placeholder="Enter your email"
                     value={email}
-                    onChangeText={setEmail}
+                    onChangeText={(v) => {
+                      setEmail(v);
+                      if (errors.email) setErrors((e) => ({ ...e, email: undefined }));
+                    }}
                     keyboardType="email-address"
                     autoCapitalize="none"
                     autoComplete="email"
                   />
                 </XStack>
+                {errors.email ? (
+                  <Text color="$red10" fontSize={12} pl="$1" pt="$1">
+                    {errors.email}
+                  </Text>
+                ) : null}
               </YStack>
 
               <YStack gap="$1">
-                <Label htmlFor="password" fontSize={14} fontWeight="600">
+                <Label htmlFor="signin-password" fontSize={14} fontWeight="600">
                   Password
                 </Label>
                 <XStack
                   borderWidth={1}
-                  borderColor="$borderColor"
+                  borderColor={errors.password ? "$red10" : "$borderColor"}
                   bg="$background"
                   rounded="$6"
                   items="center"
                   px="$3"
-                  // height={50}
                 >
-                  <Lock size={20} color="gray" />
+                  <Lock size={20} color={errors.password ? "$red10" : "gray"} />
                   <Input
-                    id="password"
+                    id="signin-password"
                     size={"$5"}
                     flex={1}
                     bg="$colorTransparent"
                     borderWidth={0}
                     placeholder="Enter your password"
                     value={password}
-                    onChangeText={setPassword}
+                    onChangeText={(v) => {
+                      setPassword(v);
+                      if (errors.password) setErrors((e) => ({ ...e, password: undefined }));
+                    }}
                     secureTextEntry
                     autoCapitalize="none"
+                    autoComplete="current-password"
                   />
                 </XStack>
+                {errors.password ? (
+                  <Text color="$red10" fontSize={12} pl="$1" pt="$1">
+                    {errors.password}
+                  </Text>
+                ) : null}
               </YStack>
             </YStack>
           </YStack>
@@ -174,7 +245,7 @@ export default function SignIn() {
             <Button
               size="$5"
               onPress={handleEmailSignIn}
-              disabled={emailLoading || loading}
+              disabled={emailLoading || loading || googleLoading}
               bg="$blue10"
               rounded="$6"
               height={56}
@@ -194,6 +265,32 @@ export default function SignIn() {
               <Button.Icon>
                 <LogIn size={20} />
               </Button.Icon>
+            </Button>
+
+            {/* Divider */}
+            <XStack items="center" gap="$3" py="$1">
+              <XStack flex={1} height={1} bg="$borderColor" />
+              <Text fontSize={13} color="$color8">
+                or
+              </Text>
+              <XStack flex={1} height={1} bg="$borderColor" />
+            </XStack>
+
+            {/* Google sign-in */}
+            <Button
+              size="$5"
+              onPress={handleGoogleSignIn}
+              disabled={emailLoading || loading || googleLoading}
+              bg="$background"
+              borderWidth={1}
+              borderColor="$borderColor"
+              rounded="$6"
+              height={56}
+              icon={googleLoading ? <Spinner color="$color" /> : undefined}
+            >
+              <Button.Text fontSize="$4" fontWeight="600" color="$color">
+                {googleLoading ? "Signing in..." : "Continue with Google"}
+              </Button.Text>
             </Button>
 
             <XStack justify="center" items="center" gap="$2" pt="$2">
@@ -230,6 +327,7 @@ export default function SignIn() {
           </YStack>
         </YStack>
       </YStack>
-    </ScrollView>
+      </ScrollView>
+    </KeyboardAvoidingView>
   );
 }

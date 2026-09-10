@@ -4,6 +4,8 @@ import { Link } from "expo-router";
 import { Listing } from "lib/types";
 import { useToggleFavorite } from "lib/query/useFavorites";
 import { formatRelativeTime } from "lib/utils";
+import { useRef } from "react";
+import { Animated } from "react-native";
 
 type ListingCardProps = {
   item: Listing;
@@ -12,11 +14,27 @@ type ListingCardProps = {
 const ListingCard = ({ item }: ListingCardProps) => {
   const { toggleFavorite, isFavorited } = useToggleFavorite();
   const liked = isFavorited(item.id);
+  const scaleAnim = useRef(new Animated.Value(1)).current;
 
   const handleToggleFavorite = (e: any) => {
     e.preventDefault();
     e.stopPropagation();
     toggleFavorite(item.id);
+
+    Animated.sequence([
+      Animated.spring(scaleAnim, {
+        toValue: 1.4,
+        useNativeDriver: true,
+        speed: 50,
+        bounciness: 12,
+      }),
+      Animated.spring(scaleAnim, {
+        toValue: 1,
+        useNativeDriver: true,
+        speed: 30,
+        bounciness: 8,
+      }),
+    ]).start();
   };
 
   return (
@@ -68,20 +86,22 @@ const ListingCard = ({ item }: ListingCardProps) => {
             <XStack
               style={{ position: "absolute", top: 12, right: 2, zIndex: 10 }}
             >
-              <Button
-                size="$3"
-                circular
-                icon={
-                  <Heart
-                    size={20}
-                    color={liked ? "red" : "white"}
-                    fill={liked ? "red" : "transparent"}
-                  />
-                }
-                chromeless
-                unstyled
-                onPress={handleToggleFavorite}
-              />
+              <Animated.View style={{ transform: [{ scale: scaleAnim }] }}>
+                <Button
+                  size="$3"
+                  circular
+                  icon={
+                    <Heart
+                      size={20}
+                      color={liked ? "red" : "white"}
+                      fill={liked ? "red" : "transparent"}
+                    />
+                  }
+                  chromeless
+                  unstyled
+                  onPress={handleToggleFavorite}
+                />
+              </Animated.View>
             </XStack>
           </View>
         </Card.Header>

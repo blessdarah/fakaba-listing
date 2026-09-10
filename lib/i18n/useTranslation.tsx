@@ -1,6 +1,9 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { translate, setLocale, getCurrentLocale, getAvailableLocales } from './index';
 import * as Localization from 'expo-localization';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+
+const LOCALE_STORAGE_KEY = '@fakaba_locale';
 
 interface TranslationContextType {
   t: (key: string, options?: any) => string;
@@ -16,17 +19,25 @@ export const TranslationProvider: React.FC<{ children: React.ReactNode }> = ({ c
   const availableLocales = getAvailableLocales();
 
   useEffect(() => {
-    // Set initial locale based on device settings
-    const deviceLocale = Localization.getLocales()[0]?.languageCode ?? 'en';
-    if (availableLocales.includes(deviceLocale)) {
-      changeLocale(deviceLocale);
-    }
+    AsyncStorage.getItem(LOCALE_STORAGE_KEY).then((stored) => {
+      if (stored && availableLocales.includes(stored)) {
+        setLocale(stored);
+        setCurrentLocale(stored);
+      } else {
+        const deviceLocale = Localization.getLocales()[0]?.languageCode ?? 'en';
+        if (availableLocales.includes(deviceLocale)) {
+          setLocale(deviceLocale);
+          setCurrentLocale(deviceLocale);
+        }
+      }
+    });
   }, []);
 
   const changeLocale = (newLocale: string) => {
     if (availableLocales.includes(newLocale)) {
       setLocale(newLocale);
       setCurrentLocale(newLocale);
+      AsyncStorage.setItem(LOCALE_STORAGE_KEY, newLocale);
     }
   };
 

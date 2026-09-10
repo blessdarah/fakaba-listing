@@ -1,5 +1,14 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { getListings, getListing, getListingByUserId } from '../firestore/listings';
+import {
+  getListings,
+  getListing,
+  getListingByUserId,
+  getMyListings,
+  uploadListingImages,
+  createListing,
+  updateListingStatus,
+  deleteListing,
+} from '../firestore/listings';
 import { Listing } from '../types';
 
 // Query keys for cache management
@@ -70,4 +79,72 @@ export function usePrefetchListing() {
       queryFn: () => getListing(id),
     });
   };
+}
+
+/**
+ * Hook to fetch all listings owned by the current user (all statuses)
+ */
+export function useMyListings(userId: string) {
+  return useQuery({
+    queryKey: listingsKeys.byUser(userId),
+    queryFn: () => getMyListings(userId),
+    enabled: !!userId,
+    staleTime: 5 * 60 * 1000,
+  });
+}
+
+/**
+ * Hook to create a new listing with image upload
+ */
+export function useCreateListing(userId: string) {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async ({
+      formData,
+      imageUris,
+    }: {
+      formData: Omit<Listing, 'id' | 'createdAt' | 'updatedAt' | 'owner' | 'imageUrls'>;
+      imageUris: string[];
+    }) => {
+      const imageUrls = await uploadListingImages(userId, imageUris);
+      return createListing({ ...formData, imageUrls });
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: listingsKeys.lists() });
+      queryClient.invalidateQueries({ queryKey: listingsKeys.byUser(userId) });
+    },
+  });
+}
+
+/**
+ * Hook to update a listing's status (publish/unpublish)
+ */
+export function useUpdateListingStatus(userId: string) {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: ({ id, status }: { id: string; status: 'active' | 'inactive' }) =>
+      updateListingStatus(id, status),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: listingsKeys.lists() });
+      queryClient.invalidateQueries({ queryKey: listingsKeys.byUser(userId) });
+      queryClient.invalidateQueries({ queryKey: listingsKeys.details() });
+    },
+  });
+}
+
+/**
+ * Hook to permanently delete a listing
+ */
+export function useDeleteListing(userId: string) {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (id: string) => deleteListing(id),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: listingsKeys.lists() });
+      queryClient.invalidateQueries({ queryKey: listingsKeys.byUser(userId) });
+    },
+  });
 }

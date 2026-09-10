@@ -1,17 +1,19 @@
-import { YStack, Text, ScrollView, View, Spinner, XStack } from "tamagui";
+import { YStack, Text, View, Spinner, Button } from "tamagui";
 import React from "react";
-import ListingCard from "components/ListingCard";
-import ScreenContainer from "components/ScreenContainer";
-import { Heart } from "@tamagui/lucide-icons-2";
-import { RefreshControl } from "react-native";
+import ListingCardCompact from "components/ListingCardCompact";
+import { Heart, Search } from "@tamagui/lucide-icons-2";
+import { FlatList, RefreshControl } from "react-native";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { useRouter } from "expo-router";
 import { useListings } from "lib/query/useListings";
 import { useFavorites } from "lib/query/useFavorites";
 
 export default function FavoritesScreen() {
-  // Use TanStack Query hooks
+  const router = useRouter();
+  const insets = useSafeAreaInsets();
   const {
     data: listings = [],
-    isLoading: loading,
+    isLoading,
     refetch: refetchListings,
   } = useListings();
   const { data: userFavorites = [], refetch: refetchFavorites } =
@@ -26,84 +28,68 @@ export default function FavoritesScreen() {
     userFavorites.includes(listing.id)
   );
 
-  if (loading) {
-    return (
-      <ScrollView
-        showsVerticalScrollIndicator={false}
-        flex={1}
-        refreshControl={
-          <RefreshControl
-            refreshing={loading}
-            onRefresh={handleRefresh}
-            tintColor="$blue8"
-          />
-        }
-      >
-        <ScreenContainer>
-          <YStack flex={1} justify="center" items="center" py="$10">
-            <Spinner size="large" color="$blue8" />
-            <Text fontSize="$4" color="gray" mt="$3">
-              Loading your favorites...
-            </Text>
-          </YStack>
-        </ScreenContainer>
-      </ScrollView>
-    );
-  }
-
-  if (favoriteListings.length === 0) {
-    return (
-      <ScrollView
-        showsVerticalScrollIndicator={false}
-        flex={1}
-        refreshControl={
-          <RefreshControl
-            refreshing={loading}
-            onRefresh={handleRefresh}
-            tintColor="$blue8"
-          />
-        }
-      >
-        <ScreenContainer>
-          <YStack flex={1} justify="center" items="center" py="$10" gap="$3">
-            <Heart size={64} color="gray" />
-            <Text fontSize="$6" fontWeight="bold" color="black">
-              No Favorites Yet
-            </Text>
-            <Text fontSize="$4" color="gray" text="center" px="$4">
-              Start adding listings to your favorites to see them here
-            </Text>
-          </YStack>
-        </ScreenContainer>
-      </ScrollView>
-    );
-  }
-
   return (
-    <ScrollView
-      showsVerticalScrollIndicator={false}
-      flex={1}
-      background="$background"
-      refreshControl={
-        <RefreshControl
-          refreshing={loading}
-          onRefresh={handleRefresh}
-          tintColor="$blue8"
-        />
-      }
-    >
-      <ScreenContainer>
-        <YStack gap="$3" py="$3">
-          <Text fontSize="$6" fontWeight="bold" mb="$2">
-            Your Favorites ({favoriteListings.length})
-          </Text>
-          {favoriteListings.map((listing) => (
-            <View key={listing.id} width="100%">
-              <ListingCard item={listing} />
-            </View>
-          ))}
+    <YStack flex={1} bg="$background">
+      {/* Header */}
+      <YStack
+        pt={insets.top + 8}
+        pb="$3"
+        px="$4"
+        bg="$background"
+        borderBottomWidth={1}
+        borderBottomColor="$borderColor"
+      >
+        <Text fontSize="$6" fontWeight="700">
+          Favorites{favoriteListings.length > 0 ? ` (${favoriteListings.length})` : ""}
+        </Text>
+      </YStack>
+
+      {isLoading ? (
+        <YStack flex={1} items="center" justify="center">
+          <Spinner size="large" color="$blue9" />
         </YStack>
-      </ScreenContainer>
-    </ScrollView>
+      ) : (
+        <FlatList
+          data={favoriteListings}
+          keyExtractor={(item) => item.id}
+          showsVerticalScrollIndicator={false}
+          contentContainerStyle={{
+            padding: 16,
+            paddingBottom: insets.bottom + 40,
+          }}
+          ItemSeparatorComponent={() => <View height={12} />}
+          renderItem={({ item }) => <ListingCardCompact item={item} />}
+          refreshControl={
+            <RefreshControl
+              refreshing={isLoading}
+              onRefresh={handleRefresh}
+            />
+          }
+          ListEmptyComponent={
+            <YStack items="center" py="$10" gap="$3">
+              <Heart size={48} color="$color8" />
+              <Text fontSize="$5" fontWeight="600" color="$color">
+                No Favorites Yet
+              </Text>
+              <Text color="$color8" fontSize="$3" text="center" px="$6">
+                Start adding listings to your favorites to see them here
+              </Text>
+              <Button
+                size="$4"
+                bg="$blue9"
+                rounded="$4"
+                mt="$2"
+                icon={<Search size={16} color="white" />}
+                onPress={() => router.push("/(tabs)/search")}
+              >
+                <Button.Text fontWeight="600" color="white">
+                  Browse Listings
+                </Button.Text>
+              </Button>
+            </YStack>
+          }
+        />
+      )}
+    </YStack>
   );
 }

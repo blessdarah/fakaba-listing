@@ -3,11 +3,16 @@ import {
   getDoc,
   collection,
   getDocs,
+  addDoc,
+  updateDoc,
+  deleteDoc,
   query,
   where,
   limit,
+  serverTimestamp,
 } from "firebase/firestore";
-import { db } from "../../firebase.config.js";
+import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
+import { db, storage } from "../../firebase.config.js";
 import { Listing, User } from "lib/types.js";
 
 export const getListings = async (): Promise<Listing[]> => {
@@ -129,5 +134,108 @@ export const getListingByUserId = async (id: string) => {
     }
 
     throw new Error("Failed to load listing. Please try again.");
+  }
+};
+
+export const getMyListings = async (ownerId: string): Promise<Listing[]> => {
+  try {
+    const q = query(
+      collection(db, "properties"),
+      where("ownerId", "==", ownerId)
+    );
+    const snapshot = await getDocs(q);
+
+    return snapshot.docs.map((d) => ({
+      id: d.id,
+      ...(d.data() as Omit<Listing, "id">),
+    }));
+  } catch (error: any) {
+    console.error("Error fetching my listings:", error);
+    throw new Error("Failed to load your listings. Please try again.");
+  }
+};
+
+export const uploadListingImages = async (
+  ownerId: string,
+  imageUris: string[]
+): Promise<string[]> => {
+  const timestamp = Date.now();
+  const urls: string[] = [];
+
+  for (let i = 0; i < imageUris.length; i++) {
+    const response = await fetch(imageUris[i]);
+    const blob = await response.blob();
+    const storageRef = ref(storage, `listings/${ownerId}/${timestamp}_${i}`);
+    await uploadBytes(storageRef, blob);
+    const downloadURL = await getDownloadURL(storageRef);
+    urls.push(downloadURL);
+  }
+
+  return urls;
+};
+
+export const createListing = async (
+  data: Omit<Listing, "id" | "createdAt" | "updatedAt" | "owner">
+): Promise<Listing> => {
+  try {
+    const docRef = await addDoc(collection(db, "properties"), {
+      ...data,
+      status: "active",
+      isPublic: true,
+      createdAt: serverTimestamp(),
+      updatedAt: serverTimestamp(),
+    });
+
+    return {
+      id: docRef.id,
+      ...data,
+      createdAt: null as any,
+      updatedAt: null as any,
+    };
+  } catch (error: any) {
+    console.error("Error creating listing:", error);
+
+    if (error.code === "permission-denied") {
+      throw new Error("Permission denied: Please sign in to create a listing.");
+    }
+
+    throw new Error("Failed to create listing. Please try again.");
+  }
+};
+
+export const updateListingStatus = async (
+  id: string,
+  status: "active" | "inactive"
+): Promise<void> => {
+  try {
+    const listingRef = doc(db, "properties", id);
+    await updateDoc(listingRef, {
+      status,
+      isPublic: status === "active",
+      updatedAt: serverTimestamp(),
+    });
+  } catch (error: any) {
+    console.error("Error updating listing status:", error);
+
+    if (error.code === "permission-denied") {
+      throw new Error("Permission denied: Unable to update this listing.");
+    }
+
+    throw new Error("Failed to update listing. Please try again.");
+  }
+};
+
+export const deleteListing = async (id: string): Promise<void> => {
+  try {
+    const listingRef = doc(db, "properties", id);
+    await deleteDoc(listingRef);
+  } catch (error: any) {
+    console.error("Error deleting listing:", error);
+
+    if (error.code === "permission-denied") {
+      throw new Error("Permission denied: Unable to delete this listing.");
+    }
+
+    throw new Error("Failed to delete listing. Please try again.");
   }
 };

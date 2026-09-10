@@ -13,7 +13,7 @@
       "backgroundColor": "#ffffff",
       "dark": {
         "image": "./assets/images/splash-dark.png",
-        "backgroundColor": "#000000"
+        "backgroundColor": "#0F172A"
       }
     },
     "assetBundlePatterns": [

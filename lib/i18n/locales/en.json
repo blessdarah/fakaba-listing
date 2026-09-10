@@ -54,6 +54,14 @@
     "commercial": "Commercial",
     "land": "Land"
   },
+  "search": {
+    "title": "Search",
+    "placeholder": "Search by name, location...",
+    "resultsCount": "{{count}} results",
+    "noResults": "No listings found",
+    "noResultsHint": "Try adjusting your search or filters",
+    "filterCount": "{{count}} filters active"
+  },
   "filter": {
     "title": "Filters",
     "propertyType": "Property Type",
@@ -64,7 +72,11 @@
     "category": "Category",
     "location": "Location",
     "price": "Price",
-    "type": "Type"
+    "priceRange": "Price Range",
+    "type": "Type",
+    "townCity": "Town / City",
+    "reset": "Reset",
+    "apply": "Apply Filters"
   },
   "auth": {
     "signIn": "Sign In",
@@ -100,7 +112,18 @@
     "theme": "Theme",
     "notifications": "Notifications",
     "privacy": "Privacy",
-    "support": "Support"
+    "support": "Support",
+    "personalInfo": "Personal Information",
+    "preferences": "Preferences",
+    "listingsActivity": "Listings & Activity",
+    "accountSecurity": "Account & Security",
+    "resetPassword": "Reset Password",
+    "resetPasswordSent": "We sent a password reset link to your email.",
+    "resetPasswordNoEmail": "No email found for this account.",
+    "resetPasswordFailed": "Unable to send reset email.",
+    "themeDescription": "Theme follows your device settings.",
+    "memberSince": "Member Since",
+    "appVersion": "Fakaba v1.0.0"
   },
   "profile": {
     "title": "Profile Settings",
@@ -133,7 +156,10 @@
     "lastActive": "Last active",
     "profileStrengthTitle": "Complete your profile",
     "profileStrengthDescription": "Add more details so guests can trust your activity.",
-    "updateProfile": "Update profile"
+    "updateProfile": "Update profile",
+    "photoUpdated": "Profile photo updated",
+    "photoUpdateFailed": "Failed to update profile photo",
+    "photoPermissionDenied": "Photo library access is required to change your profile picture"
   },
   "errors": {
     "authRequired": "Authentication Required",
@@ -152,5 +178,80 @@
     "viewDetails": "View Details",
     "addToFavorites": "Add to Favorites",
     "removeFromFavorites": "Remove from Favorites"
+  },
+  "agent": {
+    "becomeAgent": "Become an Agent",
+    "becomeAgentDescription": "Start listing and managing properties on Fakaba",
+    "becomeAgentButton": "Become an Agent",
+    "becomeAgentSuccess": "You are now an agent!",
+    "becomeAgentError": "Failed to update your account. Please try again."
+  },
+  "myListings": {
+    "title": "Your Listings",
+    "empty": "You haven't created any listings yet.",
+    "createFirst": "Create your first listing",
+    "active": "Active",
+    "inactive": "Inactive",
+    "unpublish": "Unpublish",
+    "publish": "Publish",
+    "deleteListing": "Delete Listing",
+    "deleteConfirmTitle": "Delete Listing",
+    "deleteConfirmMessage": "This will permanently remove this listing. This action cannot be undone.",
+    "unpublishSuccess": "Listing unpublished",
+    "publishSuccess": "Listing published",
+    "deleteSuccess": "Listing deleted",
+    "statusError": "Failed to update listing status.",
+    "deleteError": "Failed to delete listing."
+  },
+  "changePassword": {
+    "title": "Change Password",
+    "currentPassword": "Current Password",
+    "newPassword": "New Password",
+    "confirmPassword": "Confirm New Password",
+    "currentPasswordPlaceholder": "Enter current password",
+    "newPasswordPlaceholder": "Enter new password",
+    "confirmPasswordPlaceholder": "Confirm new password",
+    "submit": "Change Password",
+    "changing": "Changing...",
+    "confirmTitle": "Change Password",
+    "confirmMessage": "Are you sure you want to change your password? You will be signed out.",
+    "success": "Password changed successfully",
+    "errorCurrentRequired": "Current password is required.",
+    "errorNewRequired": "New password is required.",
+    "errorConfirmRequired": "Please confirm your new password.",
+    "errorWrongPassword": "Current password is incorrect.",
+    "errorMismatch": "Passwords do not match.",
+    "errorTooShort": "Password must be at least 6 characters.",
+    "errorGeneric": "Failed to change password. Please try again."
+  },
+  "createListing": {
+    "title": "Create Listing",
+    "photos": "Photos",
+    "addPhoto": "Add Photo",
+    "photosLimit": "Max 10 photos",
+    "basicInfo": "Basic Information",
+    "titleLabel": "Title",
+    "titlePlaceholder": "e.g. Modern 2-bedroom apartment",
+    "descriptionLabel": "Description",
+    "descriptionPlaceholder": "Describe the property...",
+    "categoryLabel": "Category",
+    "typeLabel": "Type",
+    "locationSection": "Location",
+    "townLabel": "Town / City",
+    "addressLabel": "Address",
+    "addressPlaceholder": "e.g. Mile 17, Buea",
+    "propertyDetails": "Property Details",
+    "priceLabel": "Price (FCFA)",
+    "pricePlaceholder": "e.g. 50000",
+    "bedroomsLabel": "Bedrooms",
+    "bathroomsLabel": "Bathrooms",
+    "sizeLabel": "Size (m²)",
+    "featuresSection": "Features",
+    "featurePlaceholder": "e.g. Parking, Security...",
+    "addFeature": "Add",
+    "submit": "Publish Listing",
+    "publishing": "Publishing...",
+    "success": "Listing published successfully!",
+    "error": "Failed to publish listing. Please try again."
   }
 }

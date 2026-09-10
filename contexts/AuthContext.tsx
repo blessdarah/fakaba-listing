@@ -6,8 +6,12 @@ import {
   signOut as firebaseSignOut,
   onAuthStateChanged,
   GoogleAuthProvider,
+  EmailAuthProvider,
   signInWithEmailAndPassword,
   createUserWithEmailAndPassword,
+  updateProfile,
+  reauthenticateWithCredential,
+  updatePassword,
 } from "firebase/auth";
 import {
   doc,
@@ -16,16 +20,39 @@ import {
   updateDoc,
   serverTimestamp,
 } from "firebase/firestore";
-import { auth, googleProvider } from "../firebase.config";
+import { auth, googleProvider, storage } from "../firebase.config";
 import { db } from "../firebase.config";
+import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
 import * as AuthSession from "expo-auth-session";
 import * as WebBrowser from "expo-web-browser";
 import { Platform } from "react-native";
 
 WebBrowser.maybeCompleteAuthSession();
 
+interface UserProfile {
+  role?: "agent" | "investor" | string;
+  accountType?: string;
+  firstName?: string;
+  lastName?: string;
+  location?: string;
+  interests?: string[];
+  hasOnboarded?: boolean;
+  [key: string]: any;
+}
+
+interface SetupData {
+  accountType: string;
+  role: string;
+  location: string;
+  firstName: string;
+  lastName: string;
+  interests: string[];
+}
+
 interface AuthContextType {
   user: User | null;
+  userProfile: UserProfile | null;
+  isAgent: boolean;
   loading: boolean;
   needsSetup: boolean;
   signInWithGoogle: () => Promise<void>;
@@ -33,7 +60,10 @@ interface AuthContextType {
   signInWithEmail: (email: string, password: string) => Promise<void>;
   signUpWithEmail: (email: string, password: string) => Promise<void>;
   signOut: () => Promise<void>;
-  completeSetup: () => Promise<void>;
+  changePassword: (currentPassword: string, newPassword: string) => Promise<void>;
+  completeSetup: (data?: SetupData) => Promise<void>;
+  updateProfileImage: (uri: string) => Promise<void>;
+  becomeAgent: () => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -50,8 +80,11 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
   children,
 }) => {
   const [user, setUser] = useState<User | null>(null);
+  const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
   const [loading, setLoading] = useState(true);
   const [needsSetup, setNeedsSetup] = useState(false);
+
+  const isAgent = userProfile?.role === "agent";
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (user) => {
@@ -59,9 +92,13 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
 
       if (!user) {
         setNeedsSetup(false);
+        setUserProfile(null);
         setLoading(false);
         return;
       }
+
+      // Prevent route guard from navigating until Firestore check completes
+      setLoading(true);
 
       try {
         const userRef = doc(db, "users", user.uid);
@@ -78,9 +115,11 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
             },
             { merge: true }
           );
+          setUserProfile(null);
           setNeedsSetup(true);
         } else {
-          const data = snapshot.data() as { hasOnboarded?: boolean };
+          const data = snapshot.data() as UserProfile;
+          setUserProfile(data);
           setNeedsSetup(!data?.hasOnboarded);
         }
       } catch (error) {
@@ -174,20 +213,72 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
     }
   };
 
-  const completeSetup = async () => {
+  const completeSetup = async (data?: SetupData) => {
     try {
       const currentUser = auth.currentUser;
       if (currentUser) {
         const userRef = doc(db, "users", currentUser.uid);
-        await updateDoc(userRef, {
+        const profileData: Record<string, any> = {
           hasOnboarded: true,
           updatedAt: serverTimestamp(),
-        });
+        };
+        if (data) {
+          profileData.accountType = data.accountType.toLowerCase();
+          profileData.role = data.role.toLowerCase();
+          profileData.location = data.location;
+          profileData.firstName = data.firstName;
+          profileData.lastName = data.lastName;
+          profileData.interests = data.interests;
+        }
+        await updateDoc(userRef, profileData);
+        setUserProfile((prev) => ({ ...prev, ...profileData }));
       }
       setNeedsSetup(false);
     } catch (error) {
       console.error("Error completing setup:", error);
     }
+  };
+
+  const updateProfileImage = async (uri: string) => {
+    const currentUser = auth.currentUser;
+    if (!currentUser) throw new Error("Not authenticated");
+
+    const response = await fetch(uri);
+    const blob = await response.blob();
+    const storageRef = ref(storage, `avatars/${currentUser.uid}`);
+    await uploadBytes(storageRef, blob);
+    const downloadURL = await getDownloadURL(storageRef);
+
+    await updateProfile(currentUser, { photoURL: downloadURL });
+    await updateDoc(doc(db, "users", currentUser.uid), {
+      profileImage: downloadURL,
+    });
+
+    // Refresh user state so the UI picks up the new photoURL
+    setUser({ ...currentUser } as User);
+  };
+
+  const becomeAgent = async () => {
+    const currentUser = auth.currentUser;
+    if (!currentUser) throw new Error("Not authenticated");
+
+    const userRef = doc(db, "users", currentUser.uid);
+    await updateDoc(userRef, {
+      role: "agent",
+      updatedAt: serverTimestamp(),
+    });
+    setUserProfile((prev) => ({ ...prev, role: "agent" }));
+  };
+
+  const changePassword = async (currentPassword: string, newPassword: string) => {
+    const currentUser = auth.currentUser;
+    if (!currentUser || !currentUser.email) {
+      throw new Error("Not authenticated");
+    }
+
+    const credential = EmailAuthProvider.credential(currentUser.email, currentPassword);
+    await reauthenticateWithCredential(currentUser, credential);
+    await updatePassword(currentUser, newPassword);
   };
 
   const signOut = async () => {
@@ -203,6 +294,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
     <AuthContext.Provider
       value={{
         user,
+        userProfile,
+        isAgent,
         loading,
         needsSetup,
         signInWithGoogle,
@@ -210,7 +303,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
         signInWithEmail,
         signUpWithEmail,
         signOut,
+        changePassword,
         completeSetup,
+        updateProfileImage,
+        becomeAgent,
       }}
     >
       {children}

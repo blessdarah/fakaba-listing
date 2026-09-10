@@ -6,8 +6,8 @@ import {
   Hotel,
   CheckCircle,
 } from "@tamagui/lucide-icons-2";
-import { YStack, Text, Circle, XStack, Paragraph, View, H4 } from "tamagui";
-import { TouchableOpacity } from "react-native";
+import { YStack, Text, XStack, Paragraph, View } from "tamagui";
+import { Pressable } from "react-native";
 
 type Interest = {
   name: string;
@@ -15,30 +15,12 @@ type Interest = {
 };
 
 const interests: Interest[] = [
-  {
-    name: "Residential",
-    icon: House,
-  },
-  {
-    name: "Commercial",
-    icon: UserPlus,
-  },
-  {
-    name: "Investment Properties",
-    icon: House,
-  },
-  {
-    name: "International Properties",
-    icon: Hotel,
-  },
-  {
-    name: "Luxury Homes",
-    icon: Warehouse,
-  },
-  {
-    name: "Land & Lots",
-    icon: Map,
-  },
+  { name: "Residential", icon: House },
+  { name: "Commercial", icon: UserPlus },
+  { name: "Investment Properties", icon: House },
+  { name: "International Properties", icon: Hotel },
+  { name: "Luxury Homes", icon: Warehouse },
+  { name: "Land & Lots", icon: Map },
 ];
 
 type SetupInterestsProps = {
@@ -48,66 +30,60 @@ type SetupInterestsProps = {
 
 export const SetupInterests = ({ value, onChange }: SetupInterestsProps) => {
   return (
-    <>
-      <View>
-        <H4 text="center" my={2}>
-          Property Interests
-        </H4>
-        <Paragraph text="center">
-          Select the types of properties you're interested in.
-        </Paragraph>
+    <View>
+      <Text fontSize="$8" fontWeight="800" mb="$2">
+        What interests you?
+      </Text>
+      <Paragraph color="$color8" fontSize="$4" mb="$6">
+        Select one or more property types
+      </Paragraph>
 
-        <YStack gap={"$4"} mt={"$4"}>
-          {interests.map((interest) => {
-            const selected = value.includes(interest.name);
-            return (
-              <TouchableOpacity
-                key={interest.name}
-                onPress={() => {
-                  if (selected) {
-                    onChange(value.filter((item) => item !== interest.name));
-                  } else {
-                    onChange([...value, interest.name]);
-                  }
-                }}
+      <YStack gap="$3">
+        {interests.map((interest) => {
+          const selected = value.includes(interest.name);
+          const Icon = interest.icon;
+          return (
+            <Pressable
+              key={interest.name}
+              onPress={() => {
+                if (selected) {
+                  onChange(value.filter((item) => item !== interest.name));
+                } else {
+                  onChange([...value, interest.name]);
+                }
+              }}
+            >
+              <XStack
+                gap="$3"
+                p="$3.5"
+                bg={selected ? "$blue3" : "$background"}
+                rounded="$6"
+                borderWidth={2}
+                borderColor={selected ? "$blue8" : "$borderColor"}
+                items="center"
               >
-                <YStack
-                  gap="$2"
-                  p="$4"
-                  bg={selected ? "$backgroundPress" : "$background"}
-                  rounded="$4"
-                  borderWidth={2}
-                  borderColor={selected ? "$borderColorFocus" : "$borderColor"}
-                  shadowColor={selected ? "$shadowColor" : undefined}
-                  shadowOpacity={selected ? 0.2 : 0}
-                  shadowRadius={selected ? 8 : 0}
-                  shadowOffset={selected ? { width: 0, height: 4 } : undefined}
-                  elevation={selected ? 3 : 0}
+                <View
+                  width={44}
+                  height={44}
+                  rounded={12}
+                  bg={selected ? "$blue9" : "$color4"}
+                  items="center"
+                  justify="center"
                 >
-                  <XStack gap="$3" items="center" justify="space-between">
-                    <XStack gap="$3" items="center" flex={1}>
-                    <Circle
-                      size={48}
-                      bg="$backgroundStrong"
-                      borderWidth={1}
-                      borderColor="$borderColor"
-                      justify="center"
-                      items="center"
-                    >
-                      <interest.icon size={24} />
-                    </Circle>
-                    <Text fontSize={"$6"} fontWeight={"bold"}>
-                      {interest.name}
-                    </Text>
-                    </XStack>
-                    {selected && <CheckCircle size={20} color="$colorFocus" />}
-                  </XStack>
-                </YStack>
-              </TouchableOpacity>
-            );
-          })}
-        </YStack>
-      </View>
-    </>
+                  <Icon
+                    size={20}
+                    color={selected ? "white" : "$color11"}
+                  />
+                </View>
+                <Text flex={1} fontSize="$4" fontWeight="700">
+                  {interest.name}
+                </Text>
+                {selected && <CheckCircle size={20} color="$blue9" />}
+              </XStack>
+            </Pressable>
+          );
+        })}
+      </YStack>
+    </View>
   );
 };

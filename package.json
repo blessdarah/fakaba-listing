@@ -27,16 +27,18 @@
     "@tanstack/react-query": "^5.90.19",
     "babel-preset-expo": "~57.0.0",
     "burnt": "^0.12.2",
-    "expo": "^57.0.20",
+    "expo": "~57.0.21",
     "expo-auth-session": "~57.0.11",
+    "expo-blob": "^57.0.1",
     "expo-build-properties": "~57.0.17",
     "expo-crypto": "~57.0.2",
     "expo-dev-client": "~57.0.18",
     "expo-font": "~57.0.3",
+    "expo-image-picker": "~57.0.16",
     "expo-linear-gradient": "~57.0.1",
     "expo-linking": "~57.0.9",
     "expo-localization": "~57.0.1",
-    "expo-router": "~57.0.19",
+    "expo-router": "~57.0.20",
     "expo-splash-screen": "~57.0.8",
     "expo-status-bar": "~57.0.1",
     "expo-system-ui": "~57.0.3",
@@ -63,6 +65,7 @@
     "@tamagui/metro-plugin": "^2.7.7",
     "@types/react": "~19.2.4",
     "@types/react-native": "^0.73.0",
+    "sharp": "^0.35.4",
     "typescript": "~6.0.3"
   }
 }

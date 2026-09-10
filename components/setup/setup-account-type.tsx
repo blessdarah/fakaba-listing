@@ -1,58 +1,83 @@
-import { YStack, Text, Paragraph, View, H4 } from "tamagui";
-import { TouchableOpacity } from "react-native";
+import { YStack, Text, Paragraph, View } from "tamagui";
+import { Pressable } from "react-native";
+import { User, Building2 } from "@tamagui/lucide-icons-2";
 
-const ACCOUNT_TYPES = ["Individual", "Company"] as const;
+const ACCOUNT_TYPES = [
+  {
+    id: "Individual" as const,
+    icon: User,
+    description:
+      "I'm looking to buy, sell, or rent properties for personal use",
+  },
+  {
+    id: "Company" as const,
+    icon: Building2,
+    description: "I represent a real estate agency or brokerage",
+  },
+];
+
+type AccountTypeValue = "Individual" | "Company";
 
 type SetupAccountTypeProps = {
-  value: (typeof ACCOUNT_TYPES)[number] | null;
-  onChange: (value: (typeof ACCOUNT_TYPES)[number]) => void;
+  value: AccountTypeValue | null;
+  onChange: (value: AccountTypeValue) => void;
 };
 
-export const SetupAccountType = ({ value, onChange }: SetupAccountTypeProps) => {
+export const SetupAccountType = ({
+  value,
+  onChange,
+}: SetupAccountTypeProps) => {
   return (
-    <>
-      <View>
-        <H4 text="center" my={2}>
-          Role
-        </H4>
-        <Paragraph text="center">
-          Help us understand how you will be using Fakaba
-        </Paragraph>
+    <View>
+      <Text fontSize="$8" fontWeight="800" mb="$2">
+        How will you use Fakaba?
+      </Text>
+      <Paragraph color="$color8" fontSize="$4" mb="$6">
+        Select the option that best describes you
+      </Paragraph>
 
-        <YStack gap={"$4"} mt={"$4"}>
-          {ACCOUNT_TYPES.map((type) => {
-            const selected = value === type;
-            return (
-              <TouchableOpacity key={type} onPress={() => onChange(type)}>
-                <YStack
-                  gap="$2"
-                  p="$4"
-                  bg={selected ? "$backgroundPress" : "$background"}
-                  rounded="$4"
-                  borderWidth={2}
-                  items={"center"}
-                  justify={"center"}
-                  borderColor={selected ? "$borderColorFocus" : "$borderColor"}
-                  shadowColor={selected ? "$shadowColor" : undefined}
-                  shadowOpacity={selected ? 0.2 : 0}
-                  shadowRadius={selected ? 8 : 0}
-                  shadowOffset={selected ? { width: 0, height: 4 } : undefined}
-                  elevation={selected ? 3 : 0}
+      <YStack gap="$3">
+        {ACCOUNT_TYPES.map((type) => {
+          const selected = value === type.id;
+          const Icon = type.icon;
+          return (
+            <Pressable key={type.id} onPress={() => onChange(type.id)}>
+              <YStack
+                gap="$3"
+                p="$4"
+                bg={selected ? "$blue3" : "$background"}
+                rounded="$6"
+                borderWidth={2}
+                borderColor={selected ? "$blue8" : "$borderColor"}
+                flexDirection="row"
+                items="center"
+              >
+                <View
+                  width={48}
+                  height={48}
+                  rounded={14}
+                  bg={selected ? "$blue9" : "$color4"}
+                  items="center"
+                  justify="center"
                 >
-                  <Text fontSize={"$6"} fontWeight={"bold"}>
-                    {type}
+                  <Icon
+                    size={22}
+                    color={selected ? "white" : "$color11"}
+                  />
+                </View>
+                <YStack flex={1} gap="$1">
+                  <Text fontSize="$5" fontWeight="700">
+                    {type.id}
                   </Text>
-                  <Paragraph fontSize="$5" text={"center"}>
-                    {type === "Individual"
-                      ? "I'm looking to buy, sell, or rent properties for personal use"
-                      : "I represent a real estate agency, brokerage"}
-                  </Paragraph>
+                  <Text color="$color8" fontSize="$3" lineHeight={18}>
+                    {type.description}
+                  </Text>
                 </YStack>
-              </TouchableOpacity>
-            );
-          })}
-        </YStack>
-      </View>
-    </>
+              </YStack>
+            </Pressable>
+          );
+        })}
+      </YStack>
+    </View>
   );
 };

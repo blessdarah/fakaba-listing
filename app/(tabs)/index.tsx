@@ -8,17 +8,21 @@ import {
   YStack,
   Input,
   Button,
-  H5,
   Separator,
   ScrollView,
-  useTheme,
-  AnimatePresence,
 } from "tamagui";
 import { Slider } from "@tamagui/slider";
 import HomeCategories, { HOME_CATEGORIES } from "components/HomeCategories";
 import HorizontalListing from "components/HorizontalListing";
-import ListingCard from "components/ListingCard";
-import { Sliders, MapPin, Check, ChevronRight } from "@tamagui/lucide-icons-2";
+import ListingCardCompact from "components/ListingCardCompact";
+import {
+  Search,
+  SlidersHorizontal,
+  X,
+  MapPin,
+  ChevronRight,
+  Plus,
+} from "@tamagui/lucide-icons-2";
 import ScreenContainer from "components/ScreenContainer";
 import { useAuth } from "contexts/AuthContext";
 import { FlatList, RefreshControl } from "react-native";
@@ -30,113 +34,154 @@ import { useFavorites } from "lib/query/useFavorites";
 import { useAgents } from "lib/query/useUsers";
 import { Link } from "expo-router";
 
+// --- Constants ---
+
+const TYPE_OPTIONS = [
+  { id: "rent", labelKey: "filter.rental" },
+  { id: "sale", labelKey: "filter.sale" },
+  { id: "lease", labelKey: "filter.lease" },
+];
+
+const CATEGORY_OPTIONS = HOME_CATEGORIES.map((cat) => ({
+  id: cat.id,
+  label: cat.name,
+}));
+
+const TOWN_OPTIONS = ["Yaounde", "Douala", "Buea", "Limbe"];
+
+const DEFAULT_PRICE: [number, number] = [0, 1_000_000];
+const PRICE_STEP = 5_000;
+
+// --- Chip (same as search screen) ---
+
+function Chip({
+  label,
+  selected,
+  onPress,
+}: {
+  label: string;
+  selected: boolean;
+  onPress: () => void;
+}) {
+  return (
+    <Pressable onPress={onPress} accessibilityRole="button">
+      <View
+        px="$3"
+        py="$1.5"
+        rounded="$10"
+        bg={selected ? "$blue3" : "transparent"}
+        borderWidth={1.5}
+        borderColor={selected ? "$blue8" : "$borderColor"}
+      >
+        <Text
+          fontSize="$3"
+          fontWeight={selected ? "700" : "500"}
+          color={selected ? "$blue9" : "$color"}
+        >
+          {label}
+        </Text>
+      </View>
+    </Pressable>
+  );
+}
+
+function FilterSection({
+  title,
+  children,
+}: {
+  title: string;
+  children: React.ReactNode;
+}) {
+  return (
+    <YStack gap="$2.5">
+      <Text fontSize="$3" fontWeight="600" color="$color8" textTransform="uppercase" letterSpacing={0.5}>
+        {title}
+      </Text>
+      {children}
+    </YStack>
+  );
+}
+
+// --- Main screen ---
+
 export default function TabOneScreen() {
-  const { user } = useAuth();
+  const { user, isAgent } = useAuth();
   const { t } = useTranslation();
   const router = useRouter();
-  const [open, setOpen] = React.useState(false);
-  const [position, setPosition] = React.useState(0);
-  const [searchQuery, setSearchQuery] = React.useState("");
-  const DEFAULT_TYPES = [];
-  const DEFAULT_CATEGORIES = [];
-  const DEFAULT_TOWNS = [];
-  const DEFAULT_PRICE: [number, number] = [20000, 800000];
 
-  const [selectedTypes, setSelectedTypes] =
-    React.useState<string[]>(DEFAULT_TYPES);
-  const [selectedCategories, setSelectedCategories] =
-    React.useState<string[]>(DEFAULT_CATEGORIES);
-  const [selectedTowns, setSelectedTowns] =
-    React.useState<string[]>(DEFAULT_TOWNS);
-  const [draftTypes, setDraftTypes] = React.useState<string[]>(DEFAULT_TYPES);
-  const [draftCategories, setDraftCategories] =
-    React.useState<string[]>(DEFAULT_CATEGORIES);
-  const [draftTowns, setDraftTowns] = React.useState<string[]>(DEFAULT_TOWNS);
-  const [pickerOpen, setPickerOpen] = React.useState<
-    "type" | "category" | "town" | null
-  >(null);
-  const [pickerQuery, setPickerQuery] = React.useState("");
-  const [priceRange, setPriceRange] =
-    React.useState<[number, number]>(DEFAULT_PRICE);
-  const [draftPriceRange, setDraftPriceRange] =
-    React.useState<[number, number]>(DEFAULT_PRICE);
-  const theme = useTheme();
-  const typeOptions = ["Rental", "Sale", "Lease"];
-  const categoryOptions = HOME_CATEGORIES.map((cat) => cat.id);
-  const townOptions = ["Yaounde", "Douala", "Buea", "Limbe"];
-  const formatLabel = (value: string) =>
-    HOME_CATEGORIES.find((cat) => cat.id === value)?.name ?? value;
-  const toggleMulti = (
-    list: string[],
-    value: string,
-    setter: (next: string[]) => void
-  ) => {
-    if (list.includes(value)) {
-      setter(list.filter((item) => item !== value));
-    } else {
-      setter([...list, value]);
-    }
-  };
-  const [activeCategoryId, setActiveCategoryId] = React.useState<string | null>(
-    null
+  // Search + filter state
+  const [searchQuery, setSearchQuery] = React.useState("");
+  const [selectedTypes, setSelectedTypes] = React.useState<string[]>([]);
+  const [selectedCategories, setSelectedCategories] = React.useState<string[]>([]);
+  const [selectedTowns, setSelectedTowns] = React.useState<string[]>([]);
+  const [priceRange, setPriceRange] = React.useState<[number, number]>(DEFAULT_PRICE);
+
+  // Draft filters (in sheet before apply)
+  const [draftTypes, setDraftTypes] = React.useState<string[]>([]);
+  const [draftCategories, setDraftCategories] = React.useState<string[]>([]);
+  const [draftTowns, setDraftTowns] = React.useState<string[]>([]);
+  const [draftPrice, setDraftPrice] = React.useState<[number, number]>(DEFAULT_PRICE);
+
+  // Sheet + category state
+  const [sheetOpen, setSheetOpen] = React.useState(false);
+  const [activeCategoryId, setActiveCategoryId] = React.useState<string | null>(null);
+
+  // --- Helpers ---
+
+  const toggleItem = (list: string[], item: string) =>
+    list.includes(item) ? list.filter((i) => i !== item) : [...list, item];
+
+  const formatPrice = React.useCallback(
+    (value: number) => value.toLocaleString() + " FCFA",
+    []
   );
+
   const setCategoryFromHome = (id: string) => {
     setActiveCategoryId((prev) => (prev === id ? null : id));
     setSelectedCategories((prev) => (prev.includes(id) ? [] : [id]));
     setDraftCategories((prev) => (prev.includes(id) ? [] : [id]));
   };
+
+  const hasPriceFilter =
+    priceRange[0] !== DEFAULT_PRICE[0] || priceRange[1] !== DEFAULT_PRICE[1];
+
+  const activeFilterCount =
+    selectedTypes.length +
+    selectedCategories.length +
+    selectedTowns.length +
+    (hasPriceFilter ? 1 : 0);
+
   const hasActiveFilters =
-    selectedTypes.join("|") !== DEFAULT_TYPES.join("|") ||
-    selectedCategories.join("|") !== DEFAULT_CATEGORIES.join("|") ||
-    selectedTowns.join("|") !== DEFAULT_TOWNS.join("|") ||
-    priceRange[0] !== DEFAULT_PRICE[0] ||
-    priceRange[1] !== DEFAULT_PRICE[1] ||
+    activeFilterCount > 0 ||
     activeCategoryId !== null ||
     searchQuery.trim().length > 0;
-  const getPicker = () => {
-    if (pickerOpen === "type") {
-      return {
-        title: "Type",
-        options: typeOptions,
-        selected: draftTypes,
-        setSelected: setDraftTypes,
-        format: (v: string) => v,
-      };
-    }
-    if (pickerOpen === "category") {
-      return {
-        title: "Category",
-        options: categoryOptions,
-        selected: draftCategories,
-        setSelected: setDraftCategories,
-        format: formatLabel,
-      };
-    }
-    if (pickerOpen === "town") {
-      return {
-        title: "Town/City",
-        options: townOptions,
-        selected: draftTowns,
-        setSelected: setDraftTowns,
-        format: (v: string) => v,
-      };
-    }
-    return null;
+
+  // --- Sheet handlers ---
+
+  const openSheet = () => {
+    setDraftTypes(selectedTypes);
+    setDraftCategories(selectedCategories);
+    setDraftTowns(selectedTowns);
+    setDraftPrice(priceRange);
+    setSheetOpen(true);
   };
-  const picker = getPicker();
-  const filteredPickerOptions =
-    picker?.options.filter((option) =>
-      pickerQuery.trim().length === 0
-        ? true
-        : picker
-            .format(option)
-            .toLowerCase()
-            .includes(pickerQuery.trim().toLowerCase())
-    ) ?? [];
-  const formatPrice = React.useCallback(
-    (value: number) => value.toLocaleString(),
-    []
-  );
+
+  const applyFilters = () => {
+    setSelectedTypes(draftTypes);
+    setSelectedCategories(draftCategories);
+    setSelectedTowns(draftTowns);
+    setPriceRange(draftPrice);
+    setSheetOpen(false);
+  };
+
+  const resetFilters = () => {
+    setDraftTypes([]);
+    setDraftCategories([]);
+    setDraftTowns([]);
+    setDraftPrice(DEFAULT_PRICE);
+  };
+
+  // --- Data ---
 
   const { data: agents = [] } = useAgents();
   const agentColumns: (typeof agents)[] = [];
@@ -144,7 +189,6 @@ export default function TabOneScreen() {
     agentColumns.push(agents.slice(i, i + 4));
   }
 
-  // Use TanStack Query hooks
   const {
     data: listings = [],
     isLoading: loading,
@@ -158,48 +202,46 @@ export default function TabOneScreen() {
     refetchFavorites();
   }, [refetch, refetchFavorites]);
 
-  const normalizedSearch = searchQuery.trim().toLowerCase();
-  const typeMap: Record<string, string> = {
-    Rental: "rent",
-    Sale: "sale",
-    Lease: "lease",
-  };
-  const filteredListings = listings.filter((listing) => {
-    const matchesSearch =
-      normalizedSearch.length > 0 &&
-      (listing.title.toLowerCase().includes(normalizedSearch) ||
-        listing.description.toLowerCase().includes(normalizedSearch) ||
-        listing.location.toLowerCase().includes(normalizedSearch));
+  // --- Filtering (AND logic) ---
 
-    const matchesType =
-      selectedTypes.length > 0 &&
-      selectedTypes.map((t) => typeMap[t] ?? t).includes(listing.type);
+  const filteredListings = React.useMemo(() => {
+    const q = searchQuery.trim().toLowerCase();
+    return listings.filter((listing) => {
+      if (q.length > 0) {
+        const matchesText =
+          listing.title.toLowerCase().includes(q) ||
+          listing.description.toLowerCase().includes(q) ||
+          listing.location.toLowerCase().includes(q);
+        if (!matchesText) return false;
+      }
 
-    const matchesCategory =
-      selectedCategories.length > 0 &&
-      selectedCategories.includes(listing.category);
+      if (selectedTypes.length > 0 && !selectedTypes.includes(listing.type)) {
+        return false;
+      }
 
-    const matchesTown =
-      selectedTowns.length > 0 &&
-      selectedTowns.some((town) =>
-        listing.location.toLowerCase().includes(town.toLowerCase())
-      );
+      if (
+        selectedCategories.length > 0 &&
+        !selectedCategories.includes(listing.category)
+      ) {
+        return false;
+      }
 
-    const hasPriceFilter =
-      priceRange[0] !== DEFAULT_PRICE[0] || priceRange[1] !== DEFAULT_PRICE[1];
-    const matchesPrice =
-      hasPriceFilter &&
-      listing.price >= priceRange[0] &&
-      listing.price <= priceRange[1];
+      if (selectedTowns.length > 0) {
+        const matchesTown = selectedTowns.some((town) =>
+          listing.location.toLowerCase().includes(town.toLowerCase())
+        );
+        if (!matchesTown) return false;
+      }
 
-    return (
-      matchesSearch ||
-      matchesType ||
-      matchesCategory ||
-      matchesTown ||
-      matchesPrice
-    );
-  });
+      if (hasPriceFilter) {
+        if (listing.price < priceRange[0] || listing.price > priceRange[1]) {
+          return false;
+        }
+      }
+
+      return true;
+    });
+  }, [listings, searchQuery, selectedTypes, selectedCategories, selectedTowns, priceRange, hasPriceFilter]);
 
   return (
     <>
@@ -210,9 +252,10 @@ export default function TabOneScreen() {
         }
       >
         <ScreenContainer>
+          {/* Greeting + Avatar */}
           <XStack items="center" justify="space-between" width="100%">
             <YStack gap="$1.5">
-              <Text fontSize="$7" fontWeight={"bold"} color="$color">
+              <Text fontSize="$7" fontWeight="bold" color="$color">
                 {user?.isAnonymous || !user?.displayName
                   ? t("home.defaultGreeting")
                   : t("home.greeting", { name: user.displayName })}
@@ -223,7 +266,7 @@ export default function TabOneScreen() {
             </YStack>
 
             <Pressable
-              onPress={() => router.push("/profile")}
+              onPress={() => router.push("/(tabs)/settings")}
               accessibilityRole="button"
               accessibilityLabel={t("profile.title")}
               hitSlop={10}
@@ -245,59 +288,62 @@ export default function TabOneScreen() {
             </Pressable>
           </XStack>
 
+          {/* Search bar + filter button */}
           <XStack
-            justify="space-between"
-            items={"center"}
-            width="100%"
+            bg="$color3"
+            items="center"
+            rounded="$6"
+            px="$3"
             gap="$2"
             my="$3"
           >
-            {/* <Search size="$1" color="$color" mr="$4" /> */}
-            <View
-              width="100%"
-              items="center"
-              flexDirection="row"
-              justify="center"
-              mb="$4"
-              // bg="#ececec"
-              borderColor="$borderColor"
-              rounded={100}
-              borderWidth={1}
-            >
-              <Input
-                flex={1}
-                size="$5"
-                placeholder="Search property"
-                bg="transparent"
-                color="#333"
-                borderWidth={0}
-                value={searchQuery}
-                onChangeText={setSearchQuery}
-              />
-              <Button
-                circular
-                size="$4"
-                mr="$1.5"
-                bg={hasActiveFilters ? "$blue8" : "$background"}
-                onPress={() => {
-                  setDraftTypes(selectedTypes);
-                  setDraftCategories(selectedCategories);
-                  setDraftTowns(selectedTowns);
-                  setDraftPriceRange(priceRange);
-                  setPosition(0);
-                  setOpen(true);
-                }}
-                icon={
-                  <Sliders
-                    size={18}
-                    fontWeight={500}
-                    color={hasActiveFilters ? "white" : "$color"}
-                  />
-                }
-              ></Button>
-            </View>
+            <Search size={18} color="$color8" />
+            <Input
+              flex={1}
+              size="$3"
+              placeholder={t("home.searchPlaceholder")}
+              value={searchQuery}
+              onChangeText={setSearchQuery}
+              bg="transparent"
+              borderWidth={0}
+              py="$2"
+            />
+            <Pressable onPress={openSheet} accessibilityRole="button" accessibilityLabel={t("filter.title")}>
+              <View
+                width={36}
+                height={36}
+                rounded={10}
+                bg={activeFilterCount > 0 ? "$blue9" : "$color4"}
+                items="center"
+                justify="center"
+                position="relative"
+              >
+                <SlidersHorizontal
+                  size={18}
+                  color={activeFilterCount > 0 ? "white" : "$color"}
+                />
+                {activeFilterCount > 0 && (
+                  <View
+                    position="absolute"
+                    t={-4}
+                    r={-4}
+                    width={18}
+                    height={18}
+                    rounded={9}
+                    bg="$red9"
+                    items="center"
+                    justify="center"
+                  >
+                    <Text fontSize={10} fontWeight="700" color="white">
+                      {activeFilterCount}
+                    </Text>
+                  </View>
+                )}
+              </View>
+            </Pressable>
           </XStack>
 
+          {/* Category quick-filter */}
           <View width="100%" items="center" justify="center" mb="$5">
             <HomeCategories
               activeId={activeCategoryId}
@@ -305,6 +351,7 @@ export default function TabOneScreen() {
             />
           </View>
 
+          {/* Default home content (no filters active) */}
           {!hasActiveFilters && (
             <>
               <View width="100%" items="center" justify="center" mb="$4">
@@ -329,17 +376,23 @@ export default function TabOneScreen() {
             </>
           )}
 
+          {/* Filtered results */}
           {hasActiveFilters && (
             <YStack gap="$3" mb="$4">
-              <Text fontSize="$6" fontWeight="700" color="$color">
-                Results
-              </Text>
+              <XStack items="center" justify="space-between">
+                <Text fontSize="$6" fontWeight="700" color="$color">
+                  Results
+                </Text>
+                <Text fontSize="$3" color="$color8">
+                  {filteredListings.length} found
+                </Text>
+              </XStack>
               <FlatList
                 data={filteredListings}
                 keyExtractor={(item) => item.id}
                 scrollEnabled={false}
                 contentContainerStyle={{ gap: 12 }}
-                renderItem={({ item }) => <ListingCard item={item} />}
+                renderItem={({ item }) => <ListingCardCompact item={item} />}
               />
               {filteredListings.length === 0 && (
                 <Text color="$color8">No listings match your filters.</Text>
@@ -347,6 +400,7 @@ export default function TabOneScreen() {
             </YStack>
           )}
 
+          {/* Top agents */}
           <YStack gap="$3" mb="$4">
             <XStack justify="space-between" items="center">
               <Text fontSize="$6" fontWeight="700" color="$color">
@@ -422,300 +476,171 @@ export default function TabOneScreen() {
           </YStack>
         </ScreenContainer>
       </ScrollView>
-      {/* bottom sheet */}
+
+      {/* Filter bottom sheet */}
       <Sheet
-        open={open}
-        disableRemoveScroll={open}
-        modal={true}
-        onOpenChange={(next) => {
-          setOpen(next);
-          if (next) {
-            setDraftTypes(selectedTypes);
-            setDraftCategories(selectedCategories);
-            setDraftTowns(selectedTowns);
-            setDraftPriceRange(priceRange);
-          }
-          if (next) {
-            setPosition(0);
-          }
-        }}
-        snapPoints={[70, 45, 25, 0]}
-        snapPointsMode={"percent"}
+        modal
+        open={sheetOpen}
+        onOpenChange={setSheetOpen}
+        snapPoints={[75]}
+        snapPointsMode="percent"
         dismissOnSnapToBottom
         zIndex={100_000}
-        position={position}
-        onPositionChange={setPosition}
-        defaultPosition={0}
       >
         <Sheet.Overlay
-          bg="rgba(0,0,0,0.6)"
+          bg="rgba(0,0,0,0.5)"
           enterStyle={{ opacity: 0 }}
           exitStyle={{ opacity: 0 }}
         />
-        <XStack justify="center" py="$2">
-          <Sheet.Handle bg="$borderColor" width={48} height={6} rounded={999} />
-        </XStack>
-        <Sheet.Frame>
-          <Sheet.ScrollView p="$4">
-            <YStack gap="$4" pb="$10">
+        <Sheet.Handle bg="$borderColor" />
+        <Sheet.Frame bg="$background" rounded="$6">
+          <Sheet.ScrollView showsVerticalScrollIndicator={false}>
+            <YStack p="$4" gap="$5" pb="$8">
+              {/* Header */}
               <XStack items="center" justify="space-between">
-                <H5>Filters</H5>
-                <Button
-                  size="$3"
-                  circular
-                  bg="$background"
-                  onPress={() => setOpen(false)}
-                >
-                  <Button.Text fontWeight="600">×</Button.Text>
-                </Button>
+                <Text fontSize="$6" fontWeight="700">
+                  {t("filter.title")}
+                </Text>
+                <Pressable onPress={() => setSheetOpen(false)}>
+                  <View
+                    width={32}
+                    height={32}
+                    rounded={16}
+                    bg="$color3"
+                    items="center"
+                    justify="center"
+                  >
+                    <X size={18} color="$color" />
+                  </View>
+                </Pressable>
               </XStack>
 
-              <YStack
-                bg="$background"
-                rounded="$6"
-                p="$4"
-                gap="$4"
-                borderWidth={1}
-                borderColor="$borderColor"
-              >
-                <YStack gap="$2">
-                  <XStack items="center" justify="space-between">
-                    <Text color="$color" fontSize="$4">
-                      Type
-                    </Text>
-                    <Pressable onPress={() => setPickerOpen("type")}>
-                      <XStack items="center" gap="$2">
-                        <Text fontSize="$3" color="$color8">
-                          Select
-                        </Text>
-                        <ChevronRight size={18} color={"$color"} />
-                      </XStack>
-                    </Pressable>
-                  </XStack>
-                  {draftTypes.length > 0 && (
-                    <XStack flexWrap="wrap" gap="$2" mt="$1">
-                      {draftTypes.map((item) => (
-                        <Pressable
-                          key={item}
-                          onPress={() =>
-                            toggleMulti(draftTypes, item, setDraftTypes)
-                          }
-                        >
-                          <View
-                            style={{
-                              paddingHorizontal: 10,
-                              paddingVertical: 4,
-                              borderRadius: 14,
-                              backgroundColor: theme.blue8.val,
-                            }}
-                          >
-                            <Text fontSize="$2" color="white">
-                              {item}
-                            </Text>
-                          </View>
-                        </Pressable>
-                      ))}
-                    </XStack>
-                  )}
-                </YStack>
+              {/* Type */}
+              <FilterSection title={t("filter.type")}>
+                <XStack gap="$2" flexWrap="wrap">
+                  {TYPE_OPTIONS.map((opt) => (
+                    <Chip
+                      key={opt.id}
+                      label={t(opt.labelKey)}
+                      selected={draftTypes.includes(opt.id)}
+                      onPress={() =>
+                        setDraftTypes((prev) => toggleItem(prev, opt.id))
+                      }
+                    />
+                  ))}
+                </XStack>
+              </FilterSection>
 
-                <Separator />
+              <Separator borderColor="$borderColor" />
 
-                <YStack gap="$2">
-                  <XStack items="center" justify="space-between">
-                    <Text color="$color" fontSize="$4">
-                      Category
-                    </Text>
-                    <Pressable onPress={() => setPickerOpen("category")}>
-                      <XStack items="center" gap="$2">
-                        <Text fontSize="$3" color="$color8">
-                          Select
-                        </Text>
-                        <ChevronRight size={18} color={"$color"} />
-                      </XStack>
-                    </Pressable>
-                  </XStack>
-                  {draftCategories.length > 0 && (
-                    <XStack flexWrap="wrap" gap="$2" mt="$1">
-                      {draftCategories.map((item) => (
-                        <Pressable
-                          key={item}
-                          onPress={() =>
-                            toggleMulti(
-                              draftCategories,
-                              item,
-                              setDraftCategories
-                            )
-                          }
-                        >
-                          <View
-                            style={{
-                              paddingHorizontal: 10,
-                              paddingVertical: 4,
-                              borderRadius: 14,
-                              backgroundColor: theme.blue8.val,
-                            }}
-                          >
-                            <Text fontSize="$2" color="white">
-                              {formatLabel(item)}
-                            </Text>
-                          </View>
-                        </Pressable>
-                      ))}
-                    </XStack>
-                  )}
-                </YStack>
+              {/* Category */}
+              <FilterSection title={t("filter.category")}>
+                <XStack gap="$2" flexWrap="wrap">
+                  {CATEGORY_OPTIONS.map((opt) => (
+                    <Chip
+                      key={opt.id}
+                      label={opt.label}
+                      selected={draftCategories.includes(opt.id)}
+                      onPress={() =>
+                        setDraftCategories((prev) => toggleItem(prev, opt.id))
+                      }
+                    />
+                  ))}
+                </XStack>
+              </FilterSection>
 
-                <Separator />
+              <Separator borderColor="$borderColor" />
 
-                <YStack gap="$2">
-                  <XStack items="center" justify="space-between">
-                    <Text color="$color" fontSize="$4">
-                      Town/City
-                    </Text>
-                    <Pressable onPress={() => setPickerOpen("town")}>
-                      <XStack items="center" gap="$2">
-                        <Text fontSize="$3" color="$color8">
-                          Select
-                        </Text>
-                        <ChevronRight size={18} color={"$color"} />
-                      </XStack>
-                    </Pressable>
-                  </XStack>
-                  {draftTowns.length > 0 && (
-                    <XStack flexWrap="wrap" gap="$2" mt="$1">
-                      {draftTowns.map((item) => (
-                        <Pressable
-                          key={item}
-                          onPress={() =>
-                            toggleMulti(draftTowns, item, setDraftTowns)
-                          }
-                        >
-                          <View
-                            style={{
-                              paddingHorizontal: 10,
-                              paddingVertical: 4,
-                              borderRadius: 14,
-                              backgroundColor: theme.blue8.val,
-                            }}
-                          >
-                            <Text fontSize="$2" color="white">
-                              {item}
-                            </Text>
-                          </View>
-                        </Pressable>
-                      ))}
-                    </XStack>
-                  )}
-                </YStack>
-              </YStack>
+              {/* Town/City */}
+              <FilterSection title={t("filter.townCity")}>
+                <XStack gap="$2" flexWrap="wrap">
+                  {TOWN_OPTIONS.map((town) => (
+                    <Chip
+                      key={town}
+                      label={town}
+                      selected={draftTowns.includes(town)}
+                      onPress={() =>
+                        setDraftTowns((prev) => toggleItem(prev, town))
+                      }
+                    />
+                  ))}
+                </XStack>
+              </FilterSection>
 
-              <YStack
-                bg="$background"
-                rounded="$6"
-                p="$5"
-                gap="$4"
-                borderWidth={1}
-                borderColor="$borderColor"
-              >
-                <Text color="$color" fontSize="$4">
-                  Price
-                </Text>
-                <XStack items="center" gap="$4">
-                  <View
-                    flex={1}
-                    px="$4"
-                    py="$3"
-                    bg="$background"
-                    borderWidth={1}
-                    borderColor="$borderColor"
-                    rounded="$4"
-                  >
-                    <Text fontWeight="600">
-                      {formatPrice(draftPriceRange[0])}
-                    </Text>
-                  </View>
-                  <Text color="$color8">-</Text>
-                  <View
-                    flex={1}
-                    px="$4"
-                    py="$3"
-                    bg="$background"
-                    borderWidth={1}
-                    borderColor="$borderColor"
-                    rounded="$4"
-                  >
-                    <Text fontWeight="600">
-                      {formatPrice(draftPriceRange[1])}
-                    </Text>
-                  </View>
+              <Separator borderColor="$borderColor" />
+
+              {/* Price Range */}
+              <FilterSection title={t("filter.priceRange")}>
+                <XStack items="center" justify="space-between">
+                  <Text fontSize="$3" color="$color8">
+                    {formatPrice(draftPrice[0])}
+                  </Text>
+                  <Text fontSize="$3" color="$color8">
+                    {formatPrice(draftPrice[1])}
+                  </Text>
                 </XStack>
                 <Slider
-                  value={draftPriceRange}
+                  value={draftPrice}
                   min={0}
-                  max={1000000}
-                  step={5000}
+                  max={1_000_000}
+                  step={PRICE_STEP}
                   minStepsBetweenThumbs={1}
-                  onValueChange={(next) =>
-                    setDraftPriceRange([next[0], next[1]])
-                  }
+                  onValueChange={(next) => setDraftPrice([next[0], next[1]])}
                 >
-                  <Slider.Track bg="$borderColor" height={2}>
+                  <Slider.Track bg="$borderColor" height={3}>
                     <Slider.TrackActive bg="$blue8" />
                   </Slider.Track>
                   <Slider.Thumb
                     index={0}
                     circular
-                    size="$1"
+                    size="$1.5"
                     bg="$background"
                     borderWidth={2}
                     borderColor="$blue8"
+                    elevation="$1"
                   />
                   <Slider.Thumb
                     index={1}
                     circular
-                    size="$1"
+                    size="$1.5"
                     bg="$background"
                     borderWidth={2}
                     borderColor="$blue8"
+                    elevation="$1"
                   />
                 </Slider>
-              </YStack>
+              </FilterSection>
 
-              <XStack gap="$3" justify="space-between" mt="$2">
+              {/* Action buttons */}
+              <XStack gap="$3" mt="$2">
                 <Button
                   flex={1}
                   size="$5"
-                  bg="$background"
+                  bg="$color3"
+                  rounded="$4"
                   onPress={() => {
-                    setDraftTypes(DEFAULT_TYPES);
-                    setDraftCategories(DEFAULT_CATEGORIES);
-                    setDraftTowns(DEFAULT_TOWNS);
-                    setDraftPriceRange(DEFAULT_PRICE);
-                    setSelectedTypes(DEFAULT_TYPES);
-                    setSelectedCategories(DEFAULT_CATEGORIES);
-                    setSelectedTowns(DEFAULT_TOWNS);
+                    resetFilters();
+                    setSelectedTypes([]);
+                    setSelectedCategories([]);
+                    setSelectedTowns([]);
                     setPriceRange(DEFAULT_PRICE);
                     setActiveCategoryId(null);
-                    setOpen(false);
+                    setSheetOpen(false);
                   }}
                 >
-                  <Button.Text fontWeight="600">Reset</Button.Text>
+                  <Button.Text fontWeight="600" color="$color">
+                    {t("filter.reset")}
+                  </Button.Text>
                 </Button>
                 <Button
                   flex={1}
                   size="$5"
-                  bg="$blue8"
-                  onPress={() => {
-                    setSelectedTypes(draftTypes);
-                    setSelectedCategories(draftCategories);
-                    setSelectedTowns(draftTowns);
-                    setPriceRange(draftPriceRange);
-                    setOpen(false);
-                  }}
+                  bg="$blue9"
+                  rounded="$4"
+                  onPress={applyFilters}
                 >
                   <Button.Text fontWeight="600" color="white">
-                    Apply
+                    {t("filter.apply")}
                   </Button.Text>
                 </Button>
               </XStack>
@@ -724,114 +649,32 @@ export default function TabOneScreen() {
         </Sheet.Frame>
       </Sheet>
 
-      <Sheet
-        open={pickerOpen !== null}
-        modal
-        onOpenChange={(next) => {
-          if (!next) {
-            setPickerOpen(null);
-            setPickerQuery("");
-          }
-        }}
-        snapPoints={[80, 50, 0]}
-        snapPointsMode="percent"
-        dismissOnSnapToBottom
-        zIndex={100_001}
-      >
-        <Sheet.Overlay
-          bg="rgba(0,0,0,0.6)"
-          enterStyle={{ opacity: 0 }}
-          exitStyle={{ opacity: 0 }}
-        />
-        <XStack justify="center" py="$2">
-          <Sheet.Handle bg="$borderColor" width={48} height={6} rounded={999} />
-        </XStack>
-        <Sheet.Frame>
-          <Sheet.ScrollView p="$4">
-            <YStack gap="$4" pb="$8">
-              <XStack items="center" justify="space-between">
-                <H5>{picker?.title ?? "Select"}</H5>
-                <Button
-                  size="$3"
-                  circular
-                  onPress={() => {
-                    setPickerOpen(null);
-                    setPickerQuery("");
-                  }}
-                >
-                  <Button.Text fontWeight="600">×</Button.Text>
-                </Button>
-              </XStack>
-              <Input
-                size="$5"
-                placeholder={`Search ${picker?.title ?? ""}`}
-                value={pickerQuery}
-                onChangeText={setPickerQuery}
-                bg="$background"
-                borderWidth={1}
-                borderColor="$borderColor"
-                placeholderTextColor="$color8"
-              />
-              <YStack gap="$2">
-                {picker &&
-                  filteredPickerOptions.map((option) => {
-                    const selected = picker.selected.includes(option);
-                    return (
-                      <Pressable
-                        key={option}
-                        onPress={() =>
-                          toggleMulti(
-                            picker.selected,
-                            option,
-                            picker.setSelected
-                          )
-                        }
-                      >
-                        <XStack
-                          items="center"
-                          justify="space-between"
-                          p="$3"
-                          bg="$background"
-                          rounded="$4"
-                          borderWidth={1}
-                          borderColor={
-                            selected ? "$borderColorFocus" : "$borderColor"
-                          }
-                        >
-                          <Text fontWeight="600">{picker.format(option)}</Text>
-                          <AnimatePresence>
-                            {selected ? (
-                              <YStack
-                                animation="quick"
-                                enterStyle={{ opacity: 0, scale: 0.8 }}
-                                exitStyle={{ opacity: 0, scale: 0.8 }}
-                              >
-                                <Check size={18} color={"$color"} />
-                              </YStack>
-                            ) : null}
-                          </AnimatePresence>
-                        </XStack>
-                      </Pressable>
-                    );
-                  })}
-              </YStack>
-              <XStack gap="$3" justify="space-between" mt="$2">
-                <Button
-                  flex={1}
-                  size="$5"
-                  bg="$background"
-                  onPress={() => {
-                    setPickerOpen(null);
-                    setPickerQuery("");
-                  }}
-                >
-                  <Button.Text fontWeight="600">Done</Button.Text>
-                </Button>
-              </XStack>
-            </YStack>
-          </Sheet.ScrollView>
-        </Sheet.Frame>
-      </Sheet>
+      {/* FAB — Create Listing (agents only) */}
+      {isAgent && (
+        <Pressable
+          onPress={() => router.push("/create-listing")}
+          accessibilityRole="button"
+          accessibilityLabel="Create listing"
+          style={{
+            position: "absolute",
+            bottom: 24,
+            right: 20,
+            width: 56,
+            height: 56,
+            borderRadius: 28,
+            backgroundColor: "#2563eb",
+            alignItems: "center",
+            justifyContent: "center",
+            elevation: 6,
+            shadowColor: "#000",
+            shadowOffset: { width: 0, height: 3 },
+            shadowOpacity: 0.25,
+            shadowRadius: 4,
+          }}
+        >
+          <Plus size={26} color="white" />
+        </Pressable>
+      )}
     </>
   );
 }

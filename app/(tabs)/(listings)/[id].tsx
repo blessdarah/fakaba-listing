@@ -14,39 +14,62 @@ import {
 } from "tamagui";
 import ListingCard from "components/ListingCard";
 import { Link, Stack, useLocalSearchParams } from "expo-router";
-import { useState } from "react";
+import { useRef, useState } from "react";
 import {
   Heart,
   MessageCircle,
+  Share2,
   Map as MapIcon,
   BedDouble,
   Bath,
   Ruler,
+  EyeOff,
+  Eye,
+  Trash2,
 } from "@tamagui/lucide-icons-2";
 import {
+  Animated,
   Dimensions,
   NativeScrollEvent,
   NativeSyntheticEvent,
   Linking,
   Alert,
-  Platform,
+  Share,
 } from "react-native";
-import { useListing, useListings } from "lib/query/useListings";
+import { useListing, useListings, useUpdateListingStatus, useDeleteListing } from "lib/query/useListings";
 import { useToggleFavorite } from "lib/query/useFavorites";
+import { useAuth } from "contexts/AuthContext";
+import { useTranslation } from "lib/i18n/useTranslation";
 import { formatRelativeTime } from "lib/utils";
+import { useRouter } from "expo-router";
+import { useToastController } from "@tamagui/toast";
 
 const { width } = Dimensions.get("window");
+
+const DEFAULT_AGENT_AVATAR =
+  "https://www.gravatar.com/avatar/?d=mp&s=200";
 
 const ListingDetailsScreen = () => {
   const { id } = useLocalSearchParams<{ id: string }>();
   const [activeIndex, setActiveIndex] = useState(0);
+
+  const { user } = useAuth();
+  const { t } = useTranslation();
+  const router = useRouter();
+  const toast = useToastController();
 
   // Use TanStack Query hooks
   const { data: listing, isLoading } = useListing(id);
   const { data: allListings = [] } = useListings();
   const { toggleFavorite, isFavorited } = useToggleFavorite();
 
+  const isOwner = !!user && !!listing && listing.ownerId === user.uid;
+  const userId = user?.uid ?? "";
+  const updateStatusMutation = useUpdateListingStatus(userId);
+  const deleteListingMutation = useDeleteListing(userId);
+
   const liked = isFavorited(id as string);
+  const scaleAnim = useRef(new Animated.Value(1)).current;
   const pricing = listing
     ? listing.type === "rent"
       ? listing.price / 1000 + "k/month"
@@ -69,33 +92,68 @@ const ListingDetailsScreen = () => {
   };
 
   async function sendWhatsAppMessage() {
-    // Deep link to the app first then fallback to web
-    // with a default message
-    const message = "Hello from Fakaba";
-    const tel = "237672374414";
-    const url = `whatsapp://send?phone=${tel}&text=${encodeURIComponent(
-      message || ""
-    )}`;
+    if (!listing) return;
+
+    const ownerName = listing.owner?.firstName ?? "there";
+    const message =
+      `Hi ${ownerName}, I found your listing "${listing.title}" ` +
+      `in ${listing.location} on Fakaba and I'm interested. ` +
+      `Is the ${listing.type === "rent" ? "rental" : "property"} ` +
+      `at ${pricing} FCFA still available? I'd love to know more details.`;
+
+    const tel = "237672374414"; // TODO: use owner phone when available
+    const encoded = encodeURIComponent(message);
+    const deepLink = `whatsapp://send?phone=${tel}&text=${encoded}`;
 
     try {
-      const supported = await Linking.canOpenURL(url);
+      const supported = await Linking.canOpenURL(deepLink);
       if (supported) {
-        await Linking.openURL(url);
+        await Linking.openURL(deepLink);
         return;
       }
 
-      const webUrl = `https://wa.me/${tel}?text=${encodeURIComponent(
-        message || ""
-      )}`;
-      await Linking.openURL(webUrl);
-    } catch (error) {
+      await Linking.openURL(`https://wa.me/${tel}?text=${encoded}`);
+    } catch {
       Alert.alert("Error", "Unable to open WhatsApp");
+    }
+  }
+
+  async function handleShareListing() {
+    if (!listing) return;
+
+    const typeLabel = listing.type === "rent" ? "Rental" : "For Sale";
+    const message =
+      `Check out this listing on Fakaba!\n\n` +
+      `${listing.title}\n` +
+      `${typeLabel} — ${pricing} FCFA\n` +
+      `${listing.address}, ${listing.location}\n` +
+      `${listing.bedrooms} beds · ${listing.bathrooms} baths · ${listing.size} m²`;
+
+    try {
+      await Share.share({ message });
+    } catch {
+      // User cancelled or share failed — no action needed
     }
   }
 
   const handleToggleFavorite = () => {
     if (!id) return;
     toggleFavorite(id as string);
+
+    Animated.sequence([
+      Animated.spring(scaleAnim, {
+        toValue: 1.4,
+        useNativeDriver: true,
+        speed: 50,
+        bounciness: 12,
+      }),
+      Animated.spring(scaleAnim, {
+        toValue: 1,
+        useNativeDriver: true,
+        speed: 30,
+        bounciness: 8,
+      }),
+    ]).start();
   };
 
   if (isLoading || !listing) {
@@ -153,22 +211,34 @@ const ListingDetailsScreen = () => {
             r={20}
             justify="flex-end"
             items="flex-start"
+            gap="$2"
           >
             <Button
               borderWidth={1}
-              bg={"$background"}
-              borderColor={"$borderColor"}
+              bg="$background"
+              borderColor="$borderColor"
               size="$4"
               circular
-              icon={
-                <Heart
-                  size={24}
-                  color={liked ? "red" : "white"}
-                  fill={liked ? "red" : "transparent"}
-                />
-              }
-              onPress={handleToggleFavorite}
+              icon={<Share2 size={22} color="$color" />}
+              onPress={handleShareListing}
             />
+            <Animated.View style={{ transform: [{ scale: scaleAnim }] }}>
+              <Button
+                borderWidth={1}
+                bg="$background"
+                borderColor="$borderColor"
+                size="$4"
+                circular
+                icon={
+                  <Heart
+                    size={24}
+                    color={liked ? "red" : "white"}
+                    fill={liked ? "red" : "transparent"}
+                  />
+                }
+                onPress={handleToggleFavorite}
+              />
+            </Animated.View>
           </XStack>
 
           {/* Bottom Overlay: Pagination Dots */}
@@ -310,7 +380,7 @@ const ListingDetailsScreen = () => {
                         (Array.isArray(listing?.owner?.imageUrls) &&
                         listing.owner.imageUrls.length > 0
                           ? listing.owner.imageUrls[0]
-                          : undefined)
+                          : DEFAULT_AGENT_AVATAR)
                       }
                     />
                     <Avatar.Fallback bg="gray" />
@@ -336,6 +406,102 @@ const ListingDetailsScreen = () => {
               </Button>
             </XStack>
           </YStack>
+
+          {/* Owner Management */}
+          {isOwner && (
+            <>
+              <Separator />
+              <YStack gap="$3">
+                <Text fontSize="$5" fontWeight="600">
+                  {t("myListings.title")}
+                </Text>
+                <XStack gap="$3">
+                  <Button
+                    flex={1}
+                    size="$4"
+                    bg={listing.status === "active" ? "$color3" : "$blue3"}
+                    rounded="$4"
+                    icon={
+                      listing.status === "active" ? (
+                        <EyeOff size={16} color="$color" />
+                      ) : (
+                        <Eye size={16} color="$blue9" />
+                      )
+                    }
+                    onPress={() => {
+                      const newStatus =
+                        listing.status === "active" ? "inactive" : "active";
+                      updateStatusMutation.mutate(
+                        { id: listing.id, status: newStatus },
+                        {
+                          onSuccess: () => {
+                            toast.show(
+                              newStatus === "active"
+                                ? t("myListings.publishSuccess")
+                                : t("myListings.unpublishSuccess")
+                            );
+                          },
+                          onError: () => {
+                            toast.show(t("common.error"), {
+                              message: t("myListings.statusError"),
+                            });
+                          },
+                        }
+                      );
+                    }}
+                  >
+                    <Button.Text
+                      fontWeight="600"
+                      color={
+                        listing.status === "active" ? "$color" : "$blue9"
+                      }
+                    >
+                      {listing.status === "active"
+                        ? t("myListings.unpublish")
+                        : t("myListings.publish")}
+                    </Button.Text>
+                  </Button>
+                  <Button
+                    flex={1}
+                    size="$4"
+                    bg="$red3"
+                    rounded="$4"
+                    icon={<Trash2 size={16} color="$red9" />}
+                    onPress={() => {
+                      Alert.alert(
+                        t("myListings.deleteConfirmTitle"),
+                        t("myListings.deleteConfirmMessage"),
+                        [
+                          { text: t("common.cancel"), style: "cancel" },
+                          {
+                            text: t("common.delete"),
+                            style: "destructive",
+                            onPress: () => {
+                              deleteListingMutation.mutate(listing.id, {
+                                onSuccess: () => {
+                                  toast.show(t("myListings.deleteSuccess"));
+                                  router.back();
+                                },
+                                onError: () => {
+                                  toast.show(t("common.error"), {
+                                    message: t("myListings.deleteError"),
+                                  });
+                                },
+                              });
+                            },
+                          },
+                        ]
+                      );
+                    }}
+                  >
+                    <Button.Text fontWeight="600" color="$red9">
+                      {t("myListings.deleteListing")}
+                    </Button.Text>
+                  </Button>
+                </XStack>
+              </YStack>
+            </>
+          )}
 
           {/* Similar Listings */}
           {similarListings.length > 0 && (

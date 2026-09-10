@@ -1,4 +1,5 @@
 import "../firebase.config";
+import "@tamagui/native/setup-expo-linear-gradient";
 
 import { useEffect } from "react";
 import { StatusBar, useColorScheme } from "react-native";
@@ -130,16 +131,28 @@ function RootLayoutNav() {
           }}
         />
         <Stack.Screen
-          name="profile"
+          name="agents"
+          options={{
+            headerShown: false,
+            headerBackTitle: "Back",
+          }}
+        />
+        <Stack.Screen
+          name="create-listing"
           options={{
             headerShown: false,
           }}
         />
         <Stack.Screen
-          name="agents"
+          name="my-listings"
           options={{
             headerShown: false,
-            headerBackTitle: "Back",
+          }}
+        />
+        <Stack.Screen
+          name="change-password"
+          options={{
+            headerShown: false,
           }}
         />
       </Stack>

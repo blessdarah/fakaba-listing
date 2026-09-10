@@ -43,3 +43,13 @@ export interface User extends BaseUserInfo {
   lastName?: string;
   favorites?: string[]; // Array of listing IDs
 }
+
+export interface Review {
+  id: string;
+  userId: string;
+  agentId: string;
+  rating: number;
+  comment: string;
+  userName: string;
+  createdAt: FireStoreTimestamp;
+}
