@@ -163,10 +163,16 @@ export const uploadListingImages = async (
   const urls: string[] = [];
 
   for (let i = 0; i < imageUris.length; i++) {
-    const response = await fetch(imageUris[i]);
+    const uri = imageUris[i];
+    const originalFilename = uri.split("/").pop()?.replace(/\.[^.]+$/, "") ?? "image";
+    const extension = uri.split(".").pop()?.split("?")[0] ?? "jpg";
+    const response = await fetch(uri);
     const blob = await response.blob();
-    const storageRef = ref(storage, `listings/${ownerId}/${timestamp}_${i}`);
-    await uploadBytes(storageRef, blob);
+    const storageRef = ref(
+      storage,
+      `properties/${ownerId}-${timestamp}-${i}-${originalFilename}.${extension}`
+    );
+    await uploadBytes(storageRef, blob, { contentType: "image/jpeg" });
     const downloadURL = await getDownloadURL(storageRef);
     urls.push(downloadURL);
   }

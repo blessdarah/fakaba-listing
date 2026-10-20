@@ -8,12 +8,11 @@ import { SetupProfile } from "components/setup/setup-profile";
 import { SetupInterests } from "components/setup/setup-interests";
 import { ArrowLeft, ArrowRight, CheckCircle } from "@tamagui/lucide-icons-2";
 import { useAuth } from "../contexts/AuthContext";
-import { router } from "expo-router";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 export default function SetupScreen() {
   const [step, setStep] = useState(1);
-  const { completeSetup } = useAuth();
+  const { completeSetup, updateProfileImage } = useAuth();
   const [accountType, setAccountType] = useState<
     "Individual" | "Company" | null
   >(null);
@@ -58,15 +57,18 @@ export default function SetupScreen() {
   }, [step, fadeAnim, slideAnim]);
 
   async function updateInfo() {
-    await completeSetup({
-      accountType: accountType ?? "Individual",
-      role: role ?? "client",
-      location,
-      firstName,
-      lastName,
-      interests,
-    });
-    router.replace("/(tabs)");
+    try {
+      await completeSetup({
+        accountType: accountType ?? "Individual",
+        role: role ?? "client",
+        location,
+        firstName,
+        lastName,
+        interests,
+      });
+    } catch (error) {
+      console.error("Setup completion error:", error);
+    }
   }
 
   return (
@@ -156,6 +158,7 @@ export default function SetupScreen() {
                   lastName={lastName}
                   onChangeFirstName={setFirstName}
                   onChangeLastName={setLastName}
+                  updateProfileImage={updateProfileImage}
                 />
               )}
 

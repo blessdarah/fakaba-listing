@@ -32,7 +32,6 @@ import {
   Dimensions,
   NativeScrollEvent,
   NativeSyntheticEvent,
-  Linking,
   Alert,
   Share,
 } from "react-native";
@@ -41,13 +40,11 @@ import { useToggleFavorite } from "lib/query/useFavorites";
 import { useAuth } from "contexts/AuthContext";
 import { useTranslation } from "lib/i18n/useTranslation";
 import { formatRelativeTime } from "lib/utils";
+import { openWhatsApp } from "lib/whatsapp";
 import { useRouter } from "expo-router";
 import { useToastController } from "@tamagui/toast";
 
 const { width } = Dimensions.get("window");
-
-const DEFAULT_AGENT_AVATAR =
-  "https://www.gravatar.com/avatar/?d=mp&s=200";
 
 const ListingDetailsScreen = () => {
   const { id } = useLocalSearchParams<{ id: string }>();
@@ -95,26 +92,20 @@ const ListingDetailsScreen = () => {
     if (!listing) return;
 
     const ownerName = listing.owner?.firstName ?? "there";
-    const message =
-      `Hi ${ownerName}, I found your listing "${listing.title}" ` +
-      `in ${listing.location} on Fakaba and I'm interested. ` +
-      `Is the ${listing.type === "rent" ? "rental" : "property"} ` +
-      `at ${pricing} FCFA still available? I'd love to know more details.`;
+    const message = t("whatsapp.listingMessage", {
+      name: ownerName,
+      title: listing.title,
+      location: listing.location,
+      type: listing.type === "rent" ? "rental" : "property",
+      price: pricing,
+    });
 
-    const tel = "237672374414"; // TODO: use owner phone when available
-    const encoded = encodeURIComponent(message);
-    const deepLink = `whatsapp://send?phone=${tel}&text=${encoded}`;
+    const result = await openWhatsApp(listing.owner?.phone, message);
 
-    try {
-      const supported = await Linking.canOpenURL(deepLink);
-      if (supported) {
-        await Linking.openURL(deepLink);
-        return;
-      }
-
-      await Linking.openURL(`https://wa.me/${tel}?text=${encoded}`);
-    } catch {
-      Alert.alert("Error", "Unable to open WhatsApp");
+    if (result === "noNumber") {
+      Alert.alert(t("whatsapp.noNumberTitle"), t("whatsapp.noNumberMessage"));
+    } else if (result === "unavailable") {
+      Alert.alert(t("common.error"), t("whatsapp.openFailed"));
     }
   }
 
@@ -374,16 +365,21 @@ const ListingDetailsScreen = () => {
                     borderWidth={2}
                     borderColor="#D4A017"
                   >
-                    <Avatar.Image
-                      src={
-                        listing?.owner?.profileImage ||
-                        (Array.isArray(listing?.owner?.imageUrls) &&
-                        listing.owner.imageUrls.length > 0
-                          ? listing.owner.imageUrls[0]
-                          : DEFAULT_AGENT_AVATAR)
-                      }
-                    />
-                    <Avatar.Fallback bg="gray" />
+                    {(listing?.owner?.profileImage ||
+                      (Array.isArray(listing?.owner?.imageUrls) &&
+                        listing.owner.imageUrls.length > 0)) ? (
+                      <Avatar.Image
+                        src={
+                          listing?.owner?.profileImage ||
+                          listing!.owner!.imageUrls[0]
+                        }
+                      />
+                    ) : null}
+                    <Avatar.Fallback bg="$blue10" items="center" justify="center">
+                      <Text color="white" fontSize="$5" fontWeight="700">
+                        {(listing?.owner?.firstName?.[0] || "A").toUpperCase()}
+                      </Text>
+                    </Avatar.Fallback>
                   </Avatar>
                 </Link>
                 <YStack>
@@ -395,15 +391,17 @@ const ListingDetailsScreen = () => {
                   </Text>
                 </YStack>
               </XStack>
-              <Button
-                onPress={sendWhatsAppMessage}
-                bg="#4CAF50"
-                rounded="$10"
-                icon={<MessageCircle size={18} />}
-                px="$4"
-              >
-                WhatsApp
-              </Button>
+              {!isOwner ? (
+                <Button
+                  onPress={sendWhatsAppMessage}
+                  bg="#4CAF50"
+                  rounded="$10"
+                  icon={<MessageCircle size={18} />}
+                  px="$4"
+                >
+                  WhatsApp
+                </Button>
+              ) : null}
             </XStack>
           </YStack>
 

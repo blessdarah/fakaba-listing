@@ -105,7 +105,7 @@ function FilterSection({
 // --- Main screen ---
 
 export default function TabOneScreen() {
-  const { user, isAgent } = useAuth();
+  const { user, userProfile, isAgent } = useAuth();
   const { t } = useTranslation();
   const router = useRouter();
 
@@ -256,9 +256,14 @@ export default function TabOneScreen() {
           <XStack items="center" justify="space-between" width="100%">
             <YStack gap="$1.5">
               <Text fontSize="$7" fontWeight="bold" color="$color">
-                {user?.isAnonymous || !user?.displayName
-                  ? t("home.defaultGreeting")
-                  : t("home.greeting", { name: user.displayName })}
+                {(() => {
+                  const displayName =
+                    `${userProfile?.firstName ?? ""} ${userProfile?.lastName ?? ""}`.trim() ||
+                    user?.displayName;
+                  return user?.isAnonymous || !displayName
+                    ? t("home.defaultGreeting")
+                    : t("home.greeting", { name: displayName });
+                })()}
               </Text>
               <Text color="$color" fontSize="$5">
                 {t("home.welcomeBack")}
@@ -277,13 +282,16 @@ export default function TabOneScreen() {
                 borderColor="$blue10"
                 borderWidth={2}
               >
-                <Avatar.Image
-                  src={
-                    user?.photoURL ||
-                    "https://images.unsplash.com/photo-1531384441138-2736e62e0919?&w=100&h=100&dpr=2&q=80"
-                  }
-                />
-                <Avatar.Fallback delayMs={600} bg="$blue10" />
+                {(userProfile?.profileImage || user?.photoURL) ? (
+                  <Avatar.Image
+                    src={userProfile?.profileImage ?? user?.photoURL!}
+                  />
+                ) : null}
+                <Avatar.Fallback bg="$blue10" items="center" justify="center">
+                  <Text color="white" fontSize="$5" fontWeight="700">
+                    {(userProfile?.firstName?.[0] || user?.displayName?.[0] || "U").toUpperCase()}
+                  </Text>
+                </Avatar.Fallback>
               </Avatar>
             </Pressable>
           </XStack>
@@ -302,11 +310,13 @@ export default function TabOneScreen() {
               flex={1}
               size="$3"
               placeholder={t("home.searchPlaceholder")}
+              placeholderTextColor="$color8"
               value={searchQuery}
               onChangeText={setSearchQuery}
               bg="transparent"
               borderWidth={0}
               py="$2"
+              color="$color"
             />
             <Pressable onPress={openSheet} accessibilityRole="button" accessibilityLabel={t("filter.title")}>
               <View
@@ -407,9 +417,11 @@ export default function TabOneScreen() {
                 Top agents
               </Text>
               <Link href="/agents" asChild>
-                <Text color="$blue8" fontWeight="600">
-                  See all
-                </Text>
+                <Pressable>
+                  <Text color="$blue8" fontWeight="600">
+                    See all
+                  </Text>
+                </Pressable>
               </Link>
             </XStack>
             <ScrollView horizontal showsHorizontalScrollIndicator={false}>
@@ -441,27 +453,32 @@ export default function TabOneScreen() {
                             borderColor="$yellow10"
                             borderWidth={2}
                           >
-                            <Avatar.Image
-                              src={
-                                (agent as any).profileImage ||
-                                (agent as any).photoURL ||
-                                (agent as any).imageUrls?.[0] ||
-                                "https://images.unsplash.com/photo-1531384441138-2736e62e0919?&w=100&h=100&dpr=2&q=80"
-                              }
-                            />
-                            <Avatar.Fallback delayMs={600} bg="$blue10" />
+                            {(agent.profileImage || agent.imageUrls?.[0]) ? (
+                              <Avatar.Image
+                                src={agent.profileImage || agent.imageUrls[0]}
+                              />
+                            ) : null}
+                            <Avatar.Fallback
+                              bg="$blue10"
+                              items="center"
+                              justify="center"
+                            >
+                              <Text color="white" fontSize="$5" fontWeight="700">
+                                {(agent.firstName?.[0] ||
+                                  "A"
+                                ).toUpperCase()}
+                              </Text>
+                            </Avatar.Fallback>
                           </Avatar>
                           <YStack flex={1} gap="$1">
                             <Text fontWeight="600">
-                              {(agent as any).displayName ||
-                                `${(agent as any).firstName ?? ""} ${(agent as any).lastName ?? ""}`.trim() ||
-                                (agent as any).name ||
+                              {`${agent.firstName ?? ""} ${agent.lastName ?? ""}`.trim() ||
                                 "Agent"}
                             </Text>
                             <XStack gap="$1" items="center">
                               <MapPin size={14} color="$color8" />
                               <Text color="$color8" fontSize="$2">
-                                {(agent as any).location || "Location"}
+                                {agent.location || "Location"}
                               </Text>
                             </XStack>
                           </YStack>

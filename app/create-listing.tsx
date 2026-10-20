@@ -160,8 +160,14 @@ export default function CreateListingScreen() {
     });
 
     if (!result.canceled) {
+      const jpegAssets = result.assets.filter(
+        (a) => !a.mimeType || a.mimeType === "image/jpeg" || a.mimeType === "image/jpg"
+      );
+      if (jpegAssets.length < result.assets.length) {
+        Alert.alert(t("common.error"), "Only JPEG images are allowed");
+      }
       setImageUris((prev) =>
-        [...prev, ...result.assets.map((a) => a.uri)].slice(0, 10)
+        [...prev, ...jpegAssets.map((a) => a.uri)].slice(0, 10)
       );
     }
   };

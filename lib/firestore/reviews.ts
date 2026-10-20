@@ -37,6 +37,7 @@ export const createReview = async (review: {
   rating: number;
   comment: string;
   userName: string;
+  userImage?: string;
 }): Promise<Review> => {
   try {
     const docRef = await addDoc(collection(db, "reviews"), {
