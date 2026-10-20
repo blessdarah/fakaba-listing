@@ -57,9 +57,14 @@ const Providers = ({ children }: { children: React.ReactNode }) => {
   return <Provider>{children}</Provider>;
 };
 
-const PUBLIC_SEGMENTS = ["sign-in", "sign-up", "setup"];
+const PUBLIC_SEGMENTS = ["sign-in", "sign-up", "setup", "verify-email"];
 
-function useProtectedRoute(user: any, loading: boolean, needsSetup: boolean) {
+function useProtectedRoute(
+  user: any,
+  loading: boolean,
+  needsSetup: boolean,
+  needsEmailVerification: boolean
+) {
   const segments = useSegments();
   const navigationState = useRootNavigationState();
 
@@ -71,20 +76,22 @@ function useProtectedRoute(user: any, loading: boolean, needsSetup: boolean) {
 
     if (!user && !inPublicRoute) {
       router.replace("/sign-in");
-    } else if (user && needsSetup && segments[0] !== "setup") {
+    } else if (user && needsEmailVerification && segments[0] !== "verify-email") {
+      router.replace("/verify-email");
+    } else if (user && !needsEmailVerification && needsSetup && segments[0] !== "setup") {
       router.replace("/setup");
-    } else if (user && !needsSetup && inPublicRoute) {
+    } else if (user && !needsEmailVerification && !needsSetup && inPublicRoute) {
       router.replace("/(tabs)");
     }
-  }, [user, loading, segments, navigationState?.key, needsSetup]);
+  }, [user, loading, segments, navigationState?.key, needsSetup, needsEmailVerification]);
 }
 
 function RootLayoutNav() {
   const colorScheme = useColorScheme();
   const theme = useTheme();
-  const { user, loading, needsSetup } = useAuth();
+  const { user, loading, needsSetup, needsEmailVerification } = useAuth();
 
-  useProtectedRoute(user, loading, needsSetup);
+  useProtectedRoute(user, loading, needsSetup, needsEmailVerification);
 
   if (loading) {
     return null;
@@ -108,6 +115,12 @@ function RootLayoutNav() {
         />
         <Stack.Screen
           name="sign-up"
+          options={{
+            headerShown: false,
+          }}
+        />
+        <Stack.Screen
+          name="verify-email"
           options={{
             headerShown: false,
           }}
@@ -139,6 +152,12 @@ function RootLayoutNav() {
         />
         <Stack.Screen
           name="create-listing"
+          options={{
+            headerShown: false,
+          }}
+        />
+        <Stack.Screen
+          name="create-service"
           options={{
             headerShown: false,
           }}

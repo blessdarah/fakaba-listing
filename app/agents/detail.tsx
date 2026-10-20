@@ -33,6 +33,8 @@ import { useUser } from "lib/query/useUsers";
 import { useListingsByUser } from "lib/query/useListings";
 import { useReviewsByAgent, useCreateReview } from "lib/query/useReviews";
 import { useAuth } from "contexts/AuthContext";
+import { useTranslation } from "lib/i18n/useTranslation";
+import { openWhatsApp, normalizePhone } from "lib/whatsapp";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import type { User, Review } from "lib/types";
 
@@ -100,6 +102,9 @@ function ReviewCard({ review }: { review: Review }) {
     <YStack bg="$color2" rounded="$5" p="$4" gap="$3">
       <XStack gap="$3" items="center">
         <Avatar circular size="$5">
+          {review.userImage ? (
+            <Avatar.Image src={review.userImage} />
+          ) : null}
           <Avatar.Fallback
             bg={color as any}
             items="center"
@@ -138,6 +143,7 @@ export default function AgentDetailScreen() {
   const insets = useSafeAreaInsets();
   const { id } = useLocalSearchParams<{ id: string }>();
   const { user } = useAuth();
+  const { t } = useTranslation();
   const { data: agent, isLoading: agentLoading } = useUser(id || "");
   const { data: listings = [], isLoading: listingsLoading } =
     useListingsByUser(id || "");
@@ -184,6 +190,7 @@ export default function AgentDetailScreen() {
         rating: reviewRating,
         comment: reviewText.trim(),
         userName,
+        userImage: user.photoURL || undefined,
       },
       {
         onSuccess: () => {
@@ -207,37 +214,38 @@ export default function AgentDetailScreen() {
   const displayedListings = listings.slice(0, 3);
 
   // -- Contact handlers -----------------------------------------------------
-  const handleWhatsApp = () => {
-    const phone = (agent as any)?.phone;
-    if (!phone) {
-      Alert.alert("No phone number", "This agent has not added a phone number.");
-      return;
+  const handleWhatsApp = async () => {
+    const message = t("whatsapp.agentMessage", {
+      name: agent?.firstName ?? agentName ?? "there",
+    });
+    const result = await openWhatsApp(agent?.phone, message);
+
+    if (result === "noNumber") {
+      Alert.alert(t("whatsapp.noNumberTitle"), t("whatsapp.noNumberMessage"));
+    } else if (result === "unavailable") {
+      Alert.alert(t("common.error"), t("whatsapp.openFailed"));
     }
-    const url = `whatsapp://send?phone=${phone}`;
-    Linking.openURL(url).catch(() =>
-      Alert.alert("Error", "Could not open WhatsApp.")
-    );
   };
 
   const handleEmail = () => {
     const email = agent?.email;
     if (!email) {
-      Alert.alert("No email", "This agent has not added an email address.");
+      Alert.alert(t("whatsapp.noEmailTitle"), t("whatsapp.noEmailMessage"));
       return;
     }
     Linking.openURL(`mailto:${email}`).catch(() =>
-      Alert.alert("Error", "Could not open email client.")
+      Alert.alert(t("common.error"), t("whatsapp.emailFailed"))
     );
   };
 
   const handleCall = () => {
-    const phone = (agent as any)?.phone;
-    if (!phone) {
-      Alert.alert("No phone number", "This agent has not added a phone number.");
+    const digits = normalizePhone(agent?.phone);
+    if (!digits) {
+      Alert.alert(t("whatsapp.noNumberTitle"), t("whatsapp.noNumberMessage"));
       return;
     }
-    Linking.openURL(`tel:${phone}`).catch(() =>
-      Alert.alert("Error", "Could not make a call.")
+    Linking.openURL(`tel:${digits}`).catch(() =>
+      Alert.alert(t("common.error"), t("whatsapp.callFailed"))
     );
   };
 

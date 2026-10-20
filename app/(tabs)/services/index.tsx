@@ -1,41 +1,18 @@
-import { YStack, H1, Text, XStack, View } from "tamagui";
-import { Pressable, StatusBar, useColorScheme } from "react-native";
-import { Image, ScrollView } from "react-native";
-import { Link } from "expo-router";
-import { ChevronRight, Sparkles } from "@tamagui/lucide-icons-2";
+import { YStack, H1, Text, XStack, View, Spinner } from "tamagui";
+import { Pressable, StatusBar, useColorScheme, Image } from "react-native";
+import { ScrollView } from "react-native";
+import { Link, useRouter } from "expo-router";
+import { ChevronRight, Sparkles, Plus } from "@tamagui/lucide-icons-2";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-
-const SERVICES = [
-  {
-    id: 1,
-    title: "Consulting",
-    icon: require("../../../assets/images/consult.jpg"),
-  },
-  {
-    id: 2,
-    title: "Property Management",
-    icon: require("../../../assets/images/pm.jpg"),
-  },
-  {
-    id: 3,
-    title: "Land certification",
-    icon: require("../../../assets/images/lc.jpg"),
-  },
-  {
-    id: 4,
-    title: "Construction",
-    icon: require("../../../assets/images/construction.jpg"),
-  },
-  {
-    id: 5,
-    title: "Property development",
-    icon: require("../../../assets/images/pd.jpg"),
-  },
-];
+import { useServices } from "lib/query/useServices";
+import { useAuth } from "contexts/AuthContext";
 
 export default function ServicesScreen() {
   const insets = useSafeAreaInsets();
   const colorScheme = useColorScheme();
+  const router = useRouter();
+  const { data: services = [], isLoading } = useServices();
+  const { isAdmin } = useAuth();
 
   return (
     <YStack flex={1} bg="$background" p={0} m={0}>
@@ -90,50 +67,96 @@ export default function ServicesScreen() {
             We have a suite of services designed for every step of your journey.
           </Text>
 
-          {/* Service Cards */}
-          <YStack gap="$3">
-            {SERVICES.map((service) => (
-              <Link
-                key={service.id.toString()}
-                href={`/services/${service.id}`}
-                asChild
-              >
-                <Pressable style={({ pressed }) => ({ opacity: pressed ? 0.7 : 1 })}>
-                  <YStack
-                    bg="$background"
-                    rounded="$6"
-                    overflow="hidden"
-                    borderColor="$borderColor"
-                    borderWidth={1}
+          {isLoading ? (
+            <YStack items="center" justify="center" py="$6">
+              <Spinner size="large" color="$blue9" />
+            </YStack>
+          ) : services.length === 0 ? (
+            <YStack items="center" justify="center" py="$8" gap="$3">
+              <Text fontSize={16} fontWeight="600" color="$color8">
+                No services available
+              </Text>
+              <Text fontSize={14} color="$color8" textAlign="center">
+                Services will appear here once they are added.
+              </Text>
+            </YStack>
+          ) : (
+            <YStack gap="$3">
+              {services.map((service) => (
+                <Link
+                  key={service.id}
+                  href={`/services/${service.id}`}
+                  asChild
+                >
+                  <Pressable
+                    style={({ pressed }) => ({ opacity: pressed ? 0.7 : 1 })}
                   >
-                    <XStack items="center" gap="$3" p="$3">
-                      <View width={92} height={70} rounded="$4" overflow="hidden">
-                        <Image
-                          source={service.icon}
-                          style={{
-                            width: "100%",
-                            height: "100%",
-                            resizeMode: "cover",
-                          }}
-                        />
-                      </View>
-                      <YStack flex={1} gap="$1">
-                        <Text fontSize={16} fontWeight="700" color="$color">
-                          {service.title}
-                        </Text>
-                        <Text fontSize="$3" color="$color8">
-                          Learn more about this service
-                        </Text>
-                      </YStack>
-                      <ChevronRight size={20} color="$color8" />
-                    </XStack>
-                  </YStack>
-                </Pressable>
-              </Link>
-            ))}
-          </YStack>
+                    <YStack
+                      bg="$background"
+                      rounded="$6"
+                      overflow="hidden"
+                      borderColor="$borderColor"
+                      borderWidth={1}
+                    >
+                      <XStack items="center" gap="$3" p="$3">
+                        <View
+                          width={92}
+                          height={70}
+                          rounded="$4"
+                          overflow="hidden"
+                        >
+                          <Image
+                            source={{ uri: service.imageUrl }}
+                            style={{
+                              width: "100%",
+                              height: "100%",
+                              resizeMode: "cover",
+                            }}
+                          />
+                        </View>
+                        <YStack flex={1} gap="$1">
+                          <Text fontSize={16} fontWeight="700" color="$color">
+                            {service.title}
+                          </Text>
+                          <Text fontSize="$3" color="$color8">
+                            Learn more about this service
+                          </Text>
+                        </YStack>
+                        <ChevronRight size={20} color="$color8" />
+                      </XStack>
+                    </YStack>
+                  </Pressable>
+                </Link>
+              ))}
+            </YStack>
+          )}
         </YStack>
       </ScrollView>
+
+      {/* FAB for admins */}
+      {isAdmin && (
+        <Pressable
+          onPress={() => router.push("/create-service")}
+          style={{
+            position: "absolute",
+            bottom: insets.bottom + 24,
+            right: 24,
+            width: 56,
+            height: 56,
+            borderRadius: 28,
+            backgroundColor: "#3B82F6",
+            alignItems: "center",
+            justifyContent: "center",
+            elevation: 6,
+            shadowColor: "#000",
+            shadowOffset: { width: 0, height: 2 },
+            shadowOpacity: 0.25,
+            shadowRadius: 4,
+          }}
+        >
+          <Plus size={24} color="white" />
+        </Pressable>
+      )}
     </YStack>
   );
 }

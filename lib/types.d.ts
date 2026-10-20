@@ -29,8 +29,9 @@ interface BaseUserInfo {
   hasOnboarded: boolean;
   interests?: string[];
   location?: string;
+  phone?: string;
   profileImage?: string;
-  role?: "agent" | "investor";
+  role?: "admin" | "agent" | "investor";
   userRole?: "agent" | "investor";
   updatedAt?: FireStoreTimestamp;
 }
@@ -44,6 +45,22 @@ export interface User extends BaseUserInfo {
   favorites?: string[]; // Array of listing IDs
 }
 
+export interface ServiceFAQ {
+  question: string;
+  answer: string;
+}
+
+export interface Service {
+  id: string;
+  title: string;
+  description: string;
+  imageUrl: string;
+  faqs: ServiceFAQ[];
+  status: "active" | "inactive";
+  createdAt: FireStoreTimestamp;
+  updatedAt: FireStoreTimestamp;
+}
+
 export interface Review {
   id: string;
   userId: string;
@@ -51,5 +68,6 @@ export interface Review {
   rating: number;
   comment: string;
   userName: string;
+  userImage?: string;
   createdAt: FireStoreTimestamp;
 }

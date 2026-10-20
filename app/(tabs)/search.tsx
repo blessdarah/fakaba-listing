@@ -425,11 +425,13 @@ export default function SearchScreen() {
               flex={1}
               size="$3"
               placeholder={t("search.placeholder")}
+              placeholderTextColor="$color8"
               value={query}
               onChangeText={handleSearch}
               bg="transparent"
               borderWidth={0}
               py="$2"
+              color="$color"
             />
             <Pressable onPress={openSheet} accessibilityRole="button" accessibilityLabel={t("filter.title")}>
               <View

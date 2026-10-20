@@ -105,11 +105,13 @@ export default function AgentsScreen() {
             flex={1}
             size="$3"
             placeholder="Search by name or location"
+            placeholderTextColor="$color8"
             value={query}
             onChangeText={handleSearch}
             bg="transparent"
             borderWidth={0}
             py="$2"
+            color="$color"
           />
         </XStack>
       </YStack>

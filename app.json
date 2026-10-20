@@ -24,8 +24,6 @@
       "infoPlist": {
         "CFBundleLocalizations": [
           "en",
-          "fr",
-          "en",
           "fr"
         ],
         "ITSAppUsesNonExemptEncryption": false
@@ -37,7 +35,7 @@
         "foregroundImage": "./assets/images/adaptive-icon.png",
         "backgroundColor": "#ffffff"
       },
-      "package": "com.blessdaeah.fakaba"
+      "package": "fakaba.app"
     },
     "web": {
       "bundler": "metro",
@@ -83,9 +81,9 @@
     "extra": {
       "router": {},
       "eas": {
-        "projectId": "3ff7039b-fd59-46be-ac29-42a647394861"
+        "projectId": "b506a58b-6fc4-445e-a7b1-4a18937a1e26"
       }
     },
-    "owner": "fakaba"
+    "owner": "darah-b-studios"
   }
 }

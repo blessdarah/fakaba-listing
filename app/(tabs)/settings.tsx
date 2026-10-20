@@ -8,13 +8,16 @@ import {
   ScrollView,
   Avatar,
   Spinner,
+  Sheet,
+  Input,
+  Button,
 } from "tamagui";
 import { useAuth } from "../../contexts/AuthContext";
 import {
   useThemePreference,
   type ThemePreference,
 } from "../../contexts/ThemeContext";
-import { Pressable } from "react-native";
+import { Alert, Image, Pressable } from "react-native";
 import { useTranslation } from "lib/i18n/useTranslation";
 import * as ImagePicker from "expo-image-picker";
 import {
@@ -34,6 +37,8 @@ import {
   Check,
   Camera,
   UserPlus,
+  Trash2,
+  X,
 } from "@tamagui/lucide-icons-2";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useToastController } from "@tamagui/toast";
@@ -140,7 +145,7 @@ const SettingsRow = ({
 );
 
 export default function SettingsScreen() {
-  const { user, signOut, updateProfileImage, isAgent, becomeAgent } = useAuth();
+  const { user, userProfile, signOut, deleteAccount, updateProfileImage, updateUserProfile, isAgent, becomeAgent } = useAuth();
   const { t, locale, changeLocale, availableLocales } = useTranslation();
   const { themePreference, setThemePreference } = useThemePreference();
   const toast = useToastController();
@@ -149,16 +154,31 @@ export default function SettingsScreen() {
   const [themeOpen, setThemeOpen] = useState(false);
   const [langOpen, setLangOpen] = useState(false);
   const [uploading, setUploading] = useState(false);
+  const [pendingImage, setPendingImage] = useState<string | null>(null);
   const [becomingAgent, setBecomingAgent] = useState(false);
+
+  // -- Name edit sheet state --
+  const [nameSheetOpen, setNameSheetOpen] = useState(false);
+  const [editFirstName, setEditFirstName] = useState("");
+  const [editLastName, setEditLastName] = useState("");
+  const [savingName, setSavingName] = useState(false);
+
+  // -- WhatsApp edit sheet state --
+  const [whatsappSheetOpen, setWhatsappSheetOpen] = useState(false);
+  const [editPhone, setEditPhone] = useState("");
+  const [savingPhone, setSavingPhone] = useState(false);
 
   // --- Data ---
   const { data: myListings = [] } = useMyListings(user?.uid ?? "");
 
   // --- Computed values ---
+  const fullName =
+    `${userProfile?.firstName ?? ""} ${userProfile?.lastName ?? ""}`.trim() ||
+    user?.displayName ||
+    null;
   const listingsLabel = t("profile.listingsCount", {
     count: myListings.length,
   });
-  const whatsappValue = user?.phoneNumber ?? t("profile.whatsappValue");
   const fallbackValue = t("profile.notProvided");
   const ratingValue = 4.8;
   const reviewsCount = 42;
@@ -181,10 +201,6 @@ export default function SettingsScreen() {
     }
   }, [locale, user?.metadata?.creationTime]);
 
-  const avatarSource =
-    user?.photoURL ??
-    "https://images.unsplash.com/photo-1531384441138-2736e62e0919?&w=200&h=200&dpr=2&q=80";
-
   const currentLanguage = LANGUAGE_OPTIONS.find((l) => l.code === locale);
   const currentThemeLabel =
     THEME_OPTIONS.find((o) => o.value === themePreference)?.label ?? "System";
@@ -199,6 +215,31 @@ export default function SettingsScreen() {
     }
   };
 
+  const handleDeleteAccount = () => {
+    Alert.alert(
+      t("settings.deleteAccountConfirmTitle"),
+      t("settings.deleteAccountConfirmMessage"),
+      [
+        { text: t("common.cancel"), style: "cancel" },
+        {
+          text: t("common.delete"),
+          style: "destructive",
+          onPress: async () => {
+            try {
+              await deleteAccount();
+              toast.show(t("settings.deleteAccountSuccess"));
+            } catch (error) {
+              console.error("Delete account error:", error);
+              toast.show(t("common.error"), {
+                message: t("settings.deleteAccountError"),
+              });
+            }
+          },
+        },
+      ]
+    );
+  };
+
   const handlePickImage = async () => {
     const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
     if (status !== "granted") {
@@ -211,16 +252,25 @@ export default function SettingsScreen() {
     const result = await ImagePicker.launchImageLibraryAsync({
       mediaTypes: ["images"],
       allowsEditing: true,
+      allowsMultipleSelection: false,
+      selectionLimit: 1,
       aspect: [1, 1],
       quality: 0.7,
     });
 
     if (result.canceled) return;
 
+    setPendingImage(result.assets[0].uri);
+  };
+
+  const handleConfirmImage = async () => {
+    if (!pendingImage) return;
+
     setUploading(true);
     try {
-      await updateProfileImage(result.assets[0].uri);
+      await updateProfileImage(pendingImage);
       toast.show(t("profile.photoUpdated"));
+      setPendingImage(null);
     } catch (error) {
       console.error("Profile image upload error:", error);
       toast.show(t("common.error"), {
@@ -245,7 +295,52 @@ export default function SettingsScreen() {
     }
   };
 
+  const handleOpenNameSheet = () => {
+    setEditFirstName(userProfile?.firstName ?? "");
+    setEditLastName(userProfile?.lastName ?? "");
+    setNameSheetOpen(true);
+  };
+
+  const handleSaveName = async () => {
+    setSavingName(true);
+    try {
+      await updateUserProfile({
+        firstName: editFirstName.trim(),
+        lastName: editLastName.trim(),
+      });
+      toast.show(t("profile.profileUpdated"));
+      setNameSheetOpen(false);
+    } catch {
+      toast.show(t("common.error"), {
+        message: t("profile.profileUpdateFailed"),
+      });
+    } finally {
+      setSavingName(false);
+    }
+  };
+
+  const handleOpenWhatsappSheet = () => {
+    setEditPhone(userProfile?.phone ?? "");
+    setWhatsappSheetOpen(true);
+  };
+
+  const handleSavePhone = async () => {
+    setSavingPhone(true);
+    try {
+      await updateUserProfile({ phone: editPhone.trim() });
+      toast.show(t("profile.profileUpdated"));
+      setWhatsappSheetOpen(false);
+    } catch {
+      toast.show(t("common.error"), {
+        message: t("profile.profileUpdateFailed"),
+      });
+    } finally {
+      setSavingPhone(false);
+    }
+  };
+
   return (
+    <>
     <SafeAreaView style={{ flex: 1 }}>
       <ScrollView showsVerticalScrollIndicator={false}>
         <YStack flex={1} p="$4" gap="$5" pb="$8">
@@ -262,8 +357,14 @@ export default function SettingsScreen() {
               <Pressable onPress={handlePickImage} disabled={uploading}>
                 <View position="relative">
                   <Avatar circular size="$7" borderColor="$blue10" borderWidth={3}>
-                    <Avatar.Image src={avatarSource} />
-                    <Avatar.Fallback delayMs={600} bg="$blue10" />
+                    {(userProfile?.profileImage || user?.photoURL) ? (
+                      <Avatar.Image src={userProfile?.profileImage ?? user?.photoURL!} />
+                    ) : null}
+                    <Avatar.Fallback bg="$blue10" items="center" justify="center">
+                      <Text color="white" fontSize="$8" fontWeight="700">
+                        {(userProfile?.firstName?.[0] || user?.displayName?.[0] || "U").toUpperCase()}
+                      </Text>
+                    </Avatar.Fallback>
                   </Avatar>
                   {uploading ? (
                     <View
@@ -298,7 +399,7 @@ export default function SettingsScreen() {
 
               <YStack flex={1} gap="$1">
                 <Text fontSize="$6" fontWeight="700">
-                  {user?.displayName || fallbackValue}
+                  {fullName || fallbackValue}
                 </Text>
                 {user?.email ? (
                   <Text color="$color10">{user.email}</Text>
@@ -353,7 +454,9 @@ export default function SettingsScreen() {
               icon={<User size={18} color="white" />}
               iconBg="$blue9"
               label={t("profile.displayName")}
-              value={user?.displayName || fallbackValue}
+              value={fullName || fallbackValue}
+              showChevron
+              onPress={handleOpenNameSheet}
             />
             <SettingsRow
               icon={<Globe size={18} color="white" />}
@@ -365,9 +468,9 @@ export default function SettingsScreen() {
               icon={<MessageCircle size={18} color="white" />}
               iconBg="$green9"
               label={t("profile.whatsappContact")}
-              value={whatsappValue}
+              value={userProfile?.phone || t("whatsapp.notSet")}
               showChevron
-              onPress={() => {}}
+              onPress={handleOpenWhatsappSheet}
               isLast
             />
           </SectionCard>
@@ -576,6 +679,13 @@ export default function SettingsScreen() {
               label={t("settings.resetPassword")}
               showChevron
               onPress={() => router.push("/change-password")}
+            />
+            <SettingsRow
+              icon={<Trash2 size={18} color="white" />}
+              iconBg="$red9"
+              label={t("settings.deleteAccount")}
+              showChevron
+              onPress={handleDeleteAccount}
               isLast
             />
           </SectionCard>
@@ -611,5 +721,247 @@ export default function SettingsScreen() {
         </YStack>
       </ScrollView>
     </SafeAreaView>
+
+    {/* ---- Edit Display Name Sheet ---- */}
+    <Sheet
+      modal
+      open={nameSheetOpen}
+      onOpenChange={setNameSheetOpen}
+      snapPoints={[55]}
+      snapPointsMode="percent"
+      dismissOnSnapToBottom
+      zIndex={100_000}
+    >
+      <Sheet.Overlay
+        bg="rgba(0,0,0,0.5)"
+        enterStyle={{ opacity: 0 }}
+        exitStyle={{ opacity: 0 }}
+      />
+      <Sheet.Handle bg="$borderColor" />
+      <Sheet.Frame bg="$background" rounded="$6">
+        <YStack p="$4" gap="$4" pb="$8">
+          <XStack items="center" justify="space-between">
+            <Text fontSize="$6" fontWeight="700">
+              {t("profile.editDisplayName")}
+            </Text>
+            <Pressable onPress={() => setNameSheetOpen(false)}>
+              <View
+                width={32}
+                height={32}
+                rounded={16}
+                bg="$color3"
+                items="center"
+                justify="center"
+              >
+                <X size={18} color="$color" />
+              </View>
+            </Pressable>
+          </XStack>
+
+          <YStack gap="$2">
+            <Text fontWeight="500">{t("profile.firstName")}</Text>
+            <Input
+              size="$4"
+              bg="$color2"
+              borderColor="$borderColor"
+              rounded="$4"
+              value={editFirstName}
+              onChangeText={setEditFirstName}
+              placeholder={t("profile.firstName")}
+              placeholderTextColor="$color7"
+              autoFocus
+            />
+          </YStack>
+
+          <YStack gap="$2">
+            <Text fontWeight="500">{t("profile.lastName")}</Text>
+            <Input
+              size="$4"
+              bg="$color2"
+              borderColor="$borderColor"
+              rounded="$4"
+              value={editLastName}
+              onChangeText={setEditLastName}
+              placeholder={t("profile.lastName")}
+              placeholderTextColor="$color7"
+            />
+          </YStack>
+
+          <Button
+            bg="$blue9"
+            color="white"
+            rounded="$4"
+            size="$5"
+            onPress={handleSaveName}
+            disabled={savingName}
+          >
+            {savingName ? (
+              <Spinner size="small" color="white" />
+            ) : (
+              <Button.Text fontWeight="600" color="white">
+                {t("common.save")}
+              </Button.Text>
+            )}
+          </Button>
+        </YStack>
+      </Sheet.Frame>
+    </Sheet>
+
+    {/* ---- Edit WhatsApp Sheet ---- */}
+    <Sheet
+      modal
+      open={whatsappSheetOpen}
+      onOpenChange={setWhatsappSheetOpen}
+      snapPoints={[45]}
+      snapPointsMode="percent"
+      dismissOnSnapToBottom
+      zIndex={100_000}
+    >
+      <Sheet.Overlay
+        bg="rgba(0,0,0,0.5)"
+        enterStyle={{ opacity: 0 }}
+        exitStyle={{ opacity: 0 }}
+      />
+      <Sheet.Handle bg="$borderColor" />
+      <Sheet.Frame bg="$background" rounded="$6">
+        <YStack p="$4" gap="$4" pb="$8">
+          <XStack items="center" justify="space-between">
+            <Text fontSize="$6" fontWeight="700">
+              {t("profile.editWhatsapp")}
+            </Text>
+            <Pressable onPress={() => setWhatsappSheetOpen(false)}>
+              <View
+                width={32}
+                height={32}
+                rounded={16}
+                bg="$color3"
+                items="center"
+                justify="center"
+              >
+                <X size={18} color="$color" />
+              </View>
+            </Pressable>
+          </XStack>
+
+          <YStack gap="$2">
+            <Text fontWeight="500">{t("profile.whatsappContact")}</Text>
+            <Input
+              size="$4"
+              bg="$color2"
+              borderColor="$borderColor"
+              rounded="$4"
+              value={editPhone}
+              onChangeText={setEditPhone}
+              placeholder={t("profile.whatsappPlaceholder")}
+              placeholderTextColor="$color7"
+              keyboardType="phone-pad"
+              autoFocus
+            />
+          </YStack>
+
+          <Button
+            bg="$blue9"
+            color="white"
+            rounded="$4"
+            size="$5"
+            onPress={handleSavePhone}
+            disabled={savingPhone}
+          >
+            {savingPhone ? (
+              <Spinner size="small" color="white" />
+            ) : (
+              <Button.Text fontWeight="600" color="white">
+                {t("common.save")}
+              </Button.Text>
+            )}
+          </Button>
+        </YStack>
+      </Sheet.Frame>
+    </Sheet>
+
+    {/* ---- Image Preview Sheet ---- */}
+    <Sheet
+      modal
+      open={!!pendingImage}
+      onOpenChange={(open: boolean) => {
+        if (!open) setPendingImage(null);
+      }}
+      snapPoints={[60]}
+      snapPointsMode="percent"
+      dismissOnSnapToBottom
+      zIndex={100_000}
+    >
+      <Sheet.Overlay
+        bg="rgba(0,0,0,0.5)"
+        enterStyle={{ opacity: 0 }}
+        exitStyle={{ opacity: 0 }}
+      />
+      <Sheet.Handle bg="$borderColor" />
+      <Sheet.Frame bg="$background" rounded="$6">
+        <YStack p="$4" gap="$4" pb="$8" items="center">
+          <XStack items="center" justify="space-between" width="100%">
+            <Text fontSize="$6" fontWeight="700">
+              {t("profile.previewPhoto")}
+            </Text>
+            <Pressable onPress={() => setPendingImage(null)}>
+              <View
+                width={32}
+                height={32}
+                rounded={16}
+                bg="$color3"
+                items="center"
+                justify="center"
+              >
+                <X size={18} color="$color" />
+              </View>
+            </Pressable>
+          </XStack>
+
+          {pendingImage ? (
+            <Image
+              source={{ uri: pendingImage }}
+              style={{
+                width: 200,
+                height: 200,
+                borderRadius: 100,
+              }}
+            />
+          ) : null}
+
+          <XStack gap="$3" width="100%">
+            <Button
+              flex={1}
+              bg="$color3"
+              rounded="$4"
+              size="$5"
+              onPress={handlePickImage}
+              disabled={uploading}
+            >
+              <Button.Text fontWeight="600">
+                {t("profile.chooseAnother")}
+              </Button.Text>
+            </Button>
+            <Button
+              flex={1}
+              bg="$blue9"
+              color="white"
+              rounded="$4"
+              size="$5"
+              onPress={handleConfirmImage}
+              disabled={uploading}
+            >
+              {uploading ? (
+                <Spinner size="small" color="white" />
+              ) : (
+                <Button.Text fontWeight="600" color="white">
+                  {t("common.save")}
+                </Button.Text>
+              )}
+            </Button>
+          </XStack>
+        </YStack>
+      </Sheet.Frame>
+    </Sheet>
+    </>
   );
 }
