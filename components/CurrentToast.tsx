@@ -1,57 +1,43 @@
-import { Toast, useToastController, useToastState } from '@tamagui/toast'
-import { Button, H4, XStack, YStack, isWeb } from 'tamagui'
+import { Toast, useToastState } from "@tamagui/toast";
+import { Text, YStack } from "tamagui";
 
 export function CurrentToast() {
-  const currentToast = useToastState()
+  const currentToast = useToastState();
 
-  if (!currentToast || currentToast.isHandledNatively) return null
+  if (!currentToast || currentToast.isHandledNatively) return null;
 
   return (
     <Toast
       key={currentToast.id}
       duration={currentToast.duration}
       viewportName={currentToast.viewportName}
-      enterStyle={{ opacity: 0, scale: 0.5, y: -25 }}
-      exitStyle={{ opacity: 0, scale: 1, y: -20 }}
-      y={isWeb ? '$12' : 0}
-      theme="accent"
-      rounded="$6"
-      animation="quick"
+      enterStyle={{ opacity: 0, y: 20, scale: 0.95 }}
+      exitStyle={{ opacity: 0, y: 10, scale: 0.97 }}
+      opacity={1}
+      y={0}
+      scale={1}
+      bg="$color12"
+      borderWidth={0}
+      rounded={100}
+      px="$5"
+      py="$3"
+      mx="$4"
+      elevation="$3"
     >
-      <YStack items="center" p="$2" gap="$2">
-        <Toast.Title fontWeight="bold">{currentToast.title}</Toast.Title>
+      <YStack items="center" gap="$1">
+        <Toast.Title>
+          <Text color="$color1" fontWeight="600" fontSize={15}>
+            {currentToast.title}
+          </Text>
+        </Toast.Title>
         {!!currentToast.message && (
-          <Toast.Description>{currentToast.message}</Toast.Description>
+          <Toast.Description>
+            <Text color="$color5" fontSize={13}>
+              {currentToast.message}
+            </Text>
+          </Toast.Description>
         )}
       </YStack>
     </Toast>
-  )
-}
-
-export function ToastControl() {
-  const toast = useToastController()
-
-  return (
-    <YStack gap="$2" items="center">
-      <H4>Toast demo</H4>
-      <XStack gap="$2" justify="center">
-        <Button
-          onPress={() => {
-            toast.show('Successfully saved!', {
-              message: "Don't worry, we've got your data.",
-            })
-          }}
-        >
-          Show
-        </Button>
-        <Button
-          onPress={() => {
-            toast.hide()
-          }}
-        >
-          Hide
-        </Button>
-      </XStack>
-    </YStack>
-  )
+  );
 }

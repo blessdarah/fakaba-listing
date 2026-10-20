@@ -1,19 +1,20 @@
-import "../tamagui-web.css";
 import "../firebase.config";
+import "@tamagui/native/setup-expo-linear-gradient";
 
 import { useEffect } from "react";
-import { useColorScheme } from "react-native";
-import { StatusBar } from "expo-status-bar";
-import {
-  DarkTheme,
-  DefaultTheme,
-  ThemeProvider,
-} from "@react-navigation/native";
+import { StatusBar, useColorScheme } from "react-native";
 import { useFonts } from "expo-font";
-import { SplashScreen, Stack, router } from "expo-router";
+import {
+  SplashScreen,
+  Stack,
+  router,
+  useSegments,
+  useRootNavigationState,
+} from "expo-router";
 import { Provider } from "components/Provider";
 import { useTheme } from "tamagui";
 import { useAuth } from "../contexts/AuthContext";
+import { SafeAreaProvider } from "react-native-safe-area-context";
 
 export {
   // Catch any errors thrown by the Layout component.
@@ -56,31 +57,57 @@ const Providers = ({ children }: { children: React.ReactNode }) => {
   return <Provider>{children}</Provider>;
 };
 
+const PUBLIC_SEGMENTS = ["sign-in", "sign-up", "setup"];
+
+function useProtectedRoute(user: any, loading: boolean, needsSetup: boolean) {
+  const segments = useSegments();
+  const navigationState = useRootNavigationState();
+
+  useEffect(() => {
+    if (loading) return;
+    if (!navigationState?.key) return;
+
+    const inPublicRoute = PUBLIC_SEGMENTS.includes(segments[0] as string);
+
+    if (!user && !inPublicRoute) {
+      router.replace("/sign-in");
+    } else if (user && needsSetup && segments[0] !== "setup") {
+      router.replace("/setup");
+    } else if (user && !needsSetup && inPublicRoute) {
+      router.replace("/(tabs)");
+    }
+  }, [user, loading, segments, navigationState?.key, needsSetup]);
+}
+
 function RootLayoutNav() {
   const colorScheme = useColorScheme();
   const theme = useTheme();
-  const { user, loading } = useAuth();
+  const { user, loading, needsSetup } = useAuth();
 
-  useEffect(() => {
-    if (!loading) {
-      if (user) {
-        router.replace("/(tabs)");
-      } else {
-        router.replace("/sign-in");
-      }
-    }
-  }, [user, loading]);
+  useProtectedRoute(user, loading, needsSetup);
 
   if (loading) {
     return null;
   }
 
   return (
-    <ThemeProvider value={colorScheme === "dark" ? DarkTheme : DefaultTheme}>
-      <StatusBar style={colorScheme === "dark" ? "light" : "dark"} />
-      <Stack>
+    <SafeAreaProvider>
+      <StatusBar
+        barStyle={colorScheme === "dark" ? "light-content" : "dark-content"}
+      />
+      <Stack
+        screenOptions={{
+          contentStyle: { backgroundColor: theme.background.val },
+        }}
+      >
         <Stack.Screen
           name="sign-in"
+          options={{
+            headerShown: false,
+          }}
+        />
+        <Stack.Screen
+          name="sign-up"
           options={{
             headerShown: false,
           }}
@@ -91,21 +118,44 @@ function RootLayoutNav() {
             headerShown: false,
           }}
         />
-
         <Stack.Screen
-          name="modal"
+          name="(categories)"
           options={{
-            title: "Fakaba Listings",
-            presentation: "modal",
-            animation: "slide_from_right",
-            gestureEnabled: true,
-            gestureDirection: "horizontal",
-            contentStyle: {
-              backgroundColor: theme.background.val,
-            },
+            headerShown: false,
+          }}
+        />
+        <Stack.Screen
+          name="setup"
+          options={{
+            headerShown: false,
+          }}
+        />
+        <Stack.Screen
+          name="agents"
+          options={{
+            headerShown: false,
+            headerBackTitle: "Back",
+          }}
+        />
+        <Stack.Screen
+          name="create-listing"
+          options={{
+            headerShown: false,
+          }}
+        />
+        <Stack.Screen
+          name="my-listings"
+          options={{
+            headerShown: false,
+          }}
+        />
+        <Stack.Screen
+          name="change-password"
+          options={{
+            headerShown: false,
           }}
         />
       </Stack>
-    </ThemeProvider>
+    </SafeAreaProvider>
   );
 }
