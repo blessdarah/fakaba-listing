@@ -7,15 +7,6 @@
     "icon": "./assets/images/icon.png",
     "scheme": "myapp",
     "userInterfaceStyle": "automatic",
-    "splash": {
-      "image": "./assets/images/splash-light.png",
-      "resizeMode": "contain",
-      "backgroundColor": "#ffffff",
-      "dark": {
-        "image": "./assets/images/splash-dark.png",
-        "backgroundColor": "#0F172A"
-      }
-    },
     "assetBundlePatterns": [
       "**/*"
     ],
@@ -72,8 +63,33 @@
         }
       ],
       "expo-web-browser",
-      "expo-splash-screen",
-      "expo-status-bar"
+      [
+        "expo-splash-screen",
+        {
+          "image": "./assets/images/logo-mark.png",
+          "imageWidth": 200,
+          "resizeMode": "contain",
+          "backgroundColor": "#1300A7",
+          "dark": {
+            "image": "./assets/images/logo-mark.png",
+            "backgroundColor": "#1300A7"
+          }
+        }
+      ],
+      "expo-status-bar",
+      [
+        "expo-location",
+        {
+          "locationWhenInUsePermission": "Fakaba uses your location while the app is open to suggest places near you."
+        }
+      ],
+      [
+        "expo-image-picker",
+        {
+          "photosPermission": "Fakaba needs access to your photos so you can add a profile picture or logo.",
+          "cameraPermission": "Fakaba uses the camera so you can take a profile picture."
+        }
+      ]
     ],
     "experiments": {
       "typedRoutes": true

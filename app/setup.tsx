@@ -1,222 +1,290 @@
-import { Button, Text, XStack, YStack, View } from "tamagui";
-import { useCallback, useEffect, useRef, useState } from "react";
-import { Animated, ScrollView } from "react-native";
-import { SetupAccountType } from "components/setup/setup-account-type";
-import { SetupRole } from "components/setup/setup-role";
-import { SetupLocation } from "components/setup/setup-location";
-import { SetupProfile } from "components/setup/setup-profile";
-import { SetupInterests } from "components/setup/setup-interests";
-import { ArrowLeft, ArrowRight, CheckCircle } from "@tamagui/lucide-icons-2";
-import { useAuth } from "../contexts/AuthContext";
-import { SafeAreaView } from "react-native-safe-area-context";
+import { useState } from "react";
+import { StyleSheet, View } from "react-native";
+import Animated, { FadeIn, FadeInLeft, FadeInRight, FadeOut } from "react-native-reanimated";
+import { DoneArt } from "components/illustrations";
+import { OnboardingScreen } from "components/onboarding/OnboardingScreen";
+import { ProgressHeader } from "components/onboarding/ProgressHeader";
+import { defaultInterestsFor } from "components/setup/options";
+import {
+  AccountTypeStep,
+  BusinessStep,
+  InterestsStep,
+  LocationStep,
+  pickSquareImage,
+  ProfileStep,
+  RoleStep,
+  type BusinessDraft,
+  type ProfileDraft,
+} from "components/setup/steps";
+import { Button } from "components/ui/Button";
+import { Text } from "components/ui/Text";
+import { useAuth } from "contexts/AuthContext";
+import { useTranslation } from "lib/i18n/useTranslation";
+import { useTheme } from "theme";
 
+const TOTAL = 5;
+type Step = 1 | 2 | 3 | 4 | 5 | "done";
+
+/**
+ * "23–27 — Setup 1–5", "68 — Setup · Company details", "28 — You're in".
+ * Answers stay local until "Show me places" saves them; that flips
+ * `needsSetup` and the root navigator lands on home.
+ */
 export default function SetupScreen() {
-  const [step, setStep] = useState(1);
-  const { completeSetup, updateProfileImage } = useAuth();
-  const [accountType, setAccountType] = useState<
-    "Individual" | "Company" | null
-  >(null);
-  const [role, setRole] = useState<string | null>(null);
-  const [location, setLocation] = useState("");
-  const [firstName, setFirstName] = useState("");
-  const [lastName, setLastName] = useState("");
-  const [interests, setInterests] = useState<string[]>([]);
-  const fadeAnim = useRef(new Animated.Value(0)).current;
-  const slideAnim = useRef(new Animated.Value(12)).current;
-  const prevStep = useRef(step);
-  const totalSteps = 5;
+  const { t } = useTranslation();
+  const { user, userProfile, completeSetup, updateProfileImage } = useAuth();
 
-  const canProceed =
+  const [step, setStep] = useState<Step>(1);
+  const [direction, setDirection] = useState<1 | -1>(1);
+
+  const [accountType, setAccountType] = useState<"individual" | "company" | null>(null);
+  const [role, setRole] = useState<string | null>(null);
+  const [business, setBusiness] = useState<BusinessDraft>({
+    name: "",
+    registration: "",
+    areas: [],
+    logoUri: null,
+  });
+  const [location, setLocation] = useState(userProfile?.location ?? "");
+  const [profile, setProfile] = useState<ProfileDraft>(() => {
+    const [first = "", ...rest] = (user?.displayName ?? "").split(" ");
+    return { firstName: userProfile?.firstName ?? first, lastName: userProfile?.lastName ?? rest.join(" "), phone: "" };
+  });
+  const [photoUri, setPhotoUri] = useState<string | null>(user?.photoURL ?? null);
+  const [uploading, setUploading] = useState(false);
+  const [uploadFailed, setUploadFailed] = useState(false);
+  const [interests, setInterests] = useState<string[]>([]);
+  const [saving, setSaving] = useState(false);
+  const [saveError, setSaveError] = useState(false);
+
+  const isCompany = accountType === "company";
+
+  const canContinue =
     (step === 1 && accountType !== null) ||
-    (step === 2 && role !== null) ||
-    (step === 3 && location.trim().length > 0) ||
-    (step === 4 && firstName.trim().length > 0 && lastName.trim().length > 0) ||
+    (step === 2 && (isCompany ? business.name.trim().length > 1 : role !== null)) ||
+    (step === 3 && location.trim().length > 1) ||
+    (step === 4 && profile.firstName.trim().length > 0 && profile.lastName.trim().length > 0) ||
     (step === 5 && interests.length > 0);
 
-  const goNext = useCallback(() => {
-    setStep((s) => Math.min(s + 1, totalSteps));
-  }, []);
+  function go(next: Step) {
+    setDirection(next === "done" || (typeof step === "number" && next > step) ? 1 : -1);
+    setStep(next);
+  }
 
-  useEffect(() => {
-    const direction = step > prevStep.current ? 1 : -1;
-    fadeAnim.setValue(0);
-    slideAnim.setValue(12 * direction);
-    Animated.parallel([
-      Animated.timing(fadeAnim, {
-        toValue: 1,
-        duration: 220,
-        useNativeDriver: true,
-      }),
-      Animated.timing(slideAnim, {
-        toValue: 0,
-        duration: 220,
-        useNativeDriver: true,
-      }),
-    ]).start();
-    prevStep.current = step;
-  }, [step, fadeAnim, slideAnim]);
+  function next() {
+    if (step === 2 && isCompany && business.areas.length && !location) setLocation(business.areas[0]);
+    if (step === 2 && !isCompany && interests.length === 0) setInterests(defaultInterestsFor(role));
+    if (step === 5) go("done");
+    else if (typeof step === "number") go((step + 1) as Step);
+  }
 
-  async function updateInfo() {
+  async function uploadImage(uri: string, onLocal: (uri: string) => void) {
+    onLocal(uri);
+    setUploading(true);
+    setUploadFailed(false);
     try {
-      await completeSetup({
-        accountType: accountType ?? "Individual",
-        role: role ?? "client",
-        location,
-        firstName,
-        lastName,
-        interests,
-      });
-    } catch (error) {
-      console.error("Setup completion error:", error);
+      await updateProfileImage(uri);
+    } catch {
+      setUploadFailed(true);
+    } finally {
+      setUploading(false);
     }
   }
 
+  async function pickPhoto() {
+    const uri = await pickSquareImage();
+    if (uri) uploadImage(uri, setPhotoUri);
+  }
+
+  async function pickLogo() {
+    const uri = await pickSquareImage();
+    if (uri) uploadImage(uri, (u) => setBusiness((b) => ({ ...b, logoUri: u })));
+  }
+
+  async function finish() {
+    setSaving(true);
+    setSaveError(false);
+    const digits = profile.phone.replace(/\D/g, "");
+    try {
+      await completeSetup({
+        accountType: accountType ?? "individual",
+        role: isCompany ? "agent" : (role ?? "renter"),
+        location: location.trim(),
+        firstName: profile.firstName.trim(),
+        lastName: profile.lastName.trim(),
+        interests,
+        phone: digits ? `+237${digits}` : undefined,
+        businessName: isCompany ? business.name.trim() : undefined,
+        registrationNumber: isCompany ? business.registration.trim() : undefined,
+        serviceAreas: isCompany ? business.areas : undefined,
+      });
+    } catch {
+      setSaveError(true);
+      setSaving(false);
+    }
+  }
+
+  if (step === "done") {
+    return (
+      <DoneScreen
+        name={profile.firstName.trim()}
+        lookingTo={isCompany ? business.name.trim() : role ? t(`setup.role.${role}`) : ""}
+        lookingToLabel={isCompany ? t("setup.done.business") : t("setup.done.lookingTo")}
+        town={location.trim()}
+        showing={interests.map((i) => t(`setup.interests.${i}`)).join(", ")}
+        saving={saving}
+        error={saveError ? t("setup.saveError") : null}
+        onFinish={finish}
+      />
+    );
+  }
+
+  const entering = (direction === 1 ? FadeInRight : FadeInLeft).duration(240);
+
   return (
-    <SafeAreaView style={{ flex: 1 }}>
-      <YStack flex={1}>
-        {/* Header */}
-        <YStack px="$5" pt="$4" pb="$2" gap="$3">
-          <XStack items="center" justify="space-between">
-            {step > 1 ? (
-              <Button
-                size="$3"
-                circular
-                variant="outlined"
-                onPress={() => setStep(step - 1)}
-                icon={<ArrowLeft size={18} />}
-              />
-            ) : (
-              <View width={36} />
-            )}
-            <Text fontSize="$3" color="$color8" fontWeight="500">
-              {step} of {totalSteps}
-            </Text>
-            <View width={36} />
-          </XStack>
-
-          {/* Progress bar */}
-          <XStack gap="$1.5">
-            {Array.from({ length: totalSteps }).map((_, i) => (
-              <YStack
-                key={i}
-                flex={1}
-                height={4}
-                rounded="$10"
-                bg={i < step ? "$blue9" : "$borderColor"}
-              />
-            ))}
-          </XStack>
-        </YStack>
-
-        {/* Content */}
-        <ScrollView
-          contentContainerStyle={{ paddingBottom: 140 }}
-          showsVerticalScrollIndicator={false}
-        >
-          <YStack flex={1} px="$5" pt="$4">
-            <Animated.View
-              style={{
-                opacity: fadeAnim,
-                transform: [{ translateY: slideAnim }],
-                width: "100%",
-              }}
-            >
-              {step === 1 && (
-                <SetupAccountType
-                  value={accountType}
-                  onChange={(v) => {
-                    setAccountType(v);
-                    setTimeout(goNext, 300);
-                  }}
-                />
-              )}
-
-              {step === 2 && (
-                <SetupRole
-                  value={role}
-                  onChange={(v) => {
-                    setRole(v);
-                    setTimeout(goNext, 300);
-                  }}
-                />
-              )}
-
-              {step === 3 && (
-                <SetupLocation
-                  value={location}
-                  onChange={setLocation}
-                  onSelectQuick={(v) => {
-                    setLocation(v);
-                    setTimeout(goNext, 300);
-                  }}
-                />
-              )}
-
-              {step === 4 && (
-                <SetupProfile
-                  firstName={firstName}
-                  lastName={lastName}
-                  onChangeFirstName={setFirstName}
-                  onChangeLastName={setLastName}
-                  updateProfileImage={updateProfileImage}
-                />
-              )}
-
-              {step === 5 && (
-                <SetupInterests value={interests} onChange={setInterests} />
-              )}
-            </Animated.View>
-          </YStack>
-        </ScrollView>
-
-        {/* Bottom controls */}
-        <YStack
-          position="absolute"
-          b={0}
-          l={0}
-          r={0}
-          py="$4"
-          px="$5"
-          bg="$background"
-          borderTopWidth={1}
-          borderTopColor="$borderColor"
-          gap="$3"
-        >
-          {step < 5 ? (
-            <Button
-              size="$5"
-              bg={canProceed ? "$blue9" : "$color4"}
-              rounded="$4"
-              onPress={goNext}
-              disabled={!canProceed}
-              iconAfter={<ArrowRight size={18} color="white" />}
-            >
-              <Button.Text
-                fontWeight="700"
-                color="white"
-              >
-                Continue
-              </Button.Text>
-            </Button>
+    <OnboardingScreen
+      header={
+        <ProgressHeader
+          step={step}
+          total={TOTAL}
+          backLabel={t("setup.back")}
+          onBack={step > 1 ? () => go((step - 1) as Step) : undefined}
+        />
+      }
+      contentStyle={styles.content}
+      footer={
+        <Button
+          label={
+            step === 5
+              ? interests.length
+                ? t("setup.finishCount", { count: interests.length })
+                : t("setup.finish")
+              : t("setup.continue")
+          }
+          disabled={!canContinue || uploading}
+          onPress={next}
+        />
+      }
+    >
+      <Animated.View key={step} entering={entering} exiting={FadeOut.duration(120)}>
+        {step === 1 && <AccountTypeStep value={accountType} onChange={setAccountType} />}
+        {step === 2 &&
+          (isCompany ? (
+            <BusinessStep value={business} onChange={setBusiness} onPickLogo={pickLogo} uploading={uploading} />
           ) : (
-            <Button
-              size="$5"
-              bg={canProceed ? "$green9" : "$color4"}
-              rounded="$4"
-              onPress={() => updateInfo()}
-              disabled={!canProceed}
-              iconAfter={<CheckCircle size={18} color="white" />}
-            >
-              <Button.Text
-                fontWeight="700"
-                color="white"
-              >
-                Finish
-              </Button.Text>
-            </Button>
-          )}
-        </YStack>
-      </YStack>
-    </SafeAreaView>
+            <RoleStep value={role} onChange={setRole} />
+          ))}
+        {step === 3 && <LocationStep value={location} onChange={setLocation} company={isCompany} />}
+        {step === 4 && (
+          <ProfileStep
+            value={profile}
+            onChange={setProfile}
+            photoUri={photoUri}
+            onPickPhoto={pickPhoto}
+            uploading={uploading}
+            uploadFailed={uploadFailed}
+            showPhoto={!isCompany}
+          />
+        )}
+        {step === 5 && <InterestsStep value={interests} onChange={setInterests} />}
+      </Animated.View>
+    </OnboardingScreen>
   );
 }
+
+function DoneScreen({
+  name,
+  lookingTo,
+  lookingToLabel,
+  town,
+  showing,
+  saving,
+  error,
+  onFinish,
+}: {
+  name: string;
+  lookingTo: string;
+  lookingToLabel: string;
+  town: string;
+  showing: string;
+  saving: boolean;
+  error: string | null;
+  onFinish: () => void;
+}) {
+  const { t } = useTranslation();
+  const { colors } = useTheme();
+  const rows = [
+    { label: lookingToLabel, value: lookingTo },
+    { label: t("setup.done.in"), value: town },
+    { label: t("setup.done.showing"), value: showing },
+  ].filter((r) => r.value);
+
+  return (
+    <OnboardingScreen
+      contentStyle={styles.done}
+      footer={
+        <>
+          {error && (
+            <Text variant="sm" color="danger" align="center">
+              {error}
+            </Text>
+          )}
+          <Button
+            label={t("setup.done.cta")}
+            variant="strong"
+            trailingIcon="arrowRight"
+            trailingIconColor={colors.signal}
+            loading={saving}
+            onPress={onFinish}
+          />
+        </>
+      }
+    >
+      <Animated.View entering={FadeIn.duration(400)} style={styles.doneArt}>
+        <DoneArt />
+      </Animated.View>
+      <View style={styles.doneCopy}>
+        <Text variant="display" style={styles.doneTitle} accessibilityRole="header">
+          {name ? t("setup.done.title", { name }) : t("setup.done.titleNoName")}
+        </Text>
+        <Text variant="body" color="inkMuted">
+          {t("setup.done.lead")}
+        </Text>
+      </View>
+      <View>
+        {rows.map((r, i) => (
+          <View
+            key={r.label}
+            style={[
+              styles.summaryRow,
+              i < rows.length - 1 && { borderBottomColor: colors.line, borderBottomWidth: StyleSheet.hairlineWidth * 2 },
+            ]}
+          >
+            <Text variant="sm" color="inkMuted">
+              {r.label}
+            </Text>
+            <Text variant="base" weight="semibold" align="right" style={styles.summaryValue} numberOfLines={2}>
+              {r.value}
+            </Text>
+          </View>
+        ))}
+      </View>
+    </OnboardingScreen>
+  );
+}
+
+const styles = StyleSheet.create({
+  content: { paddingTop: 24 },
+  done: { paddingTop: 40, gap: 24 },
+  doneArt: { alignItems: "center" },
+  doneCopy: { gap: 12 },
+  doneTitle: { fontSize: 42, lineHeight: 44, letterSpacing: -1.6 },
+  summaryRow: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    paddingVertical: 13,
+    gap: 16,
+  },
+  summaryValue: { flex: 1 },
+});

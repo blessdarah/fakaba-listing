@@ -10,6 +10,7 @@ import {
   reauthenticateWithCredential,
   updatePassword,
   sendEmailVerification,
+  sendPasswordResetEmail,
   deleteUser,
 } from "firebase/auth";
 import {
@@ -37,13 +38,18 @@ interface UserProfile {
   [key: string]: any;
 }
 
-interface SetupData {
-  accountType: string;
+export interface SetupData {
+  accountType: "individual" | "company";
   role: string;
   location: string;
   firstName: string;
   lastName: string;
   interests: string[];
+  phone?: string;
+  /** Company accounts only. */
+  businessName?: string;
+  registrationNumber?: string;
+  serviceAreas?: string[];
 }
 
 interface AuthContextType {
@@ -65,6 +71,7 @@ interface AuthContextType {
   deleteAccount: () => Promise<void>;
   resendVerificationEmail: () => Promise<void>;
   checkEmailVerified: () => Promise<boolean>;
+  sendPasswordReset: (email: string) => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -196,6 +203,17 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
 
     await currentUser.reload();
     if (currentUser.emailVerified) {
+      // onAuthStateChanged bailed out early for the unverified user, so the
+      // profile (and whether setup is done) hasn't been loaded yet.
+      try {
+        const snapshot = await getDoc(doc(db, "users", currentUser.uid));
+        const data = snapshot.exists() ? (snapshot.data() as UserProfile) : null;
+        setUserProfile(data);
+        setNeedsSetup(!data?.hasOnboarded);
+      } catch (error) {
+        console.error("Error loading profile after verification:", error);
+        setNeedsSetup(true);
+      }
       setNeedsEmailVerification(false);
       setUser({ ...currentUser } as User);
       return true;
@@ -203,38 +221,44 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
     return false;
   };
 
+  /** Persists onboarding answers. Throws so the caller can show an error. */
   const completeSetup = async (data?: SetupData) => {
-    try {
-      const currentUser = auth.currentUser;
-      if (currentUser) {
-        const userRef = doc(db, "users", currentUser.uid);
-        const profileData: Record<string, any> = {
-          hasOnboarded: true,
-          updatedAt: serverTimestamp(),
-        };
-        if (data) {
-          profileData.accountType = data.accountType.toLowerCase();
-          profileData.role = data.role.toLowerCase();
-          profileData.location = data.location;
-          profileData.firstName = data.firstName;
-          profileData.lastName = data.lastName;
-          profileData.interests = data.interests;
-        }
-        await updateDoc(userRef, profileData);
+    const currentUser = auth.currentUser;
+    if (!currentUser) throw new Error("Not authenticated");
 
-        // Sync displayName to Firebase Auth so it's available everywhere
-        if (data?.firstName) {
-          const displayName =
-            `${data.firstName} ${data.lastName ?? ""}`.trim();
-          await updateProfile(currentUser, { displayName });
-        }
-
-        setUserProfile((prev) => ({ ...prev, ...profileData }));
+    const userRef = doc(db, "users", currentUser.uid);
+    const profileData: Record<string, any> = {
+      hasOnboarded: true,
+      updatedAt: serverTimestamp(),
+    };
+    if (data) {
+      profileData.accountType = data.accountType;
+      profileData.role = data.role.toLowerCase();
+      profileData.location = data.location;
+      profileData.firstName = data.firstName;
+      profileData.lastName = data.lastName;
+      profileData.interests = data.interests;
+      if (data.phone) profileData.phone = data.phone;
+      if (data.accountType === "company") {
+        profileData.businessName = data.businessName ?? "";
+        profileData.registrationNumber = data.registrationNumber ?? "";
+        profileData.serviceAreas = data.serviceAreas ?? [];
       }
-      setNeedsSetup(false);
-    } catch (error) {
-      console.error("Error completing setup:", error);
     }
+    await updateDoc(userRef, profileData);
+
+    // Sync displayName to Firebase Auth so it's available everywhere
+    if (data?.firstName) {
+      const displayName = `${data.firstName} ${data.lastName ?? ""}`.trim();
+      await updateProfile(currentUser, { displayName });
+    }
+
+    setUserProfile((prev) => ({ ...prev, ...profileData }));
+    setNeedsSetup(false);
+  };
+
+  const sendPasswordReset = async (email: string) => {
+    await sendPasswordResetEmail(auth, email.trim());
   };
 
   const updateProfileImage = async (uri: string) => {
@@ -357,6 +381,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
         becomeAgent,
         resendVerificationEmail,
         checkEmailVerified,
+        sendPasswordReset,
       }}
     >
       {children}

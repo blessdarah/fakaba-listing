@@ -1,7 +1,15 @@
 {
-  "extends": "./tsconfig.base",
+  "extends": "expo/tsconfig.base",
   "compilerOptions": {
-    "strict": true
+    "strict": true,
+    "paths": {
+      "theme": ["./theme"],
+      "theme/*": ["./theme/*"],
+      "components/*": ["./components/*"],
+      "contexts/*": ["./contexts/*"],
+      "lib/*": ["./lib/*"],
+      "assets/*": ["./assets/*"]
+    }
   },
   "include": ["**/*.ts", "**/*.tsx", ".expo/types/**/*.ts", "expo-env.d.ts"]
 }

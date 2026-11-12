@@ -1,697 +1,508 @@
-import React from "react";
-import {
-  Sheet,
-  Avatar,
-  Text,
-  View,
-  XStack,
-  YStack,
-  Input,
-  Button,
-  Separator,
-  ScrollView,
-} from "tamagui";
-import { Slider } from "@tamagui/slider";
-import HomeCategories, { HOME_CATEGORIES } from "components/HomeCategories";
-import HorizontalListing from "components/HorizontalListing";
-import ListingCardCompact from "components/ListingCardCompact";
-import {
-  Search,
-  SlidersHorizontal,
-  X,
-  MapPin,
-  ChevronRight,
-  Plus,
-} from "@tamagui/lucide-icons-2";
-import ScreenContainer from "components/ScreenContainer";
+import { router } from "expo-router";
+import { useCallback, useMemo, useState } from "react";
+import { Alert, FlatList, Pressable, RefreshControl, ScrollView, StyleSheet, View } from "react-native";
+import Animated, {
+  Extrapolation,
+  FadeIn,
+  interpolate,
+  useAnimatedReaction,
+  useAnimatedScrollHandler,
+  useAnimatedStyle,
+  useSharedValue,
+  type SharedValue,
+} from "react-native-reanimated";
+import { scheduleOnRN } from "react-native-worklets";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { StatusBar } from "expo-status-bar";
+import { AgentCard } from "components/home/AgentCard";
+import { HomeSkeleton } from "components/home/HomeSkeleton";
+import { FeedCard, ListingRow, SaleCard } from "components/home/ListingCards";
+import { NearYouCard } from "components/home/NearYouCard";
+import { SectionHeader } from "components/home/SectionHeader";
+import { PublishedArt, Spot } from "components/illustrations";
+import { Avatar } from "components/ui/Avatar";
+import { Button } from "components/ui/Button";
+import { Chip } from "components/ui/Chip";
+import { Icon } from "components/ui/Icon";
+import { Text } from "components/ui/Text";
 import { useAuth } from "contexts/AuthContext";
-import { FlatList, RefreshControl } from "react-native";
-import { Pressable } from "react-native";
-import { useRouter } from "expo-router";
+import { dealType, toDate } from "lib/format";
 import { useTranslation } from "lib/i18n/useTranslation";
+import { useToggleFavorite } from "lib/query/useFavorites";
 import { useListings } from "lib/query/useListings";
-import { useFavorites } from "lib/query/useFavorites";
 import { useAgents } from "lib/query/useUsers";
-import { Link } from "expo-router";
+import type { Listing } from "lib/types";
+import { gutter, radius, useTheme } from "theme";
 
-// --- Constants ---
+const CATEGORIES = ["Room", "Apartment", "House", "Commercial", "Land"] as const;
+const WEEK_MS = 7 * 24 * 60 * 60 * 1000;
+/** Scroll offset where the hero search has gone under the status bar. */
+const STICKY_AT = 210;
 
-const TYPE_OPTIONS = [
-  { id: "rent", labelKey: "filter.rental" },
-  { id: "sale", labelKey: "filter.sale" },
-  { id: "lease", labelKey: "filter.lease" },
-];
+/** "10 — Home", "10b — Full scroll", "10c — Scrolled (sticky header)", "77 — Loading", "82 — Dark". */
+export default function HomeScreen() {
+  const { t } = useTranslation();
+  const insets = useSafeAreaInsets();
+  const { colors, isDark } = useTheme();
+  const { user, userProfile } = useAuth();
 
-const CATEGORY_OPTIONS = HOME_CATEGORIES.map((cat) => ({
-  id: cat.id,
-  label: cat.name,
-}));
+  const listingsQuery = useListings();
+  const agentsQuery = useAgents();
+  const { toggleFavorite, isFavorited } = useToggleFavorite();
 
-const TOWN_OPTIONS = ["Yaounde", "Douala", "Buea", "Limbe"];
+  const [category, setCategory] = useState<string | null>(null);
+  const [refreshing, setRefreshing] = useState(false);
 
-const DEFAULT_PRICE: [number, number] = [0, 1_000_000];
-const PRICE_STEP = 5_000;
+  const firstName = userProfile?.firstName?.trim() || user?.displayName?.split(" ")[0] || "";
+  const fullName = userProfile?.firstName
+    ? `${userProfile.firstName} ${userProfile.lastName ?? ""}`
+    : (user?.displayName ?? user?.email ?? "");
+  const town: string = userProfile?.location?.trim() ?? "";
 
-// --- Chip (same as search screen) ---
+  const sections = useMemo(() => {
+    const all = (listingsQuery.data ?? []).filter((l) => !category || l.category === category);
+    const rentals = all.filter((l) => dealType(l) !== "sale");
+    const forSale = all.filter((l) => dealType(l) === "sale");
+    const byNewest = [...all].sort(
+      (a, b) => (toDate(b.createdAt)?.getTime() ?? 0) - (toDate(a.createdAt)?.getTime() ?? 0)
+    );
+    const thisWeek = byNewest.filter((l) => {
+      const d = toDate(l.createdAt);
+      return d && Date.now() - d.getTime() < WEEK_MS;
+    });
+    const nearby = town
+      ? all.filter((l) => `${l.location} ${l.address}`.toLowerCase().includes(town.toLowerCase()))
+      : [];
+    return {
+      all,
+      rentals,
+      forSale,
+      fresh: (thisWeek.length ? thisWeek : byNewest).slice(0, 3),
+      nearby,
+    };
+  }, [listingsQuery.data, category, town]);
 
-function Chip({
-  label,
-  selected,
+  const agents = useMemo(() => {
+    const list = agentsQuery.data ?? [];
+    const local = town ? list.filter((a) => a.location?.toLowerCase().includes(town.toLowerCase())) : [];
+    return (local.length ? local : list).slice(0, 10);
+  }, [agentsQuery.data, town]);
+
+  const listingCountByOwner = useMemo(() => {
+    const counts: Record<string, number> = {};
+    for (const l of listingsQuery.data ?? []) counts[l.ownerId] = (counts[l.ownerId] ?? 0) + 1;
+    return counts;
+  }, [listingsQuery.data]);
+
+  const onRefresh = useCallback(async () => {
+    setRefreshing(true);
+    await Promise.allSettled([listingsQuery.refetch(), agentsQuery.refetch()]);
+    setRefreshing(false);
+  }, [listingsQuery, agentsQuery]);
+
+  const scrollY = useSharedValue(0);
+  const onScroll = useAnimatedScrollHandler((e) => {
+    scrollY.value = e.contentOffset.y;
+  });
+
+  const goSearch = () => router.navigate("/search");
+  const goProfile = () => router.navigate("/profile");
+  const comingSoon = () => Alert.alert(t("soon.title"), t("soon.body"));
+
+  const renderFeed = useCallback(
+    ({ item }: { item: Listing }) => (
+      <FeedCard listing={item} saved={isFavorited(item.id)} onToggleSave={toggleFavorite} />
+    ),
+    [isFavorited, toggleFavorite]
+  );
+  const renderSale = useCallback(({ item }: { item: Listing }) => <SaleCard listing={item} />, []);
+
+  const loading = listingsQuery.isPending;
+  const failed = listingsQuery.isError && !listingsQuery.data;
+  const nothing = !loading && !failed && sections.all.length === 0;
+
+  return (
+    <View style={[styles.root, { backgroundColor: colors.bg }]}>
+      <StatusBar style={isDark ? "light" : "dark"} />
+
+      <StickyHeader
+        scrollY={scrollY}
+        town={town}
+        name={fullName}
+        photo={userProfile?.profileImage ?? user?.photoURL}
+        onSearch={goSearch}
+        onProfile={goProfile}
+      />
+
+      <Animated.ScrollView
+        onScroll={onScroll}
+        scrollEventThrottle={16}
+        showsVerticalScrollIndicator={false}
+        contentContainerStyle={{ paddingTop: insets.top + 4, paddingBottom: 24 }}
+        refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor={colors.inkMuted} />}
+      >
+        {/* Top bar */}
+        <View style={styles.topBar}>
+          <Pressable style={styles.townRow} onPress={goSearch} accessibilityRole="button" hitSlop={8}>
+            <Icon name="pin" size={18} />
+            <Text variant="base" weight="semibold">
+              {town || t("nav.search")}
+            </Text>
+            <Icon name="chevronDown" size={13} weight="bold" />
+          </Pressable>
+          <Pressable onPress={goProfile} accessibilityRole="button" accessibilityLabel={t("nav.profile")}>
+            <Avatar name={fullName} uri={userProfile?.profileImage ?? user?.photoURL} size={40} />
+          </Pressable>
+        </View>
+
+        {/* Hero */}
+        <View style={styles.hero}>
+          <Text variant="display" accessibilityRole="header">
+            {firstName ? t("feed.greeting", { name: firstName }) : t("feed.greetingNoName")}
+          </Text>
+          <SearchPill placeholder={t("feed.searchPlaceholder")} onPress={goSearch} />
+        </View>
+
+        {/* Category chips */}
+        <ScrollView
+          horizontal
+          showsHorizontalScrollIndicator={false}
+          contentContainerStyle={styles.chips}
+        >
+          <Chip label={t("feed.all")} selected={!category} onPress={() => setCategory(null)} />
+          {CATEGORIES.map((c) => (
+            <Chip
+              key={c}
+              label={t(`feed.categories.${c}`)}
+              selected={category === c}
+              onPress={() => setCategory(category === c ? null : c)}
+            />
+          ))}
+        </ScrollView>
+
+        {loading ? (
+          <HomeSkeleton />
+        ) : failed ? (
+          <Message
+            title={t("feed.errorTitle")}
+            body={t("feed.errorBody")}
+            action={t("feed.retry")}
+            onAction={() => listingsQuery.refetch()}
+          />
+        ) : nothing ? (
+          <Message title={t("feed.empty")} body={t("feed.emptyBody")} />
+        ) : (
+          <Animated.View entering={FadeIn.duration(250)}>
+            {sections.rentals.length > 0 && (
+              <View style={styles.section}>
+                <SectionHeader
+                  title={t("feed.popularRentals")}
+                  action={t("feed.seeAll")}
+                  onAction={goSearch}
+                  style={styles.sectionHeader}
+                />
+                <FlatList
+                  horizontal
+                  data={sections.rentals}
+                  keyExtractor={(l) => l.id}
+                  renderItem={renderFeed}
+                  showsHorizontalScrollIndicator={false}
+                  contentContainerStyle={styles.rail}
+                  snapToInterval={312}
+                  decelerationRate="fast"
+                />
+              </View>
+            )}
+
+            {town ? (
+              <View style={[styles.section, styles.padded, styles.sectionLoose]}>
+                <SectionHeader title={t("feed.nearYou")} action={t("feed.openMap")} onAction={goSearch} />
+                <NearYouCard
+                  prices={(sections.nearby.length ? sections.nearby : sections.all).map((l) => l.price)}
+                  title={t("feed.nearCount", { count: sections.nearby.length, town })}
+                  subtitle={t("feed.nearSub")}
+                  onPress={goSearch}
+                />
+              </View>
+            ) : null}
+
+            {sections.forSale.length > 0 && (
+              <View style={[styles.section, styles.sectionLoose]}>
+                <SectionHeader
+                  title={t("feed.forSale")}
+                  action={t("feed.seeAll")}
+                  onAction={goSearch}
+                  style={styles.sectionHeader}
+                />
+                <FlatList
+                  horizontal
+                  data={sections.forSale}
+                  keyExtractor={(l) => l.id}
+                  renderItem={renderSale}
+                  showsHorizontalScrollIndicator={false}
+                  contentContainerStyle={styles.rail}
+                />
+              </View>
+            )}
+
+            {agents.length > 0 && (
+              <View style={[styles.section, styles.sectionLoose]}>
+                <SectionHeader
+                  title={town ? t("feed.topAgents", { town }) : t("feed.topAgentsNoTown")}
+                  action={t("feed.allAgents", { count: agentsQuery.data?.length ?? agents.length })}
+                  onAction={comingSoon}
+                  style={styles.sectionHeader}
+                />
+                <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.rail}>
+                  {agents.map((a) => (
+                    <AgentCard
+                      key={a.id}
+                      agent={a}
+                      meta={
+                        listingCountByOwner[a.id ?? ""]
+                          ? t("feed.places", { count: listingCountByOwner[a.id ?? ""] })
+                          : a.location
+                      }
+                    />
+                  ))}
+                </ScrollView>
+              </View>
+            )}
+
+            {sections.fresh.length > 0 && (
+              <View style={[styles.section, styles.padded, styles.sectionLoose, styles.tightGap]}>
+                <SectionHeader title={t("feed.newThisWeek")} action={t("feed.seeAll")} onAction={goSearch} />
+                <View>
+                  {sections.fresh.map((l, i) => (
+                    <ListingRow
+                      key={l.id}
+                      listing={l}
+                      saved={isFavorited(l.id)}
+                      onToggleSave={toggleFavorite}
+                      last={i === sections.fresh.length - 1}
+                    />
+                  ))}
+                </View>
+              </View>
+            )}
+
+            {/* Services teaser */}
+            <View style={[styles.padded, styles.teaserWrap]}>
+              <Pressable
+                onPress={() => router.navigate("/services")}
+                accessibilityRole="button"
+                style={({ pressed }) => [styles.teaser, { backgroundColor: "#1300A7" }, pressed && { opacity: 0.9 }]}
+              >
+                <Spot name="land" size={56} />
+                <View style={styles.teaserText}>
+                  <Text variant="base" weight="semibold" color="#FFFFFF">
+                    {t("feed.servicesTitle")}
+                  </Text>
+                  <Text variant="label" color={colors.onBrandMuted} style={styles.regular}>
+                    {t("feed.servicesSub")}
+                  </Text>
+                </View>
+                <Icon name="forward" size={16} color="#FFFFFF" weight="semibold" />
+              </Pressable>
+            </View>
+
+            {/* List your property */}
+            <View style={styles.listCta}>
+              <PublishedArt />
+              <Text variant="h2" align="center">
+                {t("feed.listTitle")}
+              </Text>
+              <Text variant="base" color="inkMuted" align="center" style={styles.listBody}>
+                {t("feed.listBody")}
+              </Text>
+              <Button label={t("feed.listCta")} variant="outline" size="md" onPress={comingSoon} style={styles.listButton} />
+            </View>
+
+            <View style={styles.end}>
+              <View style={[styles.endRule, { backgroundColor: colors.line }]} />
+              <Text variant="xs" color="inkSubtle">
+                {town ? t("feed.caughtUp", { town }) : t("feed.caughtUpNoTown")}
+              </Text>
+              <View style={[styles.endRule, { backgroundColor: colors.line }]} />
+            </View>
+          </Animated.View>
+        )}
+      </Animated.ScrollView>
+    </View>
+  );
+}
+
+function SearchPill({
+  placeholder,
+  title,
+  subtitle,
   onPress,
 }: {
-  label: string;
-  selected: boolean;
+  placeholder?: string;
+  title?: string;
+  subtitle?: string;
   onPress: () => void;
 }) {
+  const { colors } = useTheme();
   return (
-    <Pressable onPress={onPress} accessibilityRole="button">
-      <View
-        px="$3"
-        py="$1.5"
-        rounded="$10"
-        bg={selected ? "$blue3" : "transparent"}
-        borderWidth={1.5}
-        borderColor={selected ? "$blue8" : "$borderColor"}
-      >
-        <Text
-          fontSize="$3"
-          fontWeight={selected ? "700" : "500"}
-          color={selected ? "$blue9" : "$color"}
-        >
-          {label}
-        </Text>
+    <Pressable
+      onPress={onPress}
+      accessibilityRole="search"
+      accessibilityLabel={title ?? placeholder}
+      style={[styles.pill, { backgroundColor: colors.surface }]}
+    >
+      <Icon name="search" size={20} />
+      <View style={styles.pillText}>
+        {title ? (
+          <>
+            <Text variant="base" weight="semibold" numberOfLines={1}>
+              {title}
+            </Text>
+            {subtitle ? (
+              <Text variant="xs" color="inkSubtle" numberOfLines={1}>
+                {subtitle}
+              </Text>
+            ) : null}
+          </>
+        ) : (
+          <Text variant="base" color="inkSubtle" numberOfLines={1}>
+            {placeholder}
+          </Text>
+        )}
+      </View>
+      <View style={[styles.filterButton, { backgroundColor: colors.ink }]}>
+        <Icon name="filters" size={18} color="onInk" />
       </View>
     </Pressable>
   );
 }
 
-function FilterSection({
+function StickyHeader({
+  scrollY,
+  town,
+  name,
+  photo,
+  onSearch,
+  onProfile,
+}: {
+  scrollY: SharedValue<number>;
+  town: string;
+  name: string;
+  photo?: string | null;
+  onSearch: () => void;
+  onProfile: () => void;
+}) {
+  const insets = useSafeAreaInsets();
+  const { colors } = useTheme();
+  const { t } = useTranslation();
+  const style = useAnimatedStyle(() => {
+    const p = interpolate(scrollY.value, [STICKY_AT - 30, STICKY_AT], [0, 1], Extrapolation.CLAMP);
+    return { opacity: p, transform: [{ translateY: (1 - p) * -8 }] };
+  });
+  // Mirror visibility into React state so taps pass through while it's hidden.
+  const [interactive, setInteractive] = useState(false);
+  useAnimatedReaction(
+    () => scrollY.value > STICKY_AT - 10,
+    (now, prev) => {
+      if (now !== prev) scheduleOnRN(setInteractive, now);
+    }
+  );
+
+  return (
+    <Animated.View
+      pointerEvents={interactive ? "auto" : "none"}
+      style={[
+        styles.sticky,
+        { paddingTop: insets.top + 6, backgroundColor: colors.bg, borderBottomColor: colors.line },
+        style,
+      ]}
+    >
+      <View style={styles.stickyPill}>
+        <SearchPill title={town || t("feed.searchPlaceholder")} onPress={onSearch} />
+      </View>
+      <Pressable onPress={onProfile} accessibilityRole="button" accessibilityLabel={t("nav.profile")}>
+        <Avatar name={name} uri={photo} size={40} />
+      </Pressable>
+    </Animated.View>
+  );
+}
+
+function Message({
   title,
-  children,
+  body,
+  action,
+  onAction,
 }: {
   title: string;
-  children: React.ReactNode;
+  body: string;
+  action?: string;
+  onAction?: () => void;
 }) {
   return (
-    <YStack gap="$2.5">
-      <Text fontSize="$3" fontWeight="600" color="$color8" textTransform="uppercase" letterSpacing={0.5}>
+    <View style={styles.message}>
+      <Text variant="title" align="center">
         {title}
       </Text>
-      {children}
-    </YStack>
+      <Text variant="base" color="inkMuted" align="center">
+        {body}
+      </Text>
+      {action && <Button label={action} variant="quiet" size="md" onPress={onAction} style={styles.messageButton} />}
+    </View>
   );
 }
 
-// --- Main screen ---
-
-export default function TabOneScreen() {
-  const { user, userProfile, isAgent } = useAuth();
-  const { t } = useTranslation();
-  const router = useRouter();
-
-  // Search + filter state
-  const [searchQuery, setSearchQuery] = React.useState("");
-  const [selectedTypes, setSelectedTypes] = React.useState<string[]>([]);
-  const [selectedCategories, setSelectedCategories] = React.useState<string[]>([]);
-  const [selectedTowns, setSelectedTowns] = React.useState<string[]>([]);
-  const [priceRange, setPriceRange] = React.useState<[number, number]>(DEFAULT_PRICE);
-
-  // Draft filters (in sheet before apply)
-  const [draftTypes, setDraftTypes] = React.useState<string[]>([]);
-  const [draftCategories, setDraftCategories] = React.useState<string[]>([]);
-  const [draftTowns, setDraftTowns] = React.useState<string[]>([]);
-  const [draftPrice, setDraftPrice] = React.useState<[number, number]>(DEFAULT_PRICE);
-
-  // Sheet + category state
-  const [sheetOpen, setSheetOpen] = React.useState(false);
-  const [activeCategoryId, setActiveCategoryId] = React.useState<string | null>(null);
-
-  // --- Helpers ---
-
-  const toggleItem = (list: string[], item: string) =>
-    list.includes(item) ? list.filter((i) => i !== item) : [...list, item];
-
-  const formatPrice = React.useCallback(
-    (value: number) => value.toLocaleString() + " FCFA",
-    []
-  );
-
-  const setCategoryFromHome = (id: string) => {
-    setActiveCategoryId((prev) => (prev === id ? null : id));
-    setSelectedCategories((prev) => (prev.includes(id) ? [] : [id]));
-    setDraftCategories((prev) => (prev.includes(id) ? [] : [id]));
-  };
-
-  const hasPriceFilter =
-    priceRange[0] !== DEFAULT_PRICE[0] || priceRange[1] !== DEFAULT_PRICE[1];
-
-  const activeFilterCount =
-    selectedTypes.length +
-    selectedCategories.length +
-    selectedTowns.length +
-    (hasPriceFilter ? 1 : 0);
-
-  const hasActiveFilters =
-    activeFilterCount > 0 ||
-    activeCategoryId !== null ||
-    searchQuery.trim().length > 0;
-
-  // --- Sheet handlers ---
-
-  const openSheet = () => {
-    setDraftTypes(selectedTypes);
-    setDraftCategories(selectedCategories);
-    setDraftTowns(selectedTowns);
-    setDraftPrice(priceRange);
-    setSheetOpen(true);
-  };
-
-  const applyFilters = () => {
-    setSelectedTypes(draftTypes);
-    setSelectedCategories(draftCategories);
-    setSelectedTowns(draftTowns);
-    setPriceRange(draftPrice);
-    setSheetOpen(false);
-  };
-
-  const resetFilters = () => {
-    setDraftTypes([]);
-    setDraftCategories([]);
-    setDraftTowns([]);
-    setDraftPrice(DEFAULT_PRICE);
-  };
-
-  // --- Data ---
-
-  const { data: agents = [] } = useAgents();
-  const agentColumns: (typeof agents)[] = [];
-  for (let i = 0; i < agents.length; i += 4) {
-    agentColumns.push(agents.slice(i, i + 4));
-  }
-
-  const {
-    data: listings = [],
-    isLoading: loading,
-    error,
-    refetch,
-  } = useListings();
-  const { refetch: refetchFavorites } = useFavorites();
-
-  const handleRefresh = React.useCallback(() => {
-    refetch();
-    refetchFavorites();
-  }, [refetch, refetchFavorites]);
-
-  // --- Filtering (AND logic) ---
-
-  const filteredListings = React.useMemo(() => {
-    const q = searchQuery.trim().toLowerCase();
-    return listings.filter((listing) => {
-      if (q.length > 0) {
-        const matchesText =
-          listing.title.toLowerCase().includes(q) ||
-          listing.description.toLowerCase().includes(q) ||
-          listing.location.toLowerCase().includes(q);
-        if (!matchesText) return false;
-      }
-
-      if (selectedTypes.length > 0 && !selectedTypes.includes(listing.type)) {
-        return false;
-      }
-
-      if (
-        selectedCategories.length > 0 &&
-        !selectedCategories.includes(listing.category)
-      ) {
-        return false;
-      }
-
-      if (selectedTowns.length > 0) {
-        const matchesTown = selectedTowns.some((town) =>
-          listing.location.toLowerCase().includes(town.toLowerCase())
-        );
-        if (!matchesTown) return false;
-      }
-
-      if (hasPriceFilter) {
-        if (listing.price < priceRange[0] || listing.price > priceRange[1]) {
-          return false;
-        }
-      }
-
-      return true;
-    });
-  }, [listings, searchQuery, selectedTypes, selectedCategories, selectedTowns, priceRange, hasPriceFilter]);
-
-  return (
-    <>
-      <ScrollView
-        showsVerticalScrollIndicator={false}
-        refreshControl={
-          <RefreshControl refreshing={loading} onRefresh={handleRefresh} />
-        }
-      >
-        <ScreenContainer>
-          {/* Greeting + Avatar */}
-          <XStack items="center" justify="space-between" width="100%">
-            <YStack gap="$1.5">
-              <Text fontSize="$7" fontWeight="bold" color="$color">
-                {(() => {
-                  const displayName =
-                    `${userProfile?.firstName ?? ""} ${userProfile?.lastName ?? ""}`.trim() ||
-                    user?.displayName;
-                  return user?.isAnonymous || !displayName
-                    ? t("home.defaultGreeting")
-                    : t("home.greeting", { name: displayName });
-                })()}
-              </Text>
-              <Text color="$color" fontSize="$5">
-                {t("home.welcomeBack")}
-              </Text>
-            </YStack>
-
-            <Pressable
-              onPress={() => router.push("/(tabs)/settings")}
-              accessibilityRole="button"
-              accessibilityLabel={t("profile.title")}
-              hitSlop={10}
-            >
-              <Avatar
-                circular
-                size="$4.5"
-                borderColor="$blue10"
-                borderWidth={2}
-              >
-                {(userProfile?.profileImage || user?.photoURL) ? (
-                  <Avatar.Image
-                    src={userProfile?.profileImage ?? user?.photoURL!}
-                  />
-                ) : null}
-                <Avatar.Fallback bg="$blue10" items="center" justify="center">
-                  <Text color="white" fontSize="$5" fontWeight="700">
-                    {(userProfile?.firstName?.[0] || user?.displayName?.[0] || "U").toUpperCase()}
-                  </Text>
-                </Avatar.Fallback>
-              </Avatar>
-            </Pressable>
-          </XStack>
-
-          {/* Search bar + filter button */}
-          <XStack
-            bg="$color3"
-            items="center"
-            rounded="$6"
-            px="$3"
-            gap="$2"
-            my="$3"
-          >
-            <Search size={18} color="$color8" />
-            <Input
-              flex={1}
-              size="$3"
-              placeholder={t("home.searchPlaceholder")}
-              placeholderTextColor="$color8"
-              value={searchQuery}
-              onChangeText={setSearchQuery}
-              bg="transparent"
-              borderWidth={0}
-              py="$2"
-              color="$color"
-            />
-            <Pressable onPress={openSheet} accessibilityRole="button" accessibilityLabel={t("filter.title")}>
-              <View
-                width={36}
-                height={36}
-                rounded={10}
-                bg={activeFilterCount > 0 ? "$blue9" : "$color4"}
-                items="center"
-                justify="center"
-                position="relative"
-              >
-                <SlidersHorizontal
-                  size={18}
-                  color={activeFilterCount > 0 ? "white" : "$color"}
-                />
-                {activeFilterCount > 0 && (
-                  <View
-                    position="absolute"
-                    t={-4}
-                    r={-4}
-                    width={18}
-                    height={18}
-                    rounded={9}
-                    bg="$red9"
-                    items="center"
-                    justify="center"
-                  >
-                    <Text fontSize={10} fontWeight="700" color="white">
-                      {activeFilterCount}
-                    </Text>
-                  </View>
-                )}
-              </View>
-            </Pressable>
-          </XStack>
-
-          {/* Category quick-filter */}
-          <View width="100%" items="center" justify="center" mb="$5">
-            <HomeCategories
-              activeId={activeCategoryId}
-              onSelect={setCategoryFromHome}
-            />
-          </View>
-
-          {/* Default home content (no filters active) */}
-          {!hasActiveFilters && (
-            <>
-              <View width="100%" items="center" justify="center" mb="$4">
-                <HorizontalListing
-                  title={t("home.popularRentals")}
-                  listings={listings.filter((item) => item.type === "rent")}
-                  filterType="rent"
-                  loading={loading}
-                  error={error?.message || null}
-                />
-              </View>
-
-              <View width="100%" items="center" justify="center" mb="$4">
-                <HorizontalListing
-                  title={t("home.popularOnSale")}
-                  listings={listings.filter((item) => item.type === "sale")}
-                  filterType="sale"
-                  loading={loading}
-                  error={error?.message || null}
-                />
-              </View>
-            </>
-          )}
-
-          {/* Filtered results */}
-          {hasActiveFilters && (
-            <YStack gap="$3" mb="$4">
-              <XStack items="center" justify="space-between">
-                <Text fontSize="$6" fontWeight="700" color="$color">
-                  Results
-                </Text>
-                <Text fontSize="$3" color="$color8">
-                  {filteredListings.length} found
-                </Text>
-              </XStack>
-              <FlatList
-                data={filteredListings}
-                keyExtractor={(item) => item.id}
-                scrollEnabled={false}
-                contentContainerStyle={{ gap: 12 }}
-                renderItem={({ item }) => <ListingCardCompact item={item} />}
-              />
-              {filteredListings.length === 0 && (
-                <Text color="$color8">No listings match your filters.</Text>
-              )}
-            </YStack>
-          )}
-
-          {/* Top agents */}
-          <YStack gap="$3" mb="$4">
-            <XStack justify="space-between" items="center">
-              <Text fontSize="$6" fontWeight="700" color="$color">
-                Top agents
-              </Text>
-              <Link href="/agents" asChild>
-                <Pressable>
-                  <Text color="$blue8" fontWeight="600">
-                    See all
-                  </Text>
-                </Pressable>
-              </Link>
-            </XStack>
-            <ScrollView horizontal showsHorizontalScrollIndicator={false}>
-              <XStack gap="$3" pr="$2">
-                {agentColumns.map((column, columnIndex) => (
-                  <YStack key={`col-${columnIndex}`} gap="$3">
-                    {column.map((agent) => (
-                      <Link
-                        key={agent.id}
-                        href={{
-                          pathname: "/agents/detail",
-                          params: { id: agent.id },
-                        }}
-                        asChild
-                      >
-                        <XStack
-                          gap="$3"
-                          items="center"
-                          bg="$background"
-                          borderWidth={1}
-                          borderColor="$borderColor"
-                          rounded="$6"
-                          p="$2.5"
-                          width={260}
-                        >
-                          <Avatar
-                            circular
-                            size="$4.5"
-                            borderColor="$yellow10"
-                            borderWidth={2}
-                          >
-                            {(agent.profileImage || agent.imageUrls?.[0]) ? (
-                              <Avatar.Image
-                                src={agent.profileImage || agent.imageUrls[0]}
-                              />
-                            ) : null}
-                            <Avatar.Fallback
-                              bg="$blue10"
-                              items="center"
-                              justify="center"
-                            >
-                              <Text color="white" fontSize="$5" fontWeight="700">
-                                {(agent.firstName?.[0] ||
-                                  "A"
-                                ).toUpperCase()}
-                              </Text>
-                            </Avatar.Fallback>
-                          </Avatar>
-                          <YStack flex={1} gap="$1">
-                            <Text fontWeight="600">
-                              {`${agent.firstName ?? ""} ${agent.lastName ?? ""}`.trim() ||
-                                "Agent"}
-                            </Text>
-                            <XStack gap="$1" items="center">
-                              <MapPin size={14} color="$color8" />
-                              <Text color="$color8" fontSize="$2">
-                                {agent.location || "Location"}
-                              </Text>
-                            </XStack>
-                          </YStack>
-                          <ChevronRight size={18} color="$color8" />
-                        </XStack>
-                      </Link>
-                    ))}
-                  </YStack>
-                ))}
-              </XStack>
-            </ScrollView>
-          </YStack>
-        </ScreenContainer>
-      </ScrollView>
-
-      {/* Filter bottom sheet */}
-      <Sheet
-        modal
-        open={sheetOpen}
-        onOpenChange={setSheetOpen}
-        snapPoints={[75]}
-        snapPointsMode="percent"
-        dismissOnSnapToBottom
-        zIndex={100_000}
-      >
-        <Sheet.Overlay
-          bg="rgba(0,0,0,0.5)"
-          enterStyle={{ opacity: 0 }}
-          exitStyle={{ opacity: 0 }}
-        />
-        <Sheet.Handle bg="$borderColor" />
-        <Sheet.Frame bg="$background" rounded="$6">
-          <Sheet.ScrollView showsVerticalScrollIndicator={false}>
-            <YStack p="$4" gap="$5" pb="$8">
-              {/* Header */}
-              <XStack items="center" justify="space-between">
-                <Text fontSize="$6" fontWeight="700">
-                  {t("filter.title")}
-                </Text>
-                <Pressable onPress={() => setSheetOpen(false)}>
-                  <View
-                    width={32}
-                    height={32}
-                    rounded={16}
-                    bg="$color3"
-                    items="center"
-                    justify="center"
-                  >
-                    <X size={18} color="$color" />
-                  </View>
-                </Pressable>
-              </XStack>
-
-              {/* Type */}
-              <FilterSection title={t("filter.type")}>
-                <XStack gap="$2" flexWrap="wrap">
-                  {TYPE_OPTIONS.map((opt) => (
-                    <Chip
-                      key={opt.id}
-                      label={t(opt.labelKey)}
-                      selected={draftTypes.includes(opt.id)}
-                      onPress={() =>
-                        setDraftTypes((prev) => toggleItem(prev, opt.id))
-                      }
-                    />
-                  ))}
-                </XStack>
-              </FilterSection>
-
-              <Separator borderColor="$borderColor" />
-
-              {/* Category */}
-              <FilterSection title={t("filter.category")}>
-                <XStack gap="$2" flexWrap="wrap">
-                  {CATEGORY_OPTIONS.map((opt) => (
-                    <Chip
-                      key={opt.id}
-                      label={opt.label}
-                      selected={draftCategories.includes(opt.id)}
-                      onPress={() =>
-                        setDraftCategories((prev) => toggleItem(prev, opt.id))
-                      }
-                    />
-                  ))}
-                </XStack>
-              </FilterSection>
-
-              <Separator borderColor="$borderColor" />
-
-              {/* Town/City */}
-              <FilterSection title={t("filter.townCity")}>
-                <XStack gap="$2" flexWrap="wrap">
-                  {TOWN_OPTIONS.map((town) => (
-                    <Chip
-                      key={town}
-                      label={town}
-                      selected={draftTowns.includes(town)}
-                      onPress={() =>
-                        setDraftTowns((prev) => toggleItem(prev, town))
-                      }
-                    />
-                  ))}
-                </XStack>
-              </FilterSection>
-
-              <Separator borderColor="$borderColor" />
-
-              {/* Price Range */}
-              <FilterSection title={t("filter.priceRange")}>
-                <XStack items="center" justify="space-between">
-                  <Text fontSize="$3" color="$color8">
-                    {formatPrice(draftPrice[0])}
-                  </Text>
-                  <Text fontSize="$3" color="$color8">
-                    {formatPrice(draftPrice[1])}
-                  </Text>
-                </XStack>
-                <Slider
-                  value={draftPrice}
-                  min={0}
-                  max={1_000_000}
-                  step={PRICE_STEP}
-                  minStepsBetweenThumbs={1}
-                  onValueChange={(next) => setDraftPrice([next[0], next[1]])}
-                >
-                  <Slider.Track bg="$borderColor" height={3}>
-                    <Slider.TrackActive bg="$blue8" />
-                  </Slider.Track>
-                  <Slider.Thumb
-                    index={0}
-                    circular
-                    size="$1.5"
-                    bg="$background"
-                    borderWidth={2}
-                    borderColor="$blue8"
-                    elevation="$1"
-                  />
-                  <Slider.Thumb
-                    index={1}
-                    circular
-                    size="$1.5"
-                    bg="$background"
-                    borderWidth={2}
-                    borderColor="$blue8"
-                    elevation="$1"
-                  />
-                </Slider>
-              </FilterSection>
-
-              {/* Action buttons */}
-              <XStack gap="$3" mt="$2">
-                <Button
-                  flex={1}
-                  size="$5"
-                  bg="$color3"
-                  rounded="$4"
-                  onPress={() => {
-                    resetFilters();
-                    setSelectedTypes([]);
-                    setSelectedCategories([]);
-                    setSelectedTowns([]);
-                    setPriceRange(DEFAULT_PRICE);
-                    setActiveCategoryId(null);
-                    setSheetOpen(false);
-                  }}
-                >
-                  <Button.Text fontWeight="600" color="$color">
-                    {t("filter.reset")}
-                  </Button.Text>
-                </Button>
-                <Button
-                  flex={1}
-                  size="$5"
-                  bg="$blue9"
-                  rounded="$4"
-                  onPress={applyFilters}
-                >
-                  <Button.Text fontWeight="600" color="white">
-                    {t("filter.apply")}
-                  </Button.Text>
-                </Button>
-              </XStack>
-            </YStack>
-          </Sheet.ScrollView>
-        </Sheet.Frame>
-      </Sheet>
-
-      {/* FAB — Create Listing (agents only) */}
-      {isAgent && (
-        <Pressable
-          onPress={() => router.push("/create-listing")}
-          accessibilityRole="button"
-          accessibilityLabel="Create listing"
-          style={{
-            position: "absolute",
-            bottom: 24,
-            right: 20,
-            width: 56,
-            height: 56,
-            borderRadius: 28,
-            backgroundColor: "#2563eb",
-            alignItems: "center",
-            justifyContent: "center",
-            elevation: 6,
-            shadowColor: "#000",
-            shadowOffset: { width: 0, height: 3 },
-            shadowOpacity: 0.25,
-            shadowRadius: 4,
-          }}
-        >
-          <Plus size={26} color="white" />
-        </Pressable>
-      )}
-    </>
-  );
-}
+const styles = StyleSheet.create({
+  root: { flex: 1 },
+  topBar: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    paddingHorizontal: gutter,
+    paddingTop: 4,
+  },
+  townRow: { flexDirection: "row", alignItems: "center", gap: 6 },
+  hero: { paddingHorizontal: gutter, paddingTop: 20, gap: 20 },
+  pill: {
+    height: 52,
+    borderRadius: radius.full,
+    flexDirection: "row",
+    alignItems: "center",
+    paddingLeft: 18,
+    paddingRight: 8,
+    gap: 12,
+  },
+  pillText: { flex: 1 },
+  filterButton: { width: 36, height: 36, borderRadius: 18, alignItems: "center", justifyContent: "center" },
+  chips: { paddingHorizontal: gutter, paddingTop: 20, gap: 8 },
+  section: { paddingTop: 28, gap: 14 },
+  sectionLoose: { paddingTop: 40 },
+  tightGap: { gap: 6 },
+  sectionHeader: { paddingHorizontal: gutter },
+  padded: { paddingHorizontal: gutter },
+  rail: { paddingHorizontal: gutter, gap: 12 },
+  teaserWrap: { paddingTop: 32 },
+  teaser: { flexDirection: "row", alignItems: "center", padding: 16, gap: 14, borderRadius: radius.lg },
+  teaserText: { flex: 1, gap: 2 },
+  regular: { fontFamily: "Inter_400Regular" },
+  listCta: { alignItems: "center", paddingTop: 56, paddingHorizontal: 40, gap: 10 },
+  listBody: { maxWidth: 300 },
+  listButton: { marginTop: 10, borderRadius: radius.md },
+  end: { flexDirection: "row", alignItems: "center", justifyContent: "center", gap: 12, paddingTop: 56, paddingBottom: 24 },
+  endRule: { width: 40, height: 1 },
+  sticky: {
+    position: "absolute",
+    top: 0,
+    left: 0,
+    right: 0,
+    zIndex: 10,
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 10,
+    paddingHorizontal: gutter,
+    paddingBottom: 10,
+    borderBottomWidth: StyleSheet.hairlineWidth * 2,
+  },
+  stickyPill: { flex: 1 },
+  message: { paddingHorizontal: 40, paddingTop: 72, gap: 8, alignItems: "center" },
+  messageButton: { marginTop: 12 },
+});

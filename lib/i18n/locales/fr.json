@@ -333,5 +333,224 @@
     "publishing": "Publication...",
     "success": "Annonce publiée avec succès !",
     "error": "Échec de la publication. Veuillez réessayer."
+  },
+  "nav": {
+    "home": "Accueil",
+    "search": "Recherche",
+    "saved": "Favoris",
+    "services": "Services",
+    "profile": "Profil"
+  },
+  "welcome": {
+    "title": "Chaque chambre, maison et terrain. Un seul endroit.",
+    "lead": "Parlez directement à l'agent sur WhatsApp. Aucun frais de visite pour regarder.",
+    "create": "Créer un compte",
+    "haveAccount": "J'ai déjà un compte"
+  },
+  "signIn": {
+    "tagline": "Chambres, maisons et terrains partout au Cameroun — directement de ceux qui les proposent.",
+    "email": "E-mail",
+    "emailPlaceholder": "vous@exemple.com",
+    "password": "Mot de passe",
+    "passwordPlaceholder": "Votre mot de passe",
+    "forgot": "Oublié ?",
+    "submit": "Se connecter",
+    "newHere": "Nouveau sur Fakaba ?",
+    "createAccount": "Créer un compte",
+    "errors": {
+      "mismatch": "L'e-mail et le mot de passe ne correspondent pas. Vérifiez, ou réinitialisez votre mot de passe.",
+      "emailInvalid": "Cette adresse e-mail semble invalide.",
+      "required": "Saisissez votre e-mail et votre mot de passe.",
+      "network": "Vous êtes hors ligne. Vérifiez votre connexion et réessayez.",
+      "generic": "Une erreur s'est produite. Veuillez réessayer.",
+      "tooManyTitle": "Trop de tentatives",
+      "tooManyBody": "La connexion est suspendue quelques minutes pour protéger votre compte. Vous pouvez réinitialiser votre mot de passe."
+    }
+  },
+  "signUp": {
+    "title": "Créez votre compte",
+    "lead": "Enregistrez les biens qui vous plaisent et écrivez aux agents en un geste.",
+    "email": "E-mail",
+    "emailPlaceholder": "vous@exemple.com",
+    "password": "Mot de passe",
+    "passwordPlaceholder": "Au moins 8 caractères",
+    "confirm": "Confirmer le mot de passe",
+    "confirmPlaceholder": "Saisissez-le à nouveau",
+    "submit": "Créer le compte",
+    "legal": "En créant un compte, vous acceptez nos Conditions d'utilisation et notre Politique de confidentialité.",
+    "strength": {
+      "weak": "Faible",
+      "fair": "Moyen",
+      "good": "Bon",
+      "strong": "Fort"
+    },
+    "errors": {
+      "emailInvalid": "Cette adresse e-mail semble invalide.",
+      "emailInUse": "Un compte existe déjà avec cet e-mail. Essayez de vous connecter.",
+      "tooShort": "Utilisez au moins 8 caractères.",
+      "mismatch": "Les mots de passe ne correspondent pas."
+    }
+  },
+  "forgot": {
+    "title": "Mot de passe oublié ?",
+    "lead": "Saisissez l'e-mail utilisé à l'inscription. Nous vous enverrons un lien pour en choisir un nouveau.",
+    "submit": "Envoyer le lien",
+    "remembered": "Vous vous en souvenez ?",
+    "signIn": "Se connecter",
+    "sentTitle": "Consultez vos e-mails",
+    "sentBody": "Si un compte existe pour {{email}}, un lien de réinitialisation arrive. Il est valable 1 heure.",
+    "sentHint": "Rien après quelques minutes ? Regardez dans les spams, ou essayez l'e-mail utilisé à l'inscription.",
+    "backToSignIn": "Retour à la connexion",
+    "resendIn": "Renvoyer dans {{time}}",
+    "resend": "Renvoyer le lien"
+  },
+  "verify": {
+    "title": "Consultez votre boîte",
+    "lead": "Nous avons envoyé un lien à {{email}}. Touchez-le, puis revenez ici.",
+    "nothingYet": "Rien reçu ? Regardez les spams.",
+    "resendIn": "Renvoyer dans {{time}}",
+    "resend": "Renvoyer",
+    "resent": "Renvoyé",
+    "submit": "J'ai vérifié mon e-mail",
+    "notYet": "La vérification n'apparaît pas encore. Touchez le lien dans l'e-mail, puis réessayez.",
+    "differentEmail": "Utiliser un autre e-mail"
+  },
+  "setup": {
+    "back": "Retour",
+    "continue": "Continuer",
+    "finish": "Terminer",
+    "finishCount": "Terminer · {{count}} choisis",
+    "saveError": "Impossible d'enregistrer vos réponses. Vérifiez votre connexion et réessayez.",
+    "accountType": {
+      "title": "Qui rejoint Fakaba ?",
+      "lead": "Les entreprises ont un profil professionnel et publient sous leur marque.",
+      "individual": "Juste moi",
+      "individualSub": "Je cherche, loue ou vends pour moi-même",
+      "company": "Une entreprise",
+      "companySub": "Agence, promoteur ou gestionnaire immobilier"
+    },
+    "role": {
+      "title": "Qu'est-ce qui vous amène ?",
+      "lead": "Nous adaptons votre fil d'accueil. Modifiable plus tard.",
+      "renter": "Louer un logement",
+      "renterSub": "Chambres, studios, appartements",
+      "buyer": "Acheter un bien",
+      "buyerSub": "Une maison ou un terrain",
+      "seller": "Vendre ou mettre en location",
+      "sellerSub": "Publier mon propre bien",
+      "agent": "Je suis agent",
+      "agentSub": "Publier pour des clients, recevoir des avis",
+      "investor": "Investir",
+      "investorSub": "Terrains et biens de rapport"
+    },
+    "business": {
+      "title": "Votre entreprise",
+      "lead": "C'est le nom et le logo que les locataires voient sur vos annonces.",
+      "logo": "Logo",
+      "logoHint": "Un format carré est idéal. Nous utilisons vos initiales en attendant.",
+      "name": "Nom de l'entreprise",
+      "namePlaceholder": "ex. Mountain Properties",
+      "reg": "Numéro RCCM",
+      "regPlaceholder": "Numéro du registre de commerce",
+      "optional": "Facultatif",
+      "areas": "Zones couvertes"
+    },
+    "location": {
+      "title": "Où cherchez-vous ?",
+      "companyTitle": "Où êtes-vous basé ?",
+      "placeholder": "Ville ou quartier",
+      "useCurrent": "Utiliser ma position actuelle",
+      "locating": "Localisation…",
+      "denied": "Localisation désactivée. Saisissez une ville.",
+      "popular": "Populaires"
+    },
+    "profile": {
+      "title": "Un visage sur un nom",
+      "lead": "Les agents répondent plus vite aux profils avec photo.",
+      "addPhoto": "Ajouter une photo",
+      "changePhoto": "Changer la photo",
+      "photoHint": "Facultatif · appareil ou galerie",
+      "uploading": "Envoi…",
+      "uploadFailed": "La photo n'a pas été envoyée. Vous pourrez l'ajouter plus tard.",
+      "firstName": "Prénom",
+      "lastName": "Nom",
+      "whatsapp": "Numéro WhatsApp",
+      "optional": "Facultatif"
+    },
+    "interests": {
+      "title": "Que voulez-vous voir en premier ?",
+      "lead": "Choisissez autant que vous voulez.",
+      "Room": "Chambres",
+      "Apartment": "Appartements",
+      "House": "Maisons",
+      "Commercial": "Boutiques et bureaux",
+      "Land": "Terrains",
+      "Investment": "Investissement"
+    },
+    "done": {
+      "title": "Bienvenue, {{name}}.",
+      "titleNoName": "Bienvenue.",
+      "lead": "Votre fil est prêt. Voici ce que nous vous montrerons d'abord :",
+      "lookingTo": "Objectif",
+      "in": "À",
+      "showing": "Affichage",
+      "business": "Entreprise",
+      "cta": "Voir les biens"
+    }
+  },
+  "feed": {
+    "greeting": "Trouvez votre\nprochain chez-vous, {{name}}.",
+    "greetingNoName": "Trouvez votre\nprochain chez-vous.",
+    "searchPlaceholder": "Ville, quartier ou titre",
+    "all": "Tout",
+    "categories": {
+      "Room": "Chambres",
+      "Apartment": "Appartements",
+      "House": "Maisons",
+      "Commercial": "Commercial",
+      "Land": "Terrains"
+    },
+    "popularRentals": "Locations populaires",
+    "nearYou": "Près de vous",
+    "openMap": "Ouvrir la carte",
+    "nearCount": {
+      "one": "1 bien autour de {{town}}",
+      "other": "{{count}} biens autour de {{town}}"
+    },
+    "nearSub": "Touchez pour les voir sur la carte",
+    "forSale": "À vendre",
+    "topAgents": "Meilleurs agents à {{town}}",
+    "topAgentsNoTown": "Meilleurs agents",
+    "allAgents": "Les {{count}}",
+    "newThisWeek": "Nouveau cette semaine",
+    "seeAll": "Tout voir",
+    "perMonth": "FCFA / mois",
+    "fcfa": "FCFA",
+    "bd": "ch",
+    "ba": "sdb",
+    "rent": "À LOUER",
+    "sale": "À VENDRE",
+    "lease": "BAIL",
+    "servicesTitle": "Achat de terrain ? Vérifiez le titre.",
+    "servicesSub": "Services Fakaba",
+    "listTitle": "Un bien à louer ?",
+    "listBody": "Publiez-le en 5 minutes environ. Les locataires vous écrivent sur WhatsApp.",
+    "listCta": "Publier mon bien",
+    "caughtUp": "Vous avez tout vu à {{town}}",
+    "caughtUpNoTown": "Vous avez tout vu",
+    "empty": "Aucun bien ici pour l'instant",
+    "emptyBody": "Essayez une autre catégorie, ou revenez bientôt — de nouveaux biens arrivent chaque jour.",
+    "errorTitle": "Impossible de charger les biens",
+    "errorBody": "Vérifiez votre connexion et tirez vers le bas pour réessayer.",
+    "retry": "Réessayer",
+    "places": {
+      "one": "1 bien",
+      "other": "{{count}} biens"
+    }
+  },
+  "soon": {
+    "title": "Bientôt disponible",
+    "body": "Nous reconstruisons cet écran pour Fakaba v2.",
+    "signOut": "Se déconnecter"
   }
 }

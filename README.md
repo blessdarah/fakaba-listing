@@ -1,6 +1,6 @@
 # Fakaba Listings
 
-This is a [Tamagui](https://tamagui.dev) app built with [Expo](https://expo.dev).
+Fakaba v2 — built with [Expo](https://expo.dev) and Expo Router, styled with plain React Native `StyleSheet` and the tokens in `theme/`.
 
 ## Getting Started
 

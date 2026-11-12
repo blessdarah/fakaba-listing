@@ -333,5 +333,224 @@
     "publishing": "Publishing...",
     "success": "Listing published successfully!",
     "error": "Failed to publish listing. Please try again."
+  },
+  "nav": {
+    "home": "Home",
+    "search": "Search",
+    "saved": "Saved",
+    "services": "Services",
+    "profile": "Profile"
+  },
+  "welcome": {
+    "title": "Every room, house and plot. One place.",
+    "lead": "Talk straight to the agent on WhatsApp. No visit fees to look.",
+    "create": "Create an account",
+    "haveAccount": "I already have an account"
+  },
+  "signIn": {
+    "tagline": "Rooms, homes and land across Cameroon — straight from the people who list them.",
+    "email": "Email",
+    "emailPlaceholder": "you@example.com",
+    "password": "Password",
+    "passwordPlaceholder": "Your password",
+    "forgot": "Forgot?",
+    "submit": "Sign in",
+    "newHere": "New to Fakaba?",
+    "createAccount": "Create an account",
+    "errors": {
+      "mismatch": "That email and password don't match. Check for typos, or reset your password.",
+      "emailInvalid": "That email address looks invalid.",
+      "required": "Enter your email and password.",
+      "network": "You're offline. Check your connection and try again.",
+      "generic": "Something went wrong. Please try again.",
+      "tooManyTitle": "Too many attempts",
+      "tooManyBody": "Sign-in is paused for a few minutes to keep your account safe. You can reset your password now."
+    }
+  },
+  "signUp": {
+    "title": "Create your account",
+    "lead": "Save places you like and message agents in one tap.",
+    "email": "Email",
+    "emailPlaceholder": "you@example.com",
+    "password": "Password",
+    "passwordPlaceholder": "At least 8 characters",
+    "confirm": "Confirm password",
+    "confirmPlaceholder": "Re-enter your password",
+    "submit": "Create account",
+    "legal": "By creating an account you agree to our Terms of Service and Privacy Policy.",
+    "strength": {
+      "weak": "Weak",
+      "fair": "Fair",
+      "good": "Good",
+      "strong": "Strong"
+    },
+    "errors": {
+      "emailInvalid": "That email address looks invalid.",
+      "emailInUse": "There's already an account with this email. Try signing in.",
+      "tooShort": "Use at least 8 characters.",
+      "mismatch": "Passwords don't match."
+    }
+  },
+  "forgot": {
+    "title": "Forgot your password?",
+    "lead": "Enter the email you signed up with. We'll send a link to set a new one.",
+    "submit": "Send reset link",
+    "remembered": "Remembered it?",
+    "signIn": "Sign in",
+    "sentTitle": "Check your email",
+    "sentBody": "If an account exists for {{email}}, a reset link is on its way. It works for 1 hour.",
+    "sentHint": "Not there after a few minutes? Check spam, or try the email you used when you first joined.",
+    "backToSignIn": "Back to sign in",
+    "resendIn": "Resend in {{time}}",
+    "resend": "Resend link"
+  },
+  "verify": {
+    "title": "Check your inbox",
+    "lead": "We sent a link to {{email}}. Tap it, then come back here.",
+    "nothingYet": "Nothing yet? Check spam.",
+    "resendIn": "Resend in {{time}}",
+    "resend": "Resend",
+    "resent": "Sent again",
+    "submit": "I've verified my email",
+    "notYet": "We couldn't see the verification yet. Tap the link in the email, then try again.",
+    "differentEmail": "Use a different email"
+  },
+  "setup": {
+    "back": "Back",
+    "continue": "Continue",
+    "finish": "Finish",
+    "finishCount": "Finish · {{count}} selected",
+    "saveError": "We couldn't save your answers. Check your connection and try again.",
+    "accountType": {
+      "title": "Who's joining Fakaba?",
+      "lead": "Companies get a business profile and can list under a brand name.",
+      "individual": "Just me",
+      "individualSub": "I'm looking, renting or selling for myself",
+      "company": "A company",
+      "companySub": "An agency, developer or property manager"
+    },
+    "role": {
+      "title": "What brings you here?",
+      "lead": "We'll shape your home feed around it. You can change this later.",
+      "renter": "Rent a place",
+      "renterSub": "Rooms, studios, apartments",
+      "buyer": "Buy property",
+      "buyerSub": "A home or a plot to own",
+      "seller": "Sell or rent out",
+      "sellerSub": "List my own property",
+      "agent": "I'm an agent",
+      "agentSub": "List for clients, get reviews",
+      "investor": "Invest",
+      "investorSub": "Land and income property"
+    },
+    "business": {
+      "title": "Your business",
+      "lead": "This is the name and logo tenants see on your listings.",
+      "logo": "Logo",
+      "logoHint": "Square works best. We'll use your initials until you add one.",
+      "name": "Business name",
+      "namePlaceholder": "e.g. Mountain Properties",
+      "reg": "Registration number",
+      "regPlaceholder": "Trade register number",
+      "optional": "Optional",
+      "areas": "Areas you cover"
+    },
+    "location": {
+      "title": "Where are you looking?",
+      "companyTitle": "Where are you based?",
+      "placeholder": "Town or neighbourhood",
+      "useCurrent": "Use my current location",
+      "locating": "Finding you…",
+      "denied": "Location is off. Type a town instead.",
+      "popular": "Popular"
+    },
+    "profile": {
+      "title": "Put a face to the name",
+      "lead": "Agents reply faster to people with a photo.",
+      "addPhoto": "Add a photo",
+      "changePhoto": "Change photo",
+      "photoHint": "Optional · camera or gallery",
+      "uploading": "Uploading…",
+      "uploadFailed": "Photo didn't upload. You can add it later.",
+      "firstName": "First name",
+      "lastName": "Last name",
+      "whatsapp": "WhatsApp number",
+      "optional": "Optional"
+    },
+    "interests": {
+      "title": "What should we show you first?",
+      "lead": "Pick as many as you like.",
+      "Room": "Rooms",
+      "Apartment": "Apartments",
+      "House": "Houses",
+      "Commercial": "Shops & offices",
+      "Land": "Land",
+      "Investment": "Investment"
+    },
+    "done": {
+      "title": "You're in, {{name}}.",
+      "titleNoName": "You're in.",
+      "lead": "Your feed is ready. Here's what we'll show you first:",
+      "lookingTo": "Looking to",
+      "in": "In",
+      "showing": "Showing",
+      "business": "Business",
+      "cta": "Show me places"
+    }
+  },
+  "feed": {
+    "greeting": "Find your next\nplace, {{name}}.",
+    "greetingNoName": "Find your next\nplace.",
+    "searchPlaceholder": "Town, neighbourhood or title",
+    "all": "All",
+    "categories": {
+      "Room": "Rooms",
+      "Apartment": "Apartments",
+      "House": "Houses",
+      "Commercial": "Commercial",
+      "Land": "Land"
+    },
+    "popularRentals": "Popular rentals",
+    "nearYou": "Near you",
+    "openMap": "Open map",
+    "nearCount": {
+      "one": "1 place around {{town}}",
+      "other": "{{count}} places around {{town}}"
+    },
+    "nearSub": "Tap to see them on the map",
+    "forSale": "For sale",
+    "topAgents": "Top agents in {{town}}",
+    "topAgentsNoTown": "Top agents",
+    "allAgents": "All {{count}}",
+    "newThisWeek": "New this week",
+    "seeAll": "See all",
+    "perMonth": "FCFA / month",
+    "fcfa": "FCFA",
+    "bd": "bd",
+    "ba": "ba",
+    "rent": "À LOUER",
+    "sale": "À VENDRE",
+    "lease": "BAIL",
+    "servicesTitle": "Buying land? Verify the title.",
+    "servicesSub": "Fakaba services",
+    "listTitle": "Have a place to rent out?",
+    "listBody": "Post it in about 5 minutes. Tenants message you on WhatsApp.",
+    "listCta": "List your property",
+    "caughtUp": "You're all caught up in {{town}}",
+    "caughtUpNoTown": "You're all caught up",
+    "empty": "No places here yet",
+    "emptyBody": "Try another category, or check back soon — new places go up every day.",
+    "errorTitle": "Couldn't load places",
+    "errorBody": "Check your connection and pull down to try again.",
+    "retry": "Retry",
+    "places": {
+      "one": "1 place",
+      "other": "{{count}} places"
+    }
+  },
+  "soon": {
+    "title": "Coming soon",
+    "body": "We're rebuilding this screen for Fakaba v2.",
+    "signOut": "Sign out"
   }
 }

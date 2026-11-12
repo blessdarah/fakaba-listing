@@ -1,180 +1,101 @@
 import "../firebase.config";
-import "@tamagui/native/setup-expo-linear-gradient";
 
-import { useEffect } from "react";
-import { StatusBar, useColorScheme } from "react-native";
-import { useFonts } from "expo-font";
 import {
-  SplashScreen,
-  Stack,
-  router,
-  useSegments,
-  useRootNavigationState,
-} from "expo-router";
-import { Provider } from "components/Provider";
-import { useTheme } from "tamagui";
-import { useAuth } from "../contexts/AuthContext";
-import { SafeAreaProvider } from "react-native-safe-area-context";
+  BricolageGrotesque_700Bold,
+  BricolageGrotesque_800ExtraBold,
+} from "@expo-google-fonts/bricolage-grotesque";
+import {
+  Inter_400Regular,
+  Inter_500Medium,
+  Inter_600SemiBold,
+  Inter_700Bold,
+} from "@expo-google-fonts/inter";
+import { useFonts } from "expo-font";
+import { SplashScreen, Stack } from "expo-router";
+import { StatusBar } from "expo-status-bar";
+import { useEffect } from "react";
+import { BrandSplash } from "components/brand";
+import { Providers } from "components/Providers";
+import { useAuth } from "contexts/AuthContext";
+import { useThemePreference } from "contexts/ThemeContext";
+import { useTheme } from "theme";
 
-export {
-  // Catch any errors thrown by the Layout component.
-  ErrorBoundary,
-} from "expo-router";
+export { ErrorBoundary } from "expo-router";
 
-export const unstable_settings = {
-  // Ensure that reloading on `/modal` keeps a back button present.
-  initialRouteName: "(tabs)",
-};
-
-// Prevent the splash screen from auto-hiding before asset loading is complete.
+// Keep the native splash up until fonts are ready; BrandSplash takes over
+// (same blue, same mark) while Firebase restores the session.
 SplashScreen.preventAutoHideAsync();
 
 export default function RootLayout() {
-  const [interLoaded, interError] = useFonts({
-    Inter: require("@tamagui/font-inter/otf/Inter-Medium.otf"),
-    InterBold: require("@tamagui/font-inter/otf/Inter-Bold.otf"),
+  const [fontsLoaded, fontError] = useFonts({
+    BricolageGrotesque_700Bold,
+    BricolageGrotesque_800ExtraBold,
+    Inter_400Regular,
+    Inter_500Medium,
+    Inter_600SemiBold,
+    Inter_700Bold,
   });
 
   useEffect(() => {
-    if (interLoaded || interError) {
-      // Hide the splash screen after the fonts have loaded (or an error was returned) and the UI is ready.
-      SplashScreen.hideAsync();
-    }
-  }, [interLoaded, interError]);
+    if (fontsLoaded || fontError) SplashScreen.hideAsync();
+  }, [fontsLoaded, fontError]);
 
-  if (!interLoaded && !interError) {
-    return null;
-  }
+  if (!fontsLoaded && !fontError) return null;
 
   return (
     <Providers>
-      <RootLayoutNav />
+      <RootNavigator />
     </Providers>
   );
 }
 
-const Providers = ({ children }: { children: React.ReactNode }) => {
-  return <Provider>{children}</Provider>;
-};
-
-const PUBLIC_SEGMENTS = ["sign-in", "sign-up", "setup", "verify-email"];
-
-function useProtectedRoute(
-  user: any,
-  loading: boolean,
-  needsSetup: boolean,
-  needsEmailVerification: boolean
-) {
-  const segments = useSegments();
-  const navigationState = useRootNavigationState();
-
-  useEffect(() => {
-    if (loading) return;
-    if (!navigationState?.key) return;
-
-    const inPublicRoute = PUBLIC_SEGMENTS.includes(segments[0] as string);
-
-    if (!user && !inPublicRoute) {
-      router.replace("/sign-in");
-    } else if (user && needsEmailVerification && segments[0] !== "verify-email") {
-      router.replace("/verify-email");
-    } else if (user && !needsEmailVerification && needsSetup && segments[0] !== "setup") {
-      router.replace("/setup");
-    } else if (user && !needsEmailVerification && !needsSetup && inPublicRoute) {
-      router.replace("/(tabs)");
-    }
-  }, [user, loading, segments, navigationState?.key, needsSetup, needsEmailVerification]);
-}
-
-function RootLayoutNav() {
-  const colorScheme = useColorScheme();
-  const theme = useTheme();
+function RootNavigator() {
   const { user, loading, needsSetup, needsEmailVerification } = useAuth();
+  const { ready: themeReady } = useThemePreference();
+  const { colors, isDark } = useTheme();
 
-  useProtectedRoute(user, loading, needsSetup, needsEmailVerification);
-
-  if (loading) {
-    return null;
+  if (loading || !themeReady) {
+    return (
+      <>
+        <StatusBar style="light" />
+        <BrandSplash />
+      </>
+    );
   }
 
+  const signedIn = !!user;
+  const verifying = signedIn && needsEmailVerification;
+  const settingUp = signedIn && !needsEmailVerification && needsSetup;
+  const ready = signedIn && !needsEmailVerification && !needsSetup;
+
   return (
-    <SafeAreaProvider>
-      <StatusBar
-        barStyle={colorScheme === "dark" ? "light-content" : "dark-content"}
-      />
+    <>
+      <StatusBar style={isDark ? "light" : "dark"} />
       <Stack
         screenOptions={{
-          contentStyle: { backgroundColor: theme.background.val },
+          headerShown: false,
+          contentStyle: { backgroundColor: colors.bg },
+          animation: "slide_from_right",
         }}
       >
-        <Stack.Screen
-          name="sign-in"
-          options={{
-            headerShown: false,
-          }}
-        />
-        <Stack.Screen
-          name="sign-up"
-          options={{
-            headerShown: false,
-          }}
-        />
-        <Stack.Screen
-          name="verify-email"
-          options={{
-            headerShown: false,
-          }}
-        />
-        <Stack.Screen
-          name="(tabs)"
-          options={{
-            headerShown: false,
-          }}
-        />
-        <Stack.Screen
-          name="(categories)"
-          options={{
-            headerShown: false,
-          }}
-        />
-        <Stack.Screen
-          name="setup"
-          options={{
-            headerShown: false,
-          }}
-        />
-        <Stack.Screen
-          name="agents"
-          options={{
-            headerShown: false,
-            headerBackTitle: "Back",
-          }}
-        />
-        <Stack.Screen
-          name="create-listing"
-          options={{
-            headerShown: false,
-          }}
-        />
-        <Stack.Screen
-          name="create-service"
-          options={{
-            headerShown: false,
-          }}
-        />
-        <Stack.Screen
-          name="my-listings"
-          options={{
-            headerShown: false,
-          }}
-        />
-        <Stack.Screen
-          name="change-password"
-          options={{
-            headerShown: false,
-          }}
-        />
+        {/* Signed out: welcome, sign in/up, forgot password. */}
+        <Stack.Protected guard={!signedIn}>
+          <Stack.Screen name="(auth)" options={{ animation: "fade" }} />
+        </Stack.Protected>
+
+        <Stack.Protected guard={verifying}>
+          <Stack.Screen name="verify-email" options={{ animation: "fade" }} />
+        </Stack.Protected>
+
+        {/* Onboarding answers. Saving them flips needsSetup and lands on home. */}
+        <Stack.Protected guard={settingUp}>
+          <Stack.Screen name="setup" options={{ animation: "fade", gestureEnabled: false }} />
+        </Stack.Protected>
+
+        <Stack.Protected guard={ready}>
+          <Stack.Screen name="(tabs)" options={{ animation: "fade" }} />
+        </Stack.Protected>
       </Stack>
-    </SafeAreaProvider>
+    </>
   );
 }

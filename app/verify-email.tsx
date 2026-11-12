@@ -1,161 +1,124 @@
-import { useCallback, useEffect, useRef, useState } from "react";
-import { router } from "expo-router";
-import { Text, YStack } from "tamagui";
-import { Mail } from "@tamagui/lucide-icons-2";
-import { useToastController } from "@tamagui/toast";
-import { useAuth } from "../contexts/AuthContext";
-import { useTranslation } from "../lib/i18n/useTranslation";
-import { AuthButton, AuthScreen } from "../components/auth/AuthScreen";
+import { useEffect, useState } from "react";
+import { AppState, Pressable, StyleSheet, View } from "react-native";
+import Animated, { FadeIn } from "react-native-reanimated";
+import { InboxArt } from "components/illustrations";
+import { OnboardingScreen } from "components/onboarding/OnboardingScreen";
+import { ScreenTitle } from "components/onboarding/ScreenTitle";
+import { Button } from "components/ui/Button";
+import { Icon } from "components/ui/Icon";
+import { Text } from "components/ui/Text";
+import { useAuth } from "contexts/AuthContext";
+import { formatCountdown } from "lib/authErrors";
+import { useTranslation } from "lib/i18n/useTranslation";
+import { useCountdown } from "lib/useCountdown";
+import { radius, useTheme } from "theme";
 
-const RESEND_COOLDOWN = 60;
-const POLL_INTERVAL = 5000;
-
-export default function VerifyEmail() {
-  const { user, checkEmailVerified, resendVerificationEmail, signOut } =
-    useAuth();
+/** "22 — Onboarding · Verify email" */
+export default function VerifyEmailScreen() {
   const { t } = useTranslation();
-  const toast = useToastController();
-
+  const { colors } = useTheme();
+  const { user, checkEmailVerified, resendVerificationEmail, signOut } = useAuth();
+  const countdown = useCountdown(60);
   const [checking, setChecking] = useState(false);
   const [resending, setResending] = useState(false);
-  const [cooldown, setCooldown] = useState(0);
-  const pollRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const [notYet, setNotYet] = useState(false);
 
-  const handleVerified = useCallback(() => {
-    if (pollRef.current) {
-      clearInterval(pollRef.current);
-      pollRef.current = null;
-    }
-    router.replace("/setup");
-  }, []);
-
-  // Auto-poll to check verification status
+  // Coming back from the mail app is the moment people expect this to "just work".
   useEffect(() => {
-    pollRef.current = setInterval(async () => {
-      try {
-        const verified = await checkEmailVerified();
-        if (verified) handleVerified();
-      } catch {
-        // Silently ignore poll errors
-      }
-    }, POLL_INTERVAL);
+    const sub = AppState.addEventListener("change", (state) => {
+      if (state === "active") checkEmailVerified().catch(() => {});
+    });
+    return () => sub.remove();
+  }, [checkEmailVerified]);
 
-    return () => {
-      if (pollRef.current) clearInterval(pollRef.current);
-    };
-  }, [checkEmailVerified, handleVerified]);
-
-  // Cooldown timer
-  useEffect(() => {
-    if (cooldown <= 0) return;
-    const timer = setTimeout(() => setCooldown((c) => c - 1), 1000);
-    return () => clearTimeout(timer);
-  }, [cooldown]);
-
-  const handleCheck = async () => {
-    if (checking) return;
+  async function confirm() {
     setChecking(true);
+    setNotYet(false);
     try {
-      const verified = await checkEmailVerified();
-      if (verified) {
-        handleVerified();
-      } else {
-        toast.show(t("auth.verifyEmail.notVerified"));
-      }
-    } catch {
-      toast.show(t("auth.verifyEmail.notVerified"));
+      const ok = await checkEmailVerified();
+      if (!ok) setNotYet(true);
     } finally {
       setChecking(false);
     }
-  };
+  }
 
-  const handleResend = async () => {
-    if (resending || cooldown > 0) return;
+  async function resend() {
     setResending(true);
     try {
       await resendVerificationEmail();
-      setCooldown(RESEND_COOLDOWN);
-      toast.show(t("auth.verifyEmail.resent"));
+      countdown.restart();
     } catch {
-      toast.show(t("auth.verifyEmail.resendFailed"));
+      // Firebase throttles resends; the timer still guides people.
+      countdown.restart();
     } finally {
       setResending(false);
     }
-  };
-
-  const handleDifferentEmail = async () => {
-    await signOut();
-    router.replace("/sign-up");
-  };
-
-  const resendLabel =
-    cooldown > 0
-      ? t("auth.verifyEmail.resendIn", { seconds: cooldown })
-      : t("auth.verifyEmail.resend");
+  }
 
   return (
-    <AuthScreen
-      title={t("auth.verifyEmail.title")}
-      subtitle={t("auth.verifyEmail.subtitle")}
+    <OnboardingScreen
+      contentStyle={styles.content}
+      footer={
+        <>
+          <Button label={t("verify.submit")} loading={checking} onPress={confirm} />
+          <Button label={t("verify.differentEmail")} variant="link" onPress={() => signOut()} />
+        </>
+      }
     >
-      <YStack gap={20} items="center">
-        <YStack
-          width={64}
-          height={64}
-          rounded="$10"
-          bg="$blue4"
-          items="center"
-          justify="center"
-        >
-          <Mail size={32} color="$blue10" />
-        </YStack>
+      <Animated.View entering={FadeIn.duration(350)} style={styles.art}>
+        <InboxArt />
+      </Animated.View>
+      <ScreenTitle
+        title={t("verify.title")}
+        lead={t("verify.lead", { email: user?.email ?? "" })}
+      />
 
-        <Text
-          fontSize={16}
-          fontWeight="600"
-          color="$color"
-          textAlign="center"
-        >
-          {user?.email}
+      <View style={[styles.resendBar, { backgroundColor: colors.surface }]}>
+        <Text variant="sm" color="inkMuted" style={styles.flex}>
+          {t("verify.nothingYet")}
         </Text>
+        {countdown.done ? (
+          <Pressable
+            accessibilityRole="button"
+            hitSlop={10}
+            disabled={resending}
+            onPress={resend}
+          >
+            <Text variant="sm" weight="semibold" underline>
+              {t("verify.resend")}
+            </Text>
+          </Pressable>
+        ) : (
+          <Text variant="sm" weight="semibold" color="inkSubtle">
+            {t("verify.resendIn", { time: formatCountdown(countdown.left) })}
+          </Text>
+        )}
+      </View>
 
-        <Text
-          fontSize={14}
-          color="$color9"
-          textAlign="center"
-          lineHeight={20}
-        >
-          {t("auth.verifyEmail.checkInbox")}
-        </Text>
-
-        <YStack gap={12} width="100%">
-          <AuthButton
-            label={t("auth.verifyEmail.iVerified")}
-            loadingLabel={t("auth.verifyEmail.checking")}
-            loading={checking}
-            onPress={handleCheck}
-          />
-
-          <AuthButton
-            variant="secondary"
-            label={resendLabel}
-            loading={resending}
-            disabled={cooldown > 0}
-            onPress={handleResend}
-          />
-        </YStack>
-
-        <Text
-          fontSize={14}
-          color="$blue10"
-          fontWeight="600"
-          onPress={handleDifferentEmail}
-          cursor="pointer"
-          accessibilityRole="link"
-        >
-          {t("auth.verifyEmail.differentEmail")}
-        </Text>
-      </YStack>
-    </AuthScreen>
+      {notYet && (
+        <Animated.View entering={FadeIn} style={styles.notYet}>
+          <Icon name="info" size={16} color="inkMuted" style={styles.icon} />
+          <Text variant="sm" color="inkMuted" style={styles.flex}>
+            {t("verify.notYet")}
+          </Text>
+        </Animated.View>
+      )}
+    </OnboardingScreen>
   );
 }
+
+const styles = StyleSheet.create({
+  content: { gap: 24, paddingTop: 32 },
+  art: { alignItems: "center" },
+  resendBar: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 12,
+    paddingHorizontal: 16,
+    paddingVertical: 15,
+    borderRadius: radius.md,
+  },
+  notYet: { flexDirection: "row", gap: 10, marginTop: -8 },
+  icon: { marginTop: 2 },
+  flex: { flex: 1 },
+});
