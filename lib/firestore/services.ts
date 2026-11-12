@@ -4,6 +4,7 @@ import {
   collection,
   getDocs,
   addDoc,
+  updateDoc,
   query,
   where,
   serverTimestamp,
@@ -102,4 +103,21 @@ export const uploadServiceImage = async (
   );
   await uploadBytes(storageRef, blob, { contentType: "image/jpeg" });
   return getDownloadURL(storageRef);
+};
+
+export const updateService = async (
+  id: string,
+  data: Partial<Omit<Service, "id" | "createdAt" | "updatedAt">>
+): Promise<void> => {
+  try {
+    await updateDoc(doc(db, "services", id), { ...data, updatedAt: serverTimestamp() });
+  } catch (error: any) {
+    console.error("Error updating service:", error);
+
+    if (error.code === "permission-denied") {
+      throw new Error("Permission denied: Unable to update service.");
+    }
+
+    throw new Error("Failed to update service. Please try again.");
+  }
 };

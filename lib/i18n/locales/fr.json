@@ -56,11 +56,38 @@
   },
   "search": {
     "title": "Recherche",
-    "placeholder": "Rechercher par nom, lieu...",
+    "placeholder": "Ville, quartier ou titre",
     "resultsCount": "{{count}} résultats",
     "noResults": "Aucune annonce trouvée",
     "noResultsHint": "Essayez d'ajuster votre recherche ou vos filtres",
-    "filterCount": "{{count}} filtres actifs"
+    "filterCount": "{{count}} filtres actifs",
+    "clear": "Effacer",
+    "filters": "Filtres",
+    "places": {
+      "one": "bien",
+      "other": "biens"
+    },
+    "sort": {
+      "newest": "Plus récents",
+      "priceAsc": "Prix croissant",
+      "priceDesc": "Prix décroissant",
+      "title": "Trier par"
+    },
+    "under": "Moins de {{price}}",
+    "over": "Plus de {{price}}",
+    "between": "{{min}} – {{max}}",
+    "bedsPlus": "{{count}}+ ch",
+    "emptyTitle": "Rien pour l'instant",
+    "emptyBody": "Aucun bien ne correspond à ces filtres. Essayez :",
+    "raiseMax": "Monter le max à {{price}}",
+    "dropCategory": "Inclure tous les types de biens",
+    "dropBeds": "Peu importe le nombre de chambres",
+    "searchAll": "Chercher partout",
+    "clearAll": "Effacer tous les filtres",
+    "errorTitle": "Impossible de charger les biens",
+    "errorBody": "Vérifiez votre connexion et réessayez.",
+    "retry": "Réessayer",
+    "remove": "Retirer {{label}}"
   },
   "filter": {
     "title": "Filtres",
@@ -552,5 +579,419 @@
     "title": "Bientôt disponible",
     "body": "Nous reconstruisons cet écran pour Fakaba v2.",
     "signOut": "Se déconnecter"
+  },
+  "listing": {
+    "back": "Retour",
+    "share": "Partager",
+    "save": "Enregistrer",
+    "unsave": "Retirer des favoris",
+    "posted": "publié {{when}}",
+    "when": {
+      "today": "aujourd'hui",
+      "yesterday": "hier",
+      "days": "il y a {{count}} jours",
+      "weeks": {
+        "one": "il y a 1 semaine",
+        "other": "il y a {{count}} semaines"
+      },
+      "months": {
+        "one": "il y a 1 mois",
+        "other": "il y a {{count}} mois"
+      }
+    },
+    "bedrooms": {
+      "one": "Chambre",
+      "other": "Chambres"
+    },
+    "bathrooms": {
+      "one": "Salle de bain",
+      "other": "Salles de bain"
+    },
+    "floorArea": "Surface",
+    "plotSize": "Superficie",
+    "readMore": "Lire la suite",
+    "readLess": "Réduire",
+    "features": "Équipements",
+    "location": "Emplacement",
+    "role": {
+      "agent": "Agent",
+      "company": "Agence",
+      "owner": "Propriétaire"
+    },
+    "reviews": {
+      "one": "1 avis",
+      "other": "{{count}} avis"
+    },
+    "call": "Appeler",
+    "whatsapp": "WhatsApp",
+    "taken": "PRIS",
+    "takenNote": "Ce bien n'est plus disponible.",
+    "seeSimilar": {
+      "one": "Voir 1 bien similaire à {{area}}",
+      "other": "Voir {{count}} biens similaires à {{area}}"
+    },
+    "seeSimilarNone": "Chercher à {{area}}",
+    "notFound": "Cette annonce n'est pas disponible",
+    "notFoundBody": "Elle a peut-être été retirée par son auteur.",
+    "loadError": "Impossible de charger ce bien",
+    "shareText": "{{title}} — {{price}} sur Fakaba",
+    "perMonthShort": "FCFA / mois",
+    "fcfa": "FCFA"
+  },
+  "gallery": {
+    "close": "Fermer",
+    "photo": "Photo {{n}} sur {{total}}",
+    "noPhotos": "Pas encore de photos"
+  },
+  "contact": {
+    "yourMessage": "Votre message",
+    "edit": "Modifier",
+    "done": "OK",
+    "message": "Bonjour {{name}}, j'ai vu votre annonce « {{title}} » à {{area}} sur Fakaba. Est-elle toujours disponible à {{price}} FCFA ?",
+    "sendWhatsApp": "Envoyer sur WhatsApp",
+    "call": "Appeler",
+    "callNumber": "Appeler le {{number}}",
+    "email": "E-mail",
+    "sendEmail": "Envoyer un e-mail",
+    "safety": "Visitez avant de payer. N'envoyez jamais d'acompte à quelqu'un que vous n'avez pas rencontré.",
+    "noWhatsAppTitle": "Pas encore de numéro WhatsApp",
+    "noWhatsAppBody": "{{name}} n'en a pas ajouté. Écrivez-lui par e-mail — nous mentionnerons l'annonce.",
+    "emailSubject": "Votre annonce sur Fakaba : {{title}}",
+    "listedPlaces": {
+      "one": "1 bien publié",
+      "other": "{{count}} biens publiés"
+    },
+    "unavailable": "Impossible d'ouvrir WhatsApp sur cet appareil."
+  },
+  "filters": {
+    "title": "Filtres",
+    "reset": "Réinitialiser",
+    "close": "Fermer",
+    "lookingTo": "Objectif",
+    "rent": "Louer",
+    "buy": "Acheter",
+    "lease": "Bail",
+    "any": "Tous",
+    "propertyType": "Type de bien",
+    "pricePerMonth": "Prix par mois",
+    "price": "Prix",
+    "min": "Min",
+    "max": "Max",
+    "noMax": "Sans max",
+    "bedrooms": "Chambres",
+    "clear": "Effacer",
+    "show": {
+      "zero": "Aucun bien",
+      "one": "Voir 1 bien",
+      "other": "Voir {{count}} biens"
+    },
+    "most": "La plupart : {{low}} – {{high}}"
+  },
+  "saved": {
+    "changed": {
+      "one": "1 a changé depuis",
+      "other": "{{count}} ont changé depuis"
+    },
+    "edit": "Modifier",
+    "done": "OK",
+    "was": "Avant {{price}}",
+    "priceDropped": "Prix baissé, avant {{price}}",
+    "unavailable": "Plus disponible",
+    "removedTitle": "Un lieu enregistré",
+    "seeSimilar": {
+      "one": "Voir 1 similaire à proximité",
+      "other": "Voir {{count}} similaires à proximité"
+    },
+    "searchArea": "Chercher à {{area}}",
+    "remove": "Retirer des favoris",
+    "save": "Enregistrer à nouveau",
+    "emptyTitle": "Rien d'enregistré",
+    "emptyBody": "Touchez le cœur sur n'importe quel lieu. On vous préviendra ici si le prix baisse ou s'il est pris.",
+    "emptyCta": "Commencer à explorer",
+    "errorTitle": "Impossible de charger vos favoris",
+    "errorBody": "Vérifiez votre connexion et tirez vers le bas pour réessayer."
+  },
+  "account": {
+    "noName": "Votre profil",
+    "editProfile": "Modifier le profil",
+    "add": "Ajouter",
+    "sections": {
+      "account": "Compte",
+      "preferences": "Préférences"
+    },
+    "whatsapp": "Numéro WhatsApp",
+    "changePassword": "Changer le mot de passe",
+    "language": "Langue",
+    "languageNote": "Les annonces restent dans la langue de leur auteur.",
+    "appearance": "Apparence",
+    "theme": {
+      "system": "Comme l'appareil",
+      "systemSub": "Suit le mode clair ou sombre de votre téléphone",
+      "light": "Clair",
+      "dark": "Sombre"
+    },
+    "help": "Aide et assistance",
+    "signOut": "Se déconnecter",
+    "signOutTitle": "Se déconnecter de Fakaba ?",
+    "deleteAccount": "Supprimer le compte",
+    "terms": "Conditions",
+    "privacy": "Confidentialité",
+    "edit": {
+      "changePhoto": "Changer la photo",
+      "changeLogo": "Changer le logo",
+      "photoError": "Impossible d'envoyer cette photo. Essayez-en une autre.",
+      "firstName": "Prénom",
+      "lastName": "Nom",
+      "phoneHint": "Visible par vos contacts",
+      "phoneInvalid": "Saisissez les 9 chiffres de votre numéro, ex. 677 38 73 64.",
+      "town": "Ville",
+      "chooseTown": "Choisissez votre ville",
+      "emailLabel": "E-mail · pour se connecter",
+      "save": "Enregistrer",
+      "saveError": "Impossible d'enregistrer. Vérifiez votre connexion et réessayez."
+    },
+    "password": {
+      "lead": "Vous vous reconnecterez ensuite avec le nouveau.",
+      "current": "Mot de passe actuel",
+      "forgot": "Oublié ?",
+      "new": "Nouveau mot de passe",
+      "hint": "Au moins 6 caractères. Plus long, plus sûr.",
+      "tooShort": "Trop court",
+      "confirm": "Confirmer le nouveau mot de passe",
+      "confirmPlaceholder": "Saisissez-le à nouveau",
+      "mismatch": "Les deux nouveaux mots de passe ne correspondent pas.",
+      "wrongCurrent": "Ce mot de passe est incorrect.",
+      "weak": "Choisissez un mot de passe plus fort — au moins 6 caractères.",
+      "tooMany": "Trop de tentatives. Patientez quelques minutes.",
+      "doneTitle": "Mot de passe modifié",
+      "doneBody": "Reconnectez-vous avec votre nouveau mot de passe.",
+      "resetSentTitle": "Vérifiez vos e-mails",
+      "resetSentBody": "Nous avons envoyé un lien à %{email}."
+    },
+    "delete": {
+      "title": "Supprimer votre compte",
+      "lead": "Tout ce qui suit sera supprimé définitivement. C'est irréversible.",
+      "profile": "Votre profil et votre photo",
+      "profileSub": "Nom, numéro WhatsApp, connexion",
+      "listings": {
+        "one": "1 annonce et ses photos",
+        "other": "%{count} annonces et leurs photos"
+      },
+      "listingsSub": "Ceux qui les ont enregistrées verront « plus disponible »",
+      "saved": {
+        "one": "1 lieu enregistré",
+        "other": "%{count} lieux enregistrés"
+      },
+      "reviews": "Les avis que vous avez écrits",
+      "breakBody": "Envie d'une pause ? Masquez plutôt vos annonces et gardez tout.",
+      "hideListings": "Masquer mes annonces",
+      "hiddenTitle": "Annonces masquées",
+      "hiddenBody": "Personne ne peut les voir. Votre compte reste intact.",
+      "continue": "Continuer",
+      "confirmTitle": "Confirmez que c'est vous",
+      "confirmLead": "Saisissez votre mot de passe pour supprimer %{email} et tout ce qui y est lié.",
+      "confirmLeadNoPassword": "Ceci supprime %{email} et tout ce qui y est lié.",
+      "understand": "Je comprends que mon profil, mes annonces, lieux enregistrés et avis seront supprimés définitivement.",
+      "cta": "Supprimer mon compte",
+      "keep": "Garder mon compte",
+      "recentLogin": "Par sécurité, déconnectez-vous puis reconnectez-vous, et réessayez."
+    },
+    "deleted": {
+      "title": "Votre compte est supprimé",
+      "body": "Merci d'avoir utilisé Fakaba. Si vous cherchez à nouveau un logement, vous serez le bienvenu.",
+      "close": "Fermer"
+    }
+  },
+  "svc": {
+    "lead": "De l'aide pour acheter, construire et gérer un bien. Écrivez-nous sur WhatsApp.",
+    "new": "Nouveau service",
+    "newShort": "Nouveau",
+    "mostAsked": "Le plus demandé",
+    "errorTitle": "Impossible de charger les services",
+    "emptyTitle": "Les services arrivent bientôt",
+    "emptyBody": "Nous préparons de l'aide pour acheter, construire et gérer un bien.",
+    "notFound": "Ce service n'est plus disponible",
+    "untitled": "Service sans titre",
+    "questions": "Questions",
+    "ask": "Demander à Fakaba sur WhatsApp",
+    "call": "Appeler Fakaba",
+    "message": "Bonjour Fakaba, j'aimerais en savoir plus sur « %{title} ».",
+    "noWhatsApp": "Impossible d'ouvrir WhatsApp. Appelez-nous plutôt.",
+    "art": {
+      "landTitle": "Titre foncier",
+      "management": "Immeuble",
+      "building": "Boutique",
+      "selling": "Panneau",
+      "moving": "Clé"
+    },
+    "form": {
+      "admin": "Admin",
+      "newTitle": "Nouveau service",
+      "editTitle": "Modifier le service",
+      "cover": "Image de couverture",
+      "coverHint": "Ou choisissez une illustration",
+      "choosePhoto": "Choisir une photo",
+      "orIllustration": "Ou une illustration",
+      "removeCover": "Retirer la couverture",
+      "title": "Titre",
+      "titlePlaceholder": "Vérification de titre foncier",
+      "tagline": "Phrase courte",
+      "taglinePlaceholder": "Affichée sous le titre dans la liste",
+      "description": "Description",
+      "descriptionPlaceholder": "Avant de payer un terrain, nous vérifions le titre au cadastre…",
+      "highlights": "Ce qui est inclus",
+      "highlightsHint": "Un par ligne. Affiché avec des coches vertes.",
+      "highlightsPlaceholder": "Recherche du titre au cadastre\nVisite et bornage",
+      "featured": "Le plus demandé",
+      "featuredHint": "L'afficher en grande carte en haut des Services.",
+      "faqs": "FAQ · %{count}",
+      "addQuestion": "Ajouter une question",
+      "editQuestion": "Modifier la question",
+      "question": "Question",
+      "questionPlaceholder": "Combien de temps cela prend-il ?",
+      "answer": "Réponse",
+      "deleteQuestion": "Supprimer la question",
+      "preview": "Aperçu",
+      "publish": "Publier le service",
+      "save": "Enregistrer",
+      "saveError": "Impossible d'enregistrer le service",
+      "discardTitle": "Abandonner vos modifications ?",
+      "keepEditing": "Continuer",
+      "discard": "Abandonner"
+    }
+  },
+  "map": {
+    "back": "Retour",
+    "allPlaces": "Tous les lieux",
+    "thisArea": "Cette zone",
+    "searchArea": "Chercher dans cette zone",
+    "list": "Liste",
+    "locate": "Afficher ma position",
+    "placing": {
+      "one": "Placement d'1 lieu…",
+      "other": "Placement de {{count}} lieux…"
+    },
+    "none": "Aucun lieu à afficher sur la carte pour l'instant",
+    "noneHere": "Aucun lieu dans cette zone — dézoomez",
+    "types": {
+      "one": "1 type",
+      "other": "{{count}} types"
+    },
+    "under": "Moins de {{price}}",
+    "perMonthShort": "FCFA / mois",
+    "mAway": "À {{m}} m de vous",
+    "kmAway": "À {{km}} km de vous",
+    "preview": "Carte des lieux près de vous"
+  },
+  "agents": {
+    "title": "Agents",
+    "titleIn": "Agents à {{town}}",
+    "count": {
+      "one": "1 agent",
+      "other": "{{count}} agents"
+    },
+    "verifiedCount": "{{count}} vérifiés",
+    "placeholder": "Nom ou quartier",
+    "filters": {
+      "all": "Tous",
+      "verified": "Vérifiés",
+      "topRated": "Mieux notés",
+      "nearby": "Près de {{town}}"
+    },
+    "listings": {
+      "zero": "Aucune annonce",
+      "one": "1 annonce",
+      "other": "{{count}} annonces"
+    },
+    "newOnFakaba": "Nouveau sur Fakaba",
+    "company": "Entreprise",
+    "emptyTitle": "Aucun agent trouvé",
+    "emptyBody": "Essayez un autre nom ou quartier.",
+    "errorTitle": "Impossible de charger les agents",
+    "retry": "Réessayer",
+    "verifiedAgent": "Agent vérifié",
+    "verifiedCompany": "Entreprise vérifiée",
+    "stats": {
+      "listings": {
+        "one": "Annonce",
+        "other": "Annonces"
+      },
+      "reviews": {
+        "zero": "Pas encore d'avis",
+        "one": "1 avis",
+        "other": "{{count}} avis"
+      },
+      "years": {
+        "one": "1 an",
+        "other": "{{count}} ans"
+      },
+      "months": {
+        "one": "1 mois",
+        "other": "{{count}} mois"
+      },
+      "onFakaba": "Sur Fakaba",
+      "new": "Nouveau"
+    },
+    "whatTenantsSay": "Ce qu'en disent les locataires",
+    "seeAllReviews": {
+      "one": "Voir l'avis",
+      "other": "Voir les {{count}} avis"
+    },
+    "writeReview": "Laisser un avis",
+    "editReview": "Modifier votre avis",
+    "listingsBy": "Annonces de {{name}}",
+    "seeListings": {
+      "zero": "Aucune annonce",
+      "one": "Voir 1 annonce",
+      "other": "Voir {{count}} annonces"
+    },
+    "whatsapp": "WhatsApp",
+    "message": "Bonjour {{name}}, j'ai vu votre profil sur Fakaba et je cherche un logement. Êtes-vous disponible ?",
+    "share": "Partager",
+    "shareText": "{{name}} sur Fakaba — chambres, maisons et terrains.",
+    "yourView": "Voici comment les locataires vous voient",
+    "done": "OK",
+    "shareProfile": "Partager le profil",
+    "editProfile": "Modifier le profil",
+    "notFound": "Cet agent n'est pas disponible",
+    "back": "Retour",
+    "noReviewsYet": "Pas encore d'avis. Vous avez travaillé avec {{name}} ? Soyez le premier à le dire."
+  },
+  "reviews": {
+    "title": "Avis sur {{name}}",
+    "sort": {
+      "newest": "Plus récents",
+      "lowest": "Plus bas d'abord",
+      "replies": "Avec réponse"
+    },
+    "replyFrom": "Réponse de {{name}}",
+    "empty": "Pas encore d'avis",
+    "tags": {
+      "repliedFast": "Répond vite",
+      "accuratePhotos": "Photos fidèles",
+      "noVisitFee": "Pas de frais de visite",
+      "onTime": "Ponctuel",
+      "fairPrice": "Prix juste"
+    },
+    "write": {
+      "close": "Fermer",
+      "yourReviewOf": "Votre avis sur",
+      "title": "Comment ça s'est passé ?",
+      "levels": [
+        "Très mauvais",
+        "Mauvais",
+        "Correct",
+        "Bien",
+        "Excellent"
+      ],
+      "standOut": "Ce qui vous a marqué (facultatif)",
+      "tellMore": "Dites-en plus",
+      "placeholder": "Que devrait savoir le prochain locataire ?",
+      "shownAs": "Affiché publiquement comme « {{name}} »",
+      "post": "Publier l'avis",
+      "update": "Mettre à jour",
+      "error": "Impossible de publier votre avis. Vérifiez votre connexion et réessayez.",
+      "own": "Vous ne pouvez pas vous évaluer vous-même."
+    }
   }
 }

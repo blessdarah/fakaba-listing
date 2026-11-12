@@ -197,6 +197,12 @@ match /messageHistory/{historyId} {
       }
     }
 
+    // Services are Fakaba's own catalogue: anyone reads, only admins write.
+    match /services/{serviceId} {
+      allow read: if true;
+      allow create, update, delete: if isAdmin();
+    }
+
    
     match /reviews/{reviewId} {
       allow read: if true;

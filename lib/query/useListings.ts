@@ -1,7 +1,9 @@
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { keepPreviousData, useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import {
   getListings,
   getListing,
+  getListingsByIds,
+  getSearchListings,
   getListingByUserId,
   getMyListings,
   uploadListingImages,
@@ -19,6 +21,7 @@ export const listingsKeys = {
   details: () => [...listingsKeys.all, 'detail'] as const,
   detail: (id: string) => [...listingsKeys.details(), id] as const,
   byUser: (userId: string) => [...listingsKeys.all, 'user', userId] as const,
+  saved: (ids: string[]) => [...listingsKeys.all, 'saved', [...ids].sort()] as const,
 };
 
 /**
@@ -33,6 +36,18 @@ export function useListings() {
 }
 
 /**
+ * Hook to fetch the pool of active listings that search filters run over
+ */
+export function useSearchListings(enabled = true) {
+  return useQuery({
+    queryKey: [...listingsKeys.lists(), "search"] as const,
+    queryFn: () => getSearchListings(),
+    enabled,
+    staleTime: 5 * 60 * 1000,
+  });
+}
+
+/**
  * Hook to fetch a single listing by ID
  */
 export function useListing(id: string) {
@@ -41,6 +56,20 @@ export function useListing(id: string) {
     queryFn: () => getListing(id),
     enabled: !!id, // Only run if id exists
     staleTime: 10 * 60 * 1000, // 10 minutes
+  });
+}
+
+/**
+ * Hook to fetch saved listings by id (any status, so taken places still show).
+ * Keeps the previous result while ids change so rows don't flash.
+ */
+export function useSavedListings(ids: string[], enabled = true) {
+  return useQuery({
+    queryKey: listingsKeys.saved(ids),
+    queryFn: () => getListingsByIds(ids),
+    enabled,
+    placeholderData: keepPreviousData,
+    staleTime: 60 * 1000,
   });
 }
 

@@ -1,11 +1,18 @@
-import { Pressable, StyleSheet, View } from "react-native";
+import { useMemo } from "react";
+import { Platform, Pressable, StyleSheet, View } from "react-native";
+import MapView, { Marker } from "react-native-maps";
 import Svg, { G, Path, Rect } from "react-native-svg";
+import { PricePin } from "components/map/PricePin";
 import { Icon } from "components/ui/Icon";
 import { Text } from "components/ui/Text";
 import { formatPrice } from "lib/format";
+import { regionFor, useListingCoords } from "lib/geo";
+import type { Listing } from "lib/types";
 import { radius, useTheme } from "theme";
 
-/** Painted map tile from the design (no live map until the Search tab lands). */
+const PREVIEW_PINS = 8;
+
+/** Painted map tile from the design — shown until the first live pins are placed. */
 function MapArt({ dark }: { dark: boolean }) {
   const ground = dark ? "#1C1B27" : "#EFEEE9";
   const green = dark ? "#1E2E27" : "#DCEBDF";
@@ -39,20 +46,80 @@ const PIN_SPOTS = [
 ];
 
 export function NearYouCard({
-  prices,
+  listings,
   title,
   subtitle,
   onPress,
 }: {
-  prices: number[];
+  listings: Listing[];
   title: string;
   subtitle: string;
   onPress?: () => void;
 }) {
   const { colors, isDark } = useTheme();
+  const preview = useMemo(() => listings.slice(0, PREVIEW_PINS), [listings]);
+  const { placed } = useListingCoords(preview);
+  const pins = preview.filter((l) => placed[l.id]);
+  const region = useMemo(
+    () => regionFor(pins.map((l) => placed[l.id])),
+    // Re-frame only when the set of placed pins changes.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [pins.map((l) => l.id).join(",")]
+  );
+  // Leave the card's bottom strip clear of the highest-priced pin.
+  const hot = pins.length ? pins.reduce((a, b) => (b.price > a.price ? b : a)).id : null;
+
   return (
     <Pressable onPress={onPress} accessibilityRole="button" accessibilityLabel={title} style={styles.card}>
-      <MapArt dark={isDark} />
+      {pins.length ? (
+        // A live, non-interactive preview; the whole card opens the full map.
+        <View style={StyleSheet.absoluteFill} pointerEvents="none" accessibilityElementsHidden>
+          <MapView
+            style={StyleSheet.absoluteFill}
+            region={{ ...region, latitude: region.latitude - region.latitudeDelta * 0.12 }}
+            mapType={Platform.OS === "ios" ? "mutedStandard" : "standard"}
+            userInterfaceStyle={isDark ? "dark" : "light"}
+            liteMode
+            // Apple's legal label must stay visible above the info strip.
+            legalLabelInsets={{ top: 0, left: 10, right: 0, bottom: 78 }}
+            scrollEnabled={false}
+            zoomEnabled={false}
+            rotateEnabled={false}
+            pitchEnabled={false}
+            toolbarEnabled={false}
+            showsPointsOfInterests={false}
+            showsCompass={false}
+          >
+            {pins.map((l) => (
+              <Marker key={l.id} coordinate={placed[l.id]} anchor={{ x: 0.5, y: l.id === hot ? 1 : 0.5 }}>
+                <PricePin price={l.price} selected={l.id === hot} approximate={placed[l.id].approximate} />
+              </Marker>
+            ))}
+          </MapView>
+        </View>
+      ) : (
+        <PaintedPreview prices={listings.map((l) => l.price)} dark={isDark} />
+      )}
+      <View style={[styles.sheet, { backgroundColor: colors.bg }]}>
+        <View style={styles.sheetText}>
+          <Text variant="sm" weight="semibold" numberOfLines={1}>
+            {title}
+          </Text>
+          <Text variant="xs" color="inkMuted" numberOfLines={1}>
+            {subtitle}
+          </Text>
+        </View>
+        <Icon name="forward" size={16} weight="semibold" />
+      </View>
+    </Pressable>
+  );
+}
+
+function PaintedPreview({ prices, dark }: { prices: number[]; dark: boolean }) {
+  const { colors } = useTheme();
+  return (
+    <>
+      <MapArt dark={dark} />
       {prices.slice(0, 3).map((price, i) => {
         const highlight = i === 1 || (prices.length === 1 && i === 0);
         return (
@@ -71,18 +138,7 @@ export function NearYouCard({
           </View>
         );
       })}
-      <View style={[styles.sheet, { backgroundColor: colors.bg }]}>
-        <View style={styles.sheetText}>
-          <Text variant="sm" weight="semibold" numberOfLines={1}>
-            {title}
-          </Text>
-          <Text variant="xs" color="inkMuted" numberOfLines={1}>
-            {subtitle}
-          </Text>
-        </View>
-        <Icon name="forward" size={16} weight="semibold" />
-      </View>
-    </Pressable>
+    </>
   );
 }
 

@@ -270,3 +270,45 @@ const spots: Record<SpotName, React.ReactNode> = {
     </>
   ),
 };
+
+/** No results — a blank sign on an empty plot, with a magnifier. viewBox 240×180. */
+export function EmptySearchArt({ width = 220, height = 165, ...rest }: ArtProps) {
+  return (
+    <Svg width={width} height={height} viewBox="0 0 240 180" {...rest}>
+      <Path d="M20 150 L120 120 L220 150 L120 176 Z" fill={art.surface} {...stroke} />
+      <Path d="M60 140 L60 150 M180 140 L180 150 M120 120 V128" fill="none" {...stroke} />
+      <Rect x={104} y={64} width={6} height={86} fill={art.ink} {...stroke} />
+      <G transform="rotate(-6 107 54)">
+        <Rect x={62} y={30} width={94} height={44} rx={4} fill={art.paper} {...stroke} />
+        <SvgText x={109} y={60} fontSize={22} {...signFont}>
+          ?
+        </SvgText>
+      </G>
+      <Circle cx={176} cy={74} r={20} fill={art.yellow} {...stroke} />
+      <Circle cx={176} cy={74} r={10} fill={art.paper} {...stroke} />
+      <Path d="M190 88 L206 104" fill="none" stroke={art.ink} strokeWidth={5} strokeLinecap="round" />
+    </Svg>
+  );
+}
+
+/** Nothing saved — a heart on the sign, a seedling, two sparkles. viewBox 240×180. */
+export function EmptySavedArt({ width = 240, height = 180, ...rest }: ArtProps) {
+  return (
+    <Svg width={width} height={height} viewBox="0 0 240 180" {...rest}>
+      <Path d="M20 160 H220" fill="none" {...stroke} />
+      <Rect x={114} y={92} width={7} height={68} fill={art.ink} {...stroke} />
+      <G transform="rotate(5 118 62)">
+        <Rect x={70} y={32} width={96} height={60} rx={5} fill={art.paper} {...stroke} />
+        <Path
+          d="M118 80 C 102 70 94 62 94 54 a10 10 0 0 1 24 -4 a10 10 0 0 1 24 4 c0 8 -8 16 -24 26 z"
+          fill={art.yellow}
+          {...stroke}
+        />
+      </G>
+      <Path d="M44 150 Q40 128 50 112" fill="none" {...stroke} />
+      <Path d="M50 112 Q34 104 26 114 Q40 112 50 112 Z" fill={art.palm} {...stroke} />
+      <Path d="M50 112 Q62 98 70 106 Q60 108 50 112 Z" fill={art.palm} {...stroke} />
+      <Path d="M182 40 V52 M176 46 H188 M196 70 V78 M192 74 H200" fill="none" {...stroke} />
+    </Svg>
+  );
+}

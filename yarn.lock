@@ -1360,6 +1360,17 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@expo/vector-icons@npm:^15.0.2":
+  version: 15.1.1
+  resolution: "@expo/vector-icons@npm:15.1.1"
+  peerDependencies:
+    expo-font: ">=14.0.4"
+    react: "*"
+    react-native: "*"
+  checksum: 10/204fafd5141c81bd55dd33f6c00cdc48ec1d37b6460be6fa3f851ccb235e1fad1097f22d034470daa49a5b839d058bbcadda1efd349c670c2fdce2ae65fb9bba
+  languageName: node
+  linkType: hard
+
 "@expo/ws-tunnel@npm:^2.0.0":
   version: 2.0.0
   resolution: "@expo/ws-tunnel@npm:2.0.0"
@@ -2982,6 +2993,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@types/geojson@npm:^7946.0.13":
+  version: 7946.0.16
+  resolution: "@types/geojson@npm:7946.0.16"
+  checksum: 10/34d07421bdd60e7b99fa265441d17ac6e9aef48e3ce22d04324127d0de1daf7fbaa0bd3be1cece2092eb6995f21da84afa5231e24621a2910ff7340bc98f496f
+  languageName: node
+  linkType: hard
+
 "@types/istanbul-lib-coverage@npm:*, @types/istanbul-lib-coverage@npm:^2.0.0":
   version: 2.0.6
   resolution: "@types/istanbul-lib-coverage@npm:2.0.6"
@@ -4449,6 +4467,7 @@ __metadata:
     "@expo-google-fonts/bricolage-grotesque": "npm:^0.4.1"
     "@expo-google-fonts/inter": "npm:^0.4.2"
     "@expo/metro-runtime": "npm:~57.0.18"
+    "@expo/vector-icons": "npm:^15.0.2"
     "@react-native-async-storage/async-storage": "npm:^2.2.0"
     "@react-navigation/native": "npm:^7.1.6"
     "@tanstack/react-query": "npm:^5.90.19"
@@ -4479,6 +4498,7 @@ __metadata:
     react: "npm:19.2.3"
     react-dom: "npm:19.2.3"
     react-native: "npm:0.86.3"
+    react-native-maps: "npm:1.27.2"
     react-native-reanimated: "npm:4.5.1"
     react-native-safe-area-context: "npm:~5.7.0"
     react-native-screens: "npm:~4.26.0"
@@ -6349,6 +6369,22 @@ __metadata:
     react: "*"
     react-native: "*"
   checksum: 10/dc82d54e0bf8f89208a538bb0d14e4891af6efae27ed5b7b21be683a72c38c5219ab9be1ea9bd40aa1c905d481174e649d0b71aeceaa9946e6c707f251568282
+  languageName: node
+  linkType: hard
+
+"react-native-maps@npm:1.27.2":
+  version: 1.27.2
+  resolution: "react-native-maps@npm:1.27.2"
+  dependencies:
+    "@types/geojson": "npm:^7946.0.13"
+  peerDependencies:
+    react: ">= 18.3.1"
+    react-native: ">= 0.76.0"
+    react-native-web: ">= 0.11"
+  peerDependenciesMeta:
+    react-native-web:
+      optional: true
+  checksum: 10/bdc79df2c6b8b659176ebf3c7f45f4f685e2a70d2ce5a03798feff38f8ec0b8d5fc47414c34248be171154292984502bec124b394999be5171a79741bd90bb35
   languageName: node
   linkType: hard
 

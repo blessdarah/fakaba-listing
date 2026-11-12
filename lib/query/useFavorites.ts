@@ -1,7 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useUsers } from "../firestore/users";
 import { useAuth } from "../../contexts/AuthContext";
-import { listingsKeys } from "./useListings";
+import { findCachedListing, forgetSnapshot, recordSnapshot } from "../savedSnapshots";
 
 // Query keys for favorites
 export const favoritesKeys = {
@@ -75,6 +75,12 @@ export function useAddToFavorites() {
         );
       }
     },
+    // Remember the price at save time so the Saved tab can show drops
+    onSuccess: (listingId) => {
+      if (!user) return;
+      const listing = findCachedListing(queryClient, listingId);
+      if (listing) recordSnapshot(queryClient, user.uid, listing);
+    },
     // Always refetch after error or success
     onSettled: () => {
       if (user) {
@@ -118,6 +124,9 @@ export function useRemoveFromFavorites() {
       );
 
       return { previousFavorites };
+    },
+    onSuccess: (listingId) => {
+      if (user) forgetSnapshot(queryClient, user.uid, listingId);
     },
     onError: (err, listingId, context) => {
       if (user && context?.previousFavorites) {

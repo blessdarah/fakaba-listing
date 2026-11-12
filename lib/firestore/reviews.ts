@@ -2,6 +2,9 @@ import {
   collection,
   getDocs,
   addDoc,
+  doc,
+  updateDoc,
+  limit,
   query,
   where,
   orderBy,
@@ -31,6 +34,20 @@ export const getReviewsByAgent = async (
   }
 };
 
+/** Every review (public read). Used to rank agents in the directory. */
+export const getAllReviews = async (max = 1000): Promise<Review[]> => {
+  const snapshot = await getDocs(query(collection(db, "reviews"), limit(max)));
+  return snapshot.docs.map((d) => ({ id: d.id, ...(d.data() as Omit<Review, "id">) }));
+};
+
+/** Authors can edit their own review (allowed by firestore rules). */
+export const updateReview = async (
+  id: string,
+  patch: Partial<Pick<Review, "rating" | "comment" | "tags" | "userName" | "userImage">>
+) => {
+  await updateDoc(doc(db, "reviews", id), { ...patch, updatedAt: serverTimestamp() });
+};
+
 export const createReview = async (review: {
   userId: string;
   agentId: string;
@@ -38,6 +55,7 @@ export const createReview = async (review: {
   comment: string;
   userName: string;
   userImage?: string;
+  tags?: string[];
 }): Promise<Review> => {
   try {
     const docRef = await addDoc(collection(db, "reviews"), {

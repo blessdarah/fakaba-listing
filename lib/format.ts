@@ -19,8 +19,12 @@ export function dealType(listing: Pick<Listing, "type">): DealType {
 
 /** "Molyko, Buea" — neighbourhood (address) then town, without repeats. */
 export function placeLine(listing: Pick<Listing, "address" | "location">) {
-  const parts = [listing.address, listing.location].map((p) => p?.trim()).filter(Boolean) as string[];
-  return Array.from(new Set(parts)).join(", ");
+  const town = listing.location?.trim() ?? "";
+  const address = listing.address?.trim() ?? "";
+  // Skip the town when the address already ends with (or is) it.
+  if (!address) return town;
+  if (!town || address.toLowerCase().includes(town.toLowerCase())) return address;
+  return `${address}, ${town}`;
 }
 
 /** "2 bd · 1 ba · 64 m²" — skips zero/missing values. Land shows size only. */

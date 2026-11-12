@@ -3,16 +3,20 @@ import type { BottomTabBarProps } from "expo-router/tabs";
 import { Pressable, StyleSheet, View } from "react-native";
 import Animated, { useAnimatedStyle, withSpring, withTiming } from "react-native-reanimated";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { Icon, type IconName } from "components/ui/Icon";
+import Feather from "@expo/vector-icons/Feather";
 import { Text } from "components/ui/Text";
 import { useTheme } from "theme";
 
-const ICONS: Record<string, { idle: IconName; active: IconName }> = {
-  index: { idle: "home", active: "homeFill" },
-  search: { idle: "search", active: "search" },
-  saved: { idle: "heart", active: "heartFill" },
-  services: { idle: "briefcase", active: "briefcaseFill" },
-  profile: { idle: "person", active: "personFill" },
+/**
+ * Feather outlines for every tab so the set reads as one family (SF Symbols mixed
+ * filled/outlined weights). Focus is shown by ink colour and the signal bar.
+ */
+const ICONS: Record<string, keyof typeof Feather.glyphMap> = {
+  index: "home",
+  search: "search",
+  saved: "heart",
+  services: "briefcase",
+  profile: "user",
 };
 
 /** 5 destinations. Active = ink icon + label with the signal bar above it. */
@@ -55,12 +59,7 @@ export function TabBar({ state, descriptors, navigation }: BottomTabBarProps) {
             style={styles.item}
           >
             <Marker active={focused} />
-            <Icon
-              name={focused ? icon.active : icon.idle}
-              size={24}
-              color={focused ? "ink" : "inkSubtle"}
-              weight={focused ? "semibold" : "regular"}
-            />
+            <Feather name={icon} size={23} color={focused ? colors.ink : colors.inkSubtle} />
             <Text variant="caps" weight={focused ? "semibold" : "medium"} color={focused ? "ink" : "inkMuted"} style={styles.label}>
               {label}
             </Text>

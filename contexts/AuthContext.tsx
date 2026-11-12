@@ -20,6 +20,10 @@ import {
   updateDoc,
   deleteDoc,
   serverTimestamp,
+  collection,
+  getDocs,
+  query,
+  where,
 } from "firebase/firestore";
 import { auth, storage } from "../firebase.config";
 import { db } from "../firebase.config";
@@ -68,7 +72,10 @@ interface AuthContextType {
   updateProfileImage: (uri: string) => Promise<void>;
   updateUserProfile: (data: Partial<UserProfile>) => Promise<void>;
   becomeAgent: () => Promise<void>;
-  deleteAccount: () => Promise<void>;
+  /** Email/password accounts must pass their password (Firebase wants a recent sign-in). */
+  deleteAccount: (password?: string) => Promise<void>;
+  /** True when the account signs in with email + password (can change password). */
+  isPasswordUser: boolean;
   resendVerificationEmail: () => Promise<void>;
   checkEmailVerified: () => Promise<boolean>;
   sendPasswordReset: (email: string) => Promise<void>;
@@ -95,6 +102,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
 
   const isAgent = userProfile?.role === "agent";
   const isAdmin = userProfile?.role === "admin";
+  const isPasswordUser = !!user?.providerData.some((p) => p.providerId === "password");
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (user) => {
@@ -332,22 +340,36 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
     await updatePassword(currentUser, newPassword);
   };
 
-  const deleteAccount = async () => {
+  const deleteAccount = async (password?: string) => {
     const currentUser = auth.currentUser;
     if (!currentUser) throw new Error("Not authenticated");
 
-    // Delete profile image from storage
+    // Re-authenticate first so a wrong password deletes nothing.
+    if (password && currentUser.email) {
+      const credential = EmailAuthProvider.credential(currentUser.email, password);
+      await reauthenticateWithCredential(currentUser, credential);
+    }
+
+    const uid = currentUser.uid;
+    // Best effort: the auth user and profile go even if a listing or review can't.
+    const removeWhere = async (col: string, field: string) => {
+      try {
+        const snap = await getDocs(query(collection(db, col), where(field, "==", uid)));
+        await Promise.all(snap.docs.map((d) => deleteDoc(d.ref).catch(() => {})));
+      } catch (error) {
+        console.error(`Error deleting ${col}:`, error);
+      }
+    };
+    await removeWhere("properties", "ownerId");
+    await removeWhere("reviews", "userId");
+
     try {
-      const storageRef = ref(storage, `profile-images/${currentUser.uid}`);
-      await deleteObject(storageRef);
+      await deleteObject(ref(storage, `profile-images/${uid}`));
     } catch {
       // No profile image to delete
     }
 
-    // Delete user document from Firestore
-    await deleteDoc(doc(db, "users", currentUser.uid));
-
-    // Delete the Firebase Auth user
+    await deleteDoc(doc(db, "users", uid));
     await deleteUser(currentUser);
   };
 
@@ -367,6 +389,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
         userProfile,
         isAgent,
         isAdmin,
+        isPasswordUser,
         loading,
         needsSetup,
         needsEmailVerification,

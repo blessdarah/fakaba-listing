@@ -1,4 +1,5 @@
 import { Image } from "expo-image";
+import { useState } from "react";
 import { View, type StyleProp, type ViewStyle } from "react-native";
 import { radius } from "theme";
 import { Text } from "./Text";
@@ -37,8 +38,18 @@ export function Avatar({ name, uri, size = 40, kind = "person", style }: AvatarP
     overflow: "hidden" as const,
   };
 
-  if (uri) {
-    return <Image source={{ uri }} style={[shape, style as object]} contentFit="cover" transition={150} />;
+  // Fall back to initials when the photo URL is dead (deleted upload, offline).
+  const [failedUri, setFailedUri] = useState<string | null>(null);
+  if (uri && uri !== failedUri) {
+    return (
+      <Image
+        source={{ uri }}
+        style={[shape, style as object]}
+        contentFit="cover"
+        transition={150}
+        onError={() => setFailedUri(uri)}
+      />
+    );
   }
 
   return (
@@ -56,7 +67,11 @@ export function Avatar({ name, uri, size = 40, kind = "person", style }: AvatarP
       <Text
         variant={size >= 56 ? "title" : "label"}
         color={isCompany ? "#FFD700" : "#121212"}
-        style={{ fontFamily: "BricolageGrotesque_800ExtraBold", fontSize: Math.round(size * 0.36) }}
+        style={{
+          fontFamily: "BricolageGrotesque_800ExtraBold",
+          fontSize: Math.round(size * 0.36),
+          lineHeight: Math.round(size * 0.44),
+        }}
       >
         {initialsOf(name)}
       </Text>

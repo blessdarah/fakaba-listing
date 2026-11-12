@@ -56,11 +56,38 @@
   },
   "search": {
     "title": "Search",
-    "placeholder": "Search by name, location...",
+    "placeholder": "Town, neighbourhood or title",
     "resultsCount": "{{count}} results",
     "noResults": "No listings found",
     "noResultsHint": "Try adjusting your search or filters",
-    "filterCount": "{{count}} filters active"
+    "filterCount": "{{count}} filters active",
+    "clear": "Clear search",
+    "filters": "Filters",
+    "places": {
+      "one": "place",
+      "other": "places"
+    },
+    "sort": {
+      "newest": "Newest first",
+      "priceAsc": "Price: low to high",
+      "priceDesc": "Price: high to low",
+      "title": "Sort by"
+    },
+    "under": "Under {{price}}",
+    "over": "Over {{price}}",
+    "between": "{{min}} – {{max}}",
+    "bedsPlus": "{{count}}+ bd",
+    "emptyTitle": "Nothing here yet",
+    "emptyBody": "No places match these filters. Try one of these:",
+    "raiseMax": "Raise max to {{price}}",
+    "dropCategory": "Include all property types",
+    "dropBeds": "Any number of bedrooms",
+    "searchAll": "Search everywhere",
+    "clearAll": "Clear all filters",
+    "errorTitle": "Couldn't load places",
+    "errorBody": "Check your connection and try again.",
+    "retry": "Retry",
+    "remove": "Remove {{label}}"
   },
   "filter": {
     "title": "Filters",
@@ -552,5 +579,419 @@
     "title": "Coming soon",
     "body": "We're rebuilding this screen for Fakaba v2.",
     "signOut": "Sign out"
+  },
+  "listing": {
+    "back": "Back",
+    "share": "Share",
+    "save": "Save",
+    "unsave": "Remove from saved",
+    "posted": "posted {{when}}",
+    "when": {
+      "today": "today",
+      "yesterday": "yesterday",
+      "days": "{{count}} days ago",
+      "weeks": {
+        "one": "1 week ago",
+        "other": "{{count}} weeks ago"
+      },
+      "months": {
+        "one": "1 month ago",
+        "other": "{{count}} months ago"
+      }
+    },
+    "bedrooms": {
+      "one": "Bedroom",
+      "other": "Bedrooms"
+    },
+    "bathrooms": {
+      "one": "Bathroom",
+      "other": "Bathrooms"
+    },
+    "floorArea": "Floor area",
+    "plotSize": "Plot size",
+    "readMore": "Read more",
+    "readLess": "Show less",
+    "features": "What's included",
+    "location": "Location",
+    "role": {
+      "agent": "Agent",
+      "company": "Agency",
+      "owner": "Owner"
+    },
+    "reviews": {
+      "one": "1 review",
+      "other": "{{count}} reviews"
+    },
+    "call": "Call",
+    "whatsapp": "WhatsApp",
+    "taken": "TAKEN",
+    "takenNote": "This place is no longer available.",
+    "seeSimilar": {
+      "one": "See 1 similar in {{area}}",
+      "other": "See {{count}} similar in {{area}}"
+    },
+    "seeSimilarNone": "Search {{area}}",
+    "notFound": "This listing isn't available",
+    "notFoundBody": "It may have been removed by the person who posted it.",
+    "loadError": "Couldn't load this place",
+    "shareText": "{{title}} — {{price}} on Fakaba",
+    "perMonthShort": "FCFA / month",
+    "fcfa": "FCFA"
+  },
+  "gallery": {
+    "close": "Close",
+    "photo": "Photo {{n}} of {{total}}",
+    "noPhotos": "No photos yet"
+  },
+  "contact": {
+    "yourMessage": "Your message",
+    "edit": "Edit",
+    "done": "Done",
+    "message": "Hi {{name}}, I found your listing \"{{title}}\" in {{area}} on Fakaba. Is it still available at {{price}} FCFA?",
+    "sendWhatsApp": "Send on WhatsApp",
+    "call": "Call",
+    "callNumber": "Call {{number}}",
+    "email": "Email",
+    "sendEmail": "Send an email",
+    "safety": "Visit before you pay. Never send a deposit to someone you haven't met.",
+    "noWhatsAppTitle": "No WhatsApp number yet",
+    "noWhatsAppBody": "{{name}} hasn't added one. Email instead — we'll mention the listing for you.",
+    "emailSubject": "Your listing on Fakaba: {{title}}",
+    "listedPlaces": {
+      "one": "listed 1 place",
+      "other": "listed {{count}} places"
+    },
+    "unavailable": "Couldn't open WhatsApp on this device."
+  },
+  "filters": {
+    "title": "Filters",
+    "reset": "Reset",
+    "close": "Close",
+    "lookingTo": "Looking to",
+    "rent": "Rent",
+    "buy": "Buy",
+    "lease": "Lease",
+    "any": "Any",
+    "propertyType": "Property type",
+    "pricePerMonth": "Price per month",
+    "price": "Price",
+    "min": "Min",
+    "max": "Max",
+    "noMax": "No max",
+    "bedrooms": "Bedrooms",
+    "clear": "Clear",
+    "show": {
+      "zero": "No places",
+      "one": "Show 1 place",
+      "other": "Show {{count}} places"
+    },
+    "most": "Most: {{low}} – {{high}}"
+  },
+  "saved": {
+    "changed": {
+      "one": "1 changed since you saved",
+      "other": "{{count}} changed since you saved"
+    },
+    "edit": "Edit",
+    "done": "Done",
+    "was": "Was {{price}}",
+    "priceDropped": "Price dropped from {{price}}",
+    "unavailable": "No longer available",
+    "removedTitle": "A place you saved",
+    "seeSimilar": {
+      "one": "See 1 similar nearby",
+      "other": "See {{count}} similar nearby"
+    },
+    "searchArea": "Search {{area}}",
+    "remove": "Remove from saved",
+    "save": "Save again",
+    "emptyTitle": "Nothing saved yet",
+    "emptyBody": "Tap the heart on any place. We'll tell you here if the price drops or it gets taken.",
+    "emptyCta": "Start exploring",
+    "errorTitle": "Couldn't load your saved places",
+    "errorBody": "Check your connection and pull down to try again."
+  },
+  "account": {
+    "noName": "Your profile",
+    "editProfile": "Edit profile",
+    "add": "Add",
+    "sections": {
+      "account": "Account",
+      "preferences": "Preferences"
+    },
+    "whatsapp": "WhatsApp number",
+    "changePassword": "Change password",
+    "language": "Language",
+    "languageNote": "Listings stay in the language their owners wrote them in.",
+    "appearance": "Appearance",
+    "theme": {
+      "system": "Match device",
+      "systemSub": "Follows your phone's light or dark setting",
+      "light": "Light",
+      "dark": "Dark"
+    },
+    "help": "Help and support",
+    "signOut": "Sign out",
+    "signOutTitle": "Sign out of Fakaba?",
+    "deleteAccount": "Delete account",
+    "terms": "Terms",
+    "privacy": "Privacy",
+    "edit": {
+      "changePhoto": "Change photo",
+      "changeLogo": "Change logo",
+      "photoError": "Couldn't upload that photo. Try another one.",
+      "firstName": "First name",
+      "lastName": "Last name",
+      "phoneHint": "Shown to people you contact",
+      "phoneInvalid": "Enter the 9 digits of your number, e.g. 677 38 73 64.",
+      "town": "Town",
+      "chooseTown": "Choose your town",
+      "emailLabel": "Email · used to sign in",
+      "save": "Save changes",
+      "saveError": "Couldn't save your changes. Check your connection and try again."
+    },
+    "password": {
+      "lead": "You'll sign in again with the new one afterwards.",
+      "current": "Current password",
+      "forgot": "Forgot it?",
+      "new": "New password",
+      "hint": "At least 6 characters. Longer is stronger.",
+      "tooShort": "Too short",
+      "confirm": "Confirm new password",
+      "confirmPlaceholder": "Re-enter the new password",
+      "mismatch": "The two new passwords don't match.",
+      "wrongCurrent": "That password isn't right.",
+      "weak": "Pick a stronger password — at least 6 characters.",
+      "tooMany": "Too many attempts. Wait a few minutes and try again.",
+      "doneTitle": "Password changed",
+      "doneBody": "Sign in again with your new password.",
+      "resetSentTitle": "Check your email",
+      "resetSentBody": "We sent a reset link to %{email}."
+    },
+    "delete": {
+      "title": "Delete your account",
+      "lead": "This removes everything below for good. It can't be undone.",
+      "profile": "Your profile and photo",
+      "profileSub": "Name, WhatsApp number, sign-in",
+      "listings": {
+        "one": "1 listing and its photos",
+        "other": "%{count} listings and their photos"
+      },
+      "listingsSub": "Tenants who saved them will see \"no longer available\"",
+      "saved": {
+        "one": "1 saved place",
+        "other": "%{count} saved places"
+      },
+      "reviews": "Reviews you wrote",
+      "breakBody": "Taking a break? You can hide your listings instead and keep everything.",
+      "hideListings": "Hide my listings",
+      "hiddenTitle": "Listings hidden",
+      "hiddenBody": "Nobody can see them now. Your account stays as it is.",
+      "continue": "Continue",
+      "confirmTitle": "Confirm it's you",
+      "confirmLead": "Enter your password to delete %{email} and everything linked to it.",
+      "confirmLeadNoPassword": "This deletes %{email} and everything linked to it.",
+      "understand": "I understand my profile, listings, saved places and reviews will be deleted and can't be recovered.",
+      "cta": "Delete my account",
+      "keep": "Keep my account",
+      "recentLogin": "For your safety, sign out and back in, then try again."
+    },
+    "deleted": {
+      "title": "Your account is deleted",
+      "body": "Thanks for using Fakaba. If you ever need a place again, you're welcome back.",
+      "close": "Close"
+    }
+  },
+  "svc": {
+    "lead": "Help to buy, build and manage property. Ask us on WhatsApp.",
+    "new": "New service",
+    "newShort": "New",
+    "mostAsked": "Most asked",
+    "errorTitle": "Couldn't load services",
+    "emptyTitle": "Services are on the way",
+    "emptyBody": "We're lining up help with buying, building and managing property.",
+    "notFound": "This service isn't available any more",
+    "untitled": "Untitled service",
+    "questions": "Questions",
+    "ask": "Ask Fakaba on WhatsApp",
+    "call": "Call Fakaba",
+    "message": "Hello Fakaba, I'd like to know more about \"%{title}\".",
+    "noWhatsApp": "Couldn't open WhatsApp. Try calling us instead.",
+    "art": {
+      "landTitle": "Land title",
+      "management": "Building",
+      "building": "Shopfront",
+      "selling": "Sign",
+      "moving": "Key"
+    },
+    "form": {
+      "admin": "Admin",
+      "newTitle": "New service",
+      "editTitle": "Edit service",
+      "cover": "Cover image",
+      "coverHint": "Or pick an illustration from the set",
+      "choosePhoto": "Choose a photo",
+      "orIllustration": "Or use an illustration",
+      "removeCover": "Remove cover",
+      "title": "Title",
+      "titlePlaceholder": "Land title checks",
+      "tagline": "Short line",
+      "taglinePlaceholder": "Shown under the title in the list",
+      "description": "Description",
+      "descriptionPlaceholder": "Before you pay for a plot, we check the title at the land registry…",
+      "highlights": "What's included",
+      "highlightsHint": "One per line. Shown with green ticks.",
+      "highlightsPlaceholder": "Title search at the registry\nSite visit and boundary check",
+      "featured": "Most asked",
+      "featuredHint": "Show it as the big card at the top of Services.",
+      "faqs": "FAQs · %{count}",
+      "addQuestion": "Add question",
+      "editQuestion": "Edit question",
+      "question": "Question",
+      "questionPlaceholder": "How long does it take?",
+      "answer": "Answer",
+      "deleteQuestion": "Delete question",
+      "preview": "Preview",
+      "publish": "Publish service",
+      "save": "Save changes",
+      "saveError": "Couldn't save the service",
+      "discardTitle": "Discard your changes?",
+      "keepEditing": "Keep editing",
+      "discard": "Discard"
+    }
+  },
+  "map": {
+    "back": "Back",
+    "allPlaces": "All places",
+    "thisArea": "This area",
+    "searchArea": "Search this area",
+    "list": "List",
+    "locate": "Show my location",
+    "placing": {
+      "one": "Placing 1 more place…",
+      "other": "Placing {{count}} more places…"
+    },
+    "none": "No places to show on the map yet",
+    "noneHere": "No places in this area — try zooming out",
+    "types": {
+      "one": "1 type",
+      "other": "{{count}} types"
+    },
+    "under": "Under {{price}}",
+    "perMonthShort": "FCFA / mo",
+    "mAway": "{{m}} m from you",
+    "kmAway": "{{km}} km from you",
+    "preview": "Map of places near you"
+  },
+  "agents": {
+    "title": "Agents",
+    "titleIn": "Agents in {{town}}",
+    "count": {
+      "one": "1 agent",
+      "other": "{{count}} agents"
+    },
+    "verifiedCount": "{{count}} verified",
+    "placeholder": "Name or neighbourhood",
+    "filters": {
+      "all": "All",
+      "verified": "Verified",
+      "topRated": "Top rated",
+      "nearby": "Near {{town}}"
+    },
+    "listings": {
+      "zero": "No listings yet",
+      "one": "1 listing",
+      "other": "{{count}} listings"
+    },
+    "newOnFakaba": "New on Fakaba",
+    "company": "Company",
+    "emptyTitle": "No agents match",
+    "emptyBody": "Try another name or neighbourhood.",
+    "errorTitle": "Couldn't load agents",
+    "retry": "Retry",
+    "verifiedAgent": "Verified agent",
+    "verifiedCompany": "Verified company",
+    "stats": {
+      "listings": {
+        "one": "Listing",
+        "other": "Listings"
+      },
+      "reviews": {
+        "zero": "No reviews yet",
+        "one": "1 review",
+        "other": "{{count}} reviews"
+      },
+      "years": {
+        "one": "1 yr",
+        "other": "{{count}} yrs"
+      },
+      "months": {
+        "one": "1 mo",
+        "other": "{{count}} mos"
+      },
+      "onFakaba": "On Fakaba",
+      "new": "New"
+    },
+    "whatTenantsSay": "What tenants say",
+    "seeAllReviews": {
+      "one": "See the review",
+      "other": "See all {{count}} reviews"
+    },
+    "writeReview": "Write a review",
+    "editReview": "Edit your review",
+    "listingsBy": "Listings by {{name}}",
+    "seeListings": {
+      "zero": "No listings",
+      "one": "See 1 listing",
+      "other": "See {{count}} listings"
+    },
+    "whatsapp": "WhatsApp",
+    "message": "Hi {{name}}, I found your profile on Fakaba and I'm looking for a place. Are you available?",
+    "share": "Share",
+    "shareText": "{{name}} on Fakaba — rooms, homes and land.",
+    "yourView": "This is how tenants see you",
+    "done": "Done",
+    "shareProfile": "Share profile",
+    "editProfile": "Edit profile",
+    "notFound": "This agent isn't available",
+    "back": "Back",
+    "noReviewsYet": "No reviews yet. Worked with {{name}}? Be the first to say how it went."
+  },
+  "reviews": {
+    "title": "Reviews for {{name}}",
+    "sort": {
+      "newest": "Newest",
+      "lowest": "Lowest first",
+      "replies": "With replies"
+    },
+    "replyFrom": "Reply from {{name}}",
+    "empty": "No reviews yet",
+    "tags": {
+      "repliedFast": "Replied fast",
+      "accuratePhotos": "Photos were accurate",
+      "noVisitFee": "No visit fee",
+      "onTime": "On time",
+      "fairPrice": "Fair price"
+    },
+    "write": {
+      "close": "Close",
+      "yourReviewOf": "Your review of",
+      "title": "How did it go?",
+      "levels": [
+        "Terrible",
+        "Poor",
+        "Okay",
+        "Good",
+        "Great"
+      ],
+      "standOut": "What stood out? (optional)",
+      "tellMore": "Tell others more",
+      "placeholder": "What should the next tenant know?",
+      "shownAs": "Shown publicly as \"{{name}}\"",
+      "post": "Post review",
+      "update": "Update review",
+      "error": "Couldn't post your review. Check your connection and try again.",
+      "own": "You can't review yourself."
+    }
   }
 }

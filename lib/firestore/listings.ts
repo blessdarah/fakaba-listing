@@ -39,6 +39,35 @@ export const getListings = async (): Promise<Listing[]> => {
   }
 };
 
+/** Active listings for search. Filtering/sorting happens on the client for now. */
+export const getSearchListings = async (max = 300): Promise<Listing[]> => {
+  const q = query(collection(db, "properties"), where("status", "==", "active"), limit(max));
+  const snapshot = await getDocs(q);
+  return snapshot.docs.map((d) => ({ id: d.id, ...(d.data() as Omit<Listing, "id">) }));
+};
+
+/**
+ * Listings by id for the Saved tab. One read per id rather than an `in`
+ * query: the rules only let non-owners read active listings, and a single
+ * taken place would fail the whole query. Deleted or no-longer-readable
+ * listings are left out (the Saved tab shows them as unavailable); any other
+ * error is thrown so the screen can offer a retry.
+ */
+export const getListingsByIds = async (ids: string[]): Promise<Listing[]> => {
+  const found = await Promise.all(
+    ids.map(async (id) => {
+      try {
+        const snap = await getDoc(doc(db, "properties", id));
+        return snap.exists() ? ({ id: snap.id, ...(snap.data() as Omit<Listing, "id">) } as Listing) : null;
+      } catch (error: any) {
+        if (error?.code === "permission-denied") return null;
+        throw error;
+      }
+    })
+  );
+  return found.filter((l): l is Listing => !!l);
+};
+
 export const getListing = async (id: string) => {
   try {
     const ref = doc(db, "properties", id);

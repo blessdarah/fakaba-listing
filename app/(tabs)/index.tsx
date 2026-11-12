@@ -31,6 +31,9 @@ import { useTranslation } from "lib/i18n/useTranslation";
 import { useToggleFavorite } from "lib/query/useFavorites";
 import { useListings } from "lib/query/useListings";
 import { useAgents } from "lib/query/useUsers";
+import { openListing } from "lib/listing";
+import { openAgent } from "lib/agents";
+import { resetFilters } from "lib/searchFilters";
 import type { Listing } from "lib/types";
 import { gutter, radius, useTheme } from "theme";
 
@@ -106,16 +109,27 @@ export default function HomeScreen() {
   });
 
   const goSearch = () => router.navigate("/search");
+  /** "See all" style links carry the current context into Search. */
+  const searchWith = (deal?: "rent" | "sale") => {
+    resetFilters({ deal: deal ?? null, categories: category ? [category] : [] });
+    goSearch();
+  };
+  /** "Open map": the map shares Search's filters, so start it on the user's town. */
+  const openMap = () => {
+    resetFilters({ query: town, categories: category ? [category] : [] });
+    router.push("/map");
+  };
+  const onOpen = useCallback((l: Listing) => openListing(l.id), []);
   const goProfile = () => router.navigate("/profile");
   const comingSoon = () => Alert.alert(t("soon.title"), t("soon.body"));
 
   const renderFeed = useCallback(
     ({ item }: { item: Listing }) => (
-      <FeedCard listing={item} saved={isFavorited(item.id)} onToggleSave={toggleFavorite} />
+      <FeedCard listing={item} saved={isFavorited(item.id)} onToggleSave={toggleFavorite} onPress={onOpen} />
     ),
-    [isFavorited, toggleFavorite]
+    [isFavorited, toggleFavorite, onOpen]
   );
-  const renderSale = useCallback(({ item }: { item: Listing }) => <SaleCard listing={item} />, []);
+  const renderSale = useCallback(({ item }: { item: Listing }) => <SaleCard listing={item} onPress={onOpen} />, [onOpen]);
 
   const loading = listingsQuery.isPending;
   const failed = listingsQuery.isError && !listingsQuery.data;
@@ -198,7 +212,7 @@ export default function HomeScreen() {
                 <SectionHeader
                   title={t("feed.popularRentals")}
                   action={t("feed.seeAll")}
-                  onAction={goSearch}
+                  onAction={() => searchWith("rent")}
                   style={styles.sectionHeader}
                 />
                 <FlatList
@@ -216,12 +230,12 @@ export default function HomeScreen() {
 
             {town ? (
               <View style={[styles.section, styles.padded, styles.sectionLoose]}>
-                <SectionHeader title={t("feed.nearYou")} action={t("feed.openMap")} onAction={goSearch} />
+                <SectionHeader title={t("feed.nearYou")} action={t("feed.openMap")} onAction={openMap} />
                 <NearYouCard
-                  prices={(sections.nearby.length ? sections.nearby : sections.all).map((l) => l.price)}
+                  listings={sections.nearby.length ? sections.nearby : sections.all}
                   title={t("feed.nearCount", { count: sections.nearby.length, town })}
                   subtitle={t("feed.nearSub")}
-                  onPress={goSearch}
+                  onPress={openMap}
                 />
               </View>
             ) : null}
@@ -231,7 +245,7 @@ export default function HomeScreen() {
                 <SectionHeader
                   title={t("feed.forSale")}
                   action={t("feed.seeAll")}
-                  onAction={goSearch}
+                  onAction={() => searchWith("sale")}
                   style={styles.sectionHeader}
                 />
                 <FlatList
@@ -250,7 +264,7 @@ export default function HomeScreen() {
                 <SectionHeader
                   title={town ? t("feed.topAgents", { town }) : t("feed.topAgentsNoTown")}
                   action={t("feed.allAgents", { count: agentsQuery.data?.length ?? agents.length })}
-                  onAction={comingSoon}
+                  onAction={() => router.push("/agents")}
                   style={styles.sectionHeader}
                 />
                 <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.rail}>
@@ -258,6 +272,7 @@ export default function HomeScreen() {
                     <AgentCard
                       key={a.id}
                       agent={a}
+                      onPress={a.id ? () => openAgent(a.id!) : undefined}
                       meta={
                         listingCountByOwner[a.id ?? ""]
                           ? t("feed.places", { count: listingCountByOwner[a.id ?? ""] })
@@ -271,7 +286,7 @@ export default function HomeScreen() {
 
             {sections.fresh.length > 0 && (
               <View style={[styles.section, styles.padded, styles.sectionLoose, styles.tightGap]}>
-                <SectionHeader title={t("feed.newThisWeek")} action={t("feed.seeAll")} onAction={goSearch} />
+                <SectionHeader title={t("feed.newThisWeek")} action={t("feed.seeAll")} onAction={() => searchWith()} />
                 <View>
                   {sections.fresh.map((l, i) => (
                     <ListingRow
@@ -279,6 +294,7 @@ export default function HomeScreen() {
                       listing={l}
                       saved={isFavorited(l.id)}
                       onToggleSave={toggleFavorite}
+                      onPress={onOpen}
                       last={i === sections.fresh.length - 1}
                     />
                   ))}

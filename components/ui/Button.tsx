@@ -24,6 +24,7 @@ export type ButtonVariant =
   | "outline" // secondary
   | "quiet" // surface
   | "destructive" // danger tint
+  | "danger" // solid red — the final, can't-undo step
   | "link"; // text with underline
 
 type ButtonProps = Omit<PressableProps, "children" | "style"> & {
@@ -109,6 +110,7 @@ const variants = (c: Palette): Record<ButtonVariant, VariantStyle> =>
     outline: { bg: "transparent", fg: c.ink, border: c.ink },
     quiet: { bg: c.surface, fg: c.ink },
     destructive: { bg: c.dangerTint, fg: c.danger },
+    danger: { bg: c.danger, fg: "#FFFFFF" },
     link: { bg: "transparent", fg: c.ink },
   });
 

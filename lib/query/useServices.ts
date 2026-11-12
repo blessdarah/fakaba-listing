@@ -4,6 +4,7 @@ import {
   getService,
   uploadServiceImage,
   createService,
+  updateService,
 } from "../firestore/services";
 import { Service } from "../types";
 
@@ -31,22 +32,36 @@ export function useService(id: string) {
   });
 }
 
-export function useCreateService() {
+type ServiceDraft = Omit<Service, "id" | "createdAt" | "updatedAt" | "imageUrl">;
+
+/**
+ * Creates a service, or updates one when `id` is given. A local `imageUri`
+ * (file://) is uploaded first; a remote URL or null is stored as-is.
+ */
+export function useSaveService() {
   const queryClient = useQueryClient();
 
   return useMutation({
     mutationFn: async ({
+      id,
       formData,
       imageUri,
     }: {
-      formData: Omit<Service, "id" | "createdAt" | "updatedAt" | "imageUrl">;
-      imageUri: string;
+      id?: string;
+      formData: ServiceDraft;
+      imageUri: string | null;
     }) => {
-      const imageUrl = await uploadServiceImage(imageUri);
-      return createService({ ...formData, imageUrl });
+      const imageUrl = imageUri && !/^https?:/.test(imageUri) ? await uploadServiceImage(imageUri) : (imageUri ?? "");
+      if (id) {
+        await updateService(id, { ...formData, imageUrl });
+        return id;
+      }
+      const created = await createService({ ...formData, imageUrl });
+      return created.id;
     },
-    onSuccess: () => {
+    onSuccess: (id) => {
       queryClient.invalidateQueries({ queryKey: servicesKeys.lists() });
+      queryClient.invalidateQueries({ queryKey: servicesKeys.detail(id) });
     },
   });
 }

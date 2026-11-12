@@ -10,6 +10,7 @@ import {
   Inter_600SemiBold,
   Inter_700Bold,
 } from "@expo-google-fonts/inter";
+import Feather from "@expo/vector-icons/Feather";
 import { useFonts } from "expo-font";
 import { SplashScreen, Stack } from "expo-router";
 import { StatusBar } from "expo-status-bar";
@@ -28,6 +29,7 @@ SplashScreen.preventAutoHideAsync();
 
 export default function RootLayout() {
   const [fontsLoaded, fontError] = useFonts({
+    ...Feather.font,
     BricolageGrotesque_700Bold,
     BricolageGrotesque_800ExtraBold,
     Inter_400Regular,
@@ -94,6 +96,32 @@ function RootNavigator() {
 
         <Stack.Protected guard={ready}>
           <Stack.Screen name="(tabs)" options={{ animation: "fade" }} />
+          <Stack.Screen name="settings" />
+          <Stack.Screen name="service" />
+          <Stack.Screen name="agents" />
+          <Stack.Screen name="listing/[id]" />
+          <Stack.Screen
+            name="listing/gallery"
+            options={{ presentation: "fullScreenModal", animation: "fade", contentStyle: { backgroundColor: "#121212" } }}
+          />
+          <Stack.Screen
+            name="listing/contact"
+            options={{
+              presentation: "formSheet",
+              sheetAllowedDetents: "fitToContents",
+              sheetGrabberVisible: true,
+              sheetCornerRadius: 24,
+            }}
+          />
+          <Stack.Screen
+            name="filters"
+            options={{
+              presentation: "formSheet",
+              sheetAllowedDetents: "fitToContents",
+              sheetGrabberVisible: true,
+              sheetCornerRadius: 24,
+            }}
+          />
         </Stack.Protected>
       </Stack>
     </>
